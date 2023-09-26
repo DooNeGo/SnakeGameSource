@@ -4,25 +4,16 @@ namespace SnakeGameSource
 {
     internal class Config
     {
-        public const int ScreenHeight = GridCellHeight * 9;
-        public const int ScreenWidth = GridCellWidth * 16;
-
-        public const int GridCellHeight = (int)(ConsoleCharWidth * Scale);
-        public const int GridCellWidth = (int)(ConsoleCharHeight * Scale);
-
-        public const int ConsoleCharHeight = 6;
-        public const int ConsoleCharWidth = 4;
-
         public const float Scale = 2f;
 
-        public static Color SnakeHeadColor = Color.Yellow;
-        public static Color SnakeBodyColor = Color.LightYellow;
-        public static Color BackgroundColor = Color.Gold;
+        public static Color SnakeHeadColor = new(131, 240, 60);
+        public static Color SnakeBodyColor = new(255, 241, 64);
+        public static Color BackgroundColor = Color.MediumPurple;
 
         public const float SnakeSpeed = 4f;
         public const float SnakeSlewingTime = 0.5f;
 
-        public const int FramePerSecond = 71;
+        public const int FramePerSecond = 60;
         public const double FrameDelay = 1000 / FramePerSecond;
     }
 }

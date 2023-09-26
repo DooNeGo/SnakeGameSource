@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using SnakeGameSource.Components;
 using SnakeGameSource.Components.Colliders;
-using SnakeGameSource.Interfaces;
 using System;
 using System.Collections;
 using System.Collections.Generic;

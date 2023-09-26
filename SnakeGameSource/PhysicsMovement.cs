@@ -1,9 +1,19 @@
 ﻿using Microsoft.Xna.Framework;
-using SnakeGameSource.Interfaces;
 using System;
 
 namespace SnakeGameSource
 {
+    internal interface IMovable
+    {
+        public float MoveSpeed { get; }
+
+        public Vector2 Position { get; }
+
+        public float Scale { get; }
+
+        public void MoveTo(Vector2 position);
+    }
+
     internal class PhysicsMovement
     {
         private readonly IMovable _body;

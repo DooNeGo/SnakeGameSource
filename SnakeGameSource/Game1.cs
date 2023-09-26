@@ -1,10 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using SnakeGameSource.Components;
 using SnakeGameSource.Controllers;
 using SnakeGameSource.Model;
-using System.Collections.Generic;
 using static SnakeGameSource.Config;
 
 namespace SnakeGameSource
@@ -14,8 +12,6 @@ namespace SnakeGameSource
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        private readonly Dictionary<TextureName, Texture2D> _textures = new();
-
         private Grid _grid;
         private Snake _snake;
         private FoodController _foodController;
@@ -23,23 +19,26 @@ namespace SnakeGameSource
         private CollisionHandler _collisionHandler;
         private PhysicsMovement _snakeMovement;
         private KeyboardInput _input;
+        private Drawer _drawer;
 
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+            //_graphics.IsFullScreen = true;
         }
 
         protected override void Initialize()
         {
-            _grid = new(Window.ClientBounds.Size, new Point(50, 50));
-            _snake = new(new Vector2(3, 4), SnakeHeadColor, SnakeBodyColor, SnakeSpeed, _grid);
-            _foodController = new(_grid);
+            _grid = new Grid(Window.ClientBounds.Size, new Point(50, 50));
+            _snake = new Snake(new Vector2(3, 4), SnakeHeadColor, SnakeBodyColor, SnakeSpeed, _grid);
+            _foodController = new FoodController(_grid);
             _mainScene = new Scene(_snake, _foodController);
-            _collisionHandler = new(_mainScene);
-            _snakeMovement = new(_snake, SnakeSlewingTime);
-            _input = new();
+            _collisionHandler = new CollisionHandler(_mainScene);
+            _snakeMovement = new PhysicsMovement(_snake, SnakeSlewingTime);
+            _input = new KeyboardInput();
+            _drawer = new Drawer(_mainScene, Content, _grid);
 
             _grid.ActiveScene = _mainScene;
             _snake.Die += Exit;
@@ -50,14 +49,7 @@ namespace SnakeGameSource
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-
-            Texture2D headTexture = Content.Load<Texture2D>("SnakeHead");
-            Texture2D bodyTexture = Content.Load<Texture2D>("SnakeBody");
-            Texture2D foodTexture = Content.Load<Texture2D>("Food");
-
-            _textures.Add(TextureName.Food, foodTexture);
-            _textures.Add(TextureName.SnakeHead, headTexture);
-            _textures.Add(TextureName.SnakeBody, bodyTexture);
+            _drawer.LoadContent();
         }
 
         protected override void Update(GameTime gameTime)
@@ -77,25 +69,20 @@ namespace SnakeGameSource
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(BackgroundColor);
-
-            _spriteBatch.Begin();
-
-            foreach (GameObject gameObject in _mainScene)
-            {
-                TextureConfig? textureConfig = gameObject.TryGetComponent<TextureConfig>();
-                Transform? transform = gameObject.TryGetComponent<Transform>();
-
-                if (textureConfig is not null && transform is not null)
-                {
-                    Vector2 absolutePosition = _grid.GetAbsolutePosition(transform.Position, transform.Scale);
-                    float scale = _grid.CellSize.X * textureConfig.Scale / _textures[textureConfig.Name].Bounds.Size.X;
-                    _spriteBatch.Draw(_textures[textureConfig.Name], absolutePosition, null, textureConfig.Color, 0, Vector2.Zero, scale, SpriteEffects.None, 1);
-                }
-            }
-
-            _spriteBatch.End();
-
+            _drawer.Draw(_spriteBatch);
             base.Draw(gameTime);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return base.Equals(obj);
+        }
+
+        protected override void UnloadContent()
+        {
+            _drawer.UnloadContent();
+
+            base.UnloadContent();
         }
     }
 }

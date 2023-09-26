@@ -28,9 +28,9 @@ namespace SnakeGameSource.Controllers
                 new Food(_grid.Center, foodScale, Color.Red, 15),
                 new Food(_grid.Center, foodScale, Color.Blue, 10),
                 new Food(_grid.Center, foodScale, Color.Blue, 10),
-                new Food(_grid.Center, foodScale, Color.Green, 10),
-                new Food(_grid.Center, foodScale, Color.Green, 10),
-                new Food(_grid.Center, foodScale, Color.Purple, 5),
+                new Food(_grid.Center, foodScale, Color.Lime, 10),
+                new Food(_grid.Center, foodScale, Color.Lime, 10),
+                new Food(_grid.Center, foodScale, Color.White, 5),
             };
 
             Effect effect0 = _foods[0].AddComponent<Effect>();
