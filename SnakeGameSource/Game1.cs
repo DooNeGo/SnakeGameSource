@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using SnakeGameSource.Controllers;
 using SnakeGameSource.Model;
-using static SnakeGameSource.Config;
 
 namespace SnakeGameSource
 {
@@ -12,14 +11,14 @@ namespace SnakeGameSource
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
-        private Grid _grid;
-        private Snake _snake;
         private FoodController _foodController;
         private Scene _mainScene;
         private CollisionHandler _collisionHandler;
         private PhysicsMovement _snakeMovement;
         private KeyboardInput _input;
         private Drawer _drawer;
+
+        private DIContainer _diContainer;
 
         public Game1()
         {
@@ -31,24 +30,43 @@ namespace SnakeGameSource
 
         protected override void Initialize()
         {
-            _grid = new Grid(Window.ClientBounds.Size, new Point(50, 50));
-            _snake = new Snake(new Vector2(3, 4), SnakeHeadColor, SnakeBodyColor, SnakeSpeed, _grid);
-            _foodController = new FoodController(_grid);
-            _mainScene = new Scene(_snake, _foodController);
-            _collisionHandler = new CollisionHandler(_mainScene);
-            _snakeMovement = new PhysicsMovement(_snake, SnakeSlewingTime);
-            _input = new KeyboardInput();
-            _drawer = new Drawer(_mainScene, Content, _grid);
+            _diContainer = new DIContainer();
+            _diContainer.AddSingletone<Grid>()
+                        .AddSingletone<Snake>()
+                        .AddSingletone<FoodController>()
+                        .AddSingletone<CollisionHandler>()
+                        .AddSingletone<SpriteBatch>()
+                        .AddSingletone<SnakeConfig>()
+                        .AddSingletone<PhysicsMovement>()
+                        .AddSingletone<Drawer>()
+                        .AddTransient<Scene>()
+                        .AddTransient<KeyboardInput>()
+                        .AddSingletone<IMovable, Snake>()
+                        .AddSingletone(Content)
+                        .AddSingletone(Window)
+                        .AddSingletone(GraphicsDevice);
 
-            _grid.ActiveScene = _mainScene;
-            _snake.Die += Exit;
+            _diContainer.Build();
+
+            Snake snake = _diContainer.GetInstance<Snake>();
+            _foodController = _diContainer.GetInstance<FoodController>();
+            _mainScene = _diContainer.GetInstance<Scene>();
+            _collisionHandler = _diContainer.GetInstance<CollisionHandler>();
+            _snakeMovement = _diContainer.GetInstance<PhysicsMovement>();
+            _input = _diContainer.GetInstance<KeyboardInput>();
+            _drawer = _diContainer.GetInstance<Drawer>();
+            _spriteBatch = _diContainer.GetInstance<SpriteBatch>();
+
+            _mainScene.Add(snake, _foodController);
+            SetActiveScene(_mainScene);
+
+            snake.Die += Exit;
 
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
-            _spriteBatch = new SpriteBatch(GraphicsDevice);
             _drawer.LoadContent();
         }
 
@@ -68,21 +86,21 @@ namespace SnakeGameSource
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(BackgroundColor);
+            GraphicsDevice.Clear(Color.MediumPurple);
             _drawer.Draw(_spriteBatch);
             base.Draw(gameTime);
-        }
-
-        public override bool Equals(object? obj)
-        {
-            return base.Equals(obj);
         }
 
         protected override void UnloadContent()
         {
             _drawer.UnloadContent();
+        }
 
-            base.UnloadContent();
+        private void SetActiveScene(Scene scene)
+        {
+            _diContainer.GetInstance<Grid>().ActiveScene = scene;
+            _drawer.ActiveScene = scene;
+            _collisionHandler.ActiveScene = scene;
         }
     }
 }

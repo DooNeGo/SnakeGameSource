@@ -5,20 +5,19 @@ namespace SnakeGameSource.Model
 {
     internal class Scene : IEnumerable<GameObject>
     {
-        private readonly IEnumerable<GameObject>[] _compositeObjects;
+        private readonly List<IEnumerable<GameObject>> _compositeObjects = new();
         private readonly List<GameObject> _gameObjects = new();
 
-        public Scene(params IEnumerable<GameObject>[] compositeObjects)
+        public void Add(params IEnumerable<GameObject>[] compositeObjects)
         {
-            _compositeObjects = compositeObjects;
-            Update();
+            _compositeObjects.AddRange(compositeObjects);
         }
 
         public void Update()
         {
             _gameObjects.Clear();
 
-            for (int i = 0; i < _compositeObjects.Length; i++)
+            for (int i = 0; i < _compositeObjects.Count; i++)
             {
                 _gameObjects.AddRange(_compositeObjects[i]);
             }

@@ -3,8 +3,8 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using SnakeGameSource.Components;
 using SnakeGameSource.Model;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SnakeGameSource
 {
@@ -14,30 +14,32 @@ namespace SnakeGameSource
         private readonly ContentManager _contentManager;
         private readonly Grid _grid;
 
-        private Scene _scene;
+        private Scene? _scene;
 
-        public Drawer(Scene initialScene, ContentManager contentManager, Grid grid)
+        public Drawer(ContentManager content, Grid grid)
         {
-            _scene = initialScene;
-            _contentManager = contentManager;
+            _contentManager = content;
             _grid = grid;
         }
 
-        public Scene ActiveScene
+        public Scene? ActiveScene
         {
             get { return _scene; }
             set
             {
                 _scene = value;
-                LoadContent();
+                //LoadContent();
             }
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
+            if (ActiveScene is null)
+                throw new NullReferenceException(nameof(ActiveScene));
+
             spriteBatch.Begin();
 
-            foreach (GameObject gameObject in _scene)
+            foreach (GameObject gameObject in ActiveScene)
             {
                 TextureConfig? textureConfig = gameObject.TryGetComponent<TextureConfig>();
                 Transform? transform = gameObject.TryGetComponent<Transform>();
@@ -55,16 +57,25 @@ namespace SnakeGameSource
 
         public void LoadContent()
         {
-            UnloadContent();
+            _textures.Add(TextureName.SnakeHead, _contentManager.Load<Texture2D>(TextureName.SnakeHead.ToString()));
+            _textures.Add(TextureName.SnakeBody, _contentManager.Load<Texture2D>(TextureName.SnakeBody.ToString()));
+            _textures.Add(TextureName.Food, _contentManager.Load<Texture2D>(TextureName.Food.ToString()));
 
-            var textureNames = from gameObject in _scene
-                               where gameObject.TryGetComponent<TextureConfig>() is not null
-                               select gameObject.GetComponent<TextureConfig>().Name;
+            //if (ActiveScene is null)
+            //    throw new NullReferenceException(nameof(ActiveScene));
 
-            foreach (TextureName textureName in textureNames)
-            {
-                _textures.TryAdd(textureName, _contentManager.Load<Texture2D>(textureName.ToString()));
-            }
+            //UnloadContent();
+
+            //foreach (GameObject gameObject in ActiveScene)
+            //{
+            //    TextureConfig? textureConfig = gameObject.TryGetComponent<TextureConfig>();
+
+            //    if (textureConfig is not null && !_textures.ContainsKey(textureConfig.Name))
+            //    {
+            //        _textures.Add(textureConfig.Name,
+            //            _contentManager.Load<Texture2D>(textureConfig.Name.ToString()));
+            //    }
+            //}
         }
 
         public void UnloadContent()

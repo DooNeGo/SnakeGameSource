@@ -13,10 +13,11 @@ namespace SnakeGameSource.Model
         private readonly bool[,] _cells;
         //private readonly GameObject[,] _gameObjects;
 
-        public Grid(Point screenSize, Point cellSize)
+        public Grid(GameWindow window)
         {
-            CellSize = cellSize;
-            Size = screenSize / cellSize;
+            Point screenSize = window.ClientBounds.Size;
+            CellSize = new Point(screenSize.X / 15);
+            Size = window.ClientBounds.Size.Divide(CellSize);
             _cells = new bool[Size.Y, Size.X];
             Center = new Vector2((Size.X - 1) / 2f, (Size.Y - 1) / 2f);
             //_gameObjects = new GameObject[Size.Height, Size.Width];

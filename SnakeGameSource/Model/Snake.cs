@@ -21,12 +21,13 @@ namespace SnakeGameSource.Model
         private float _scale = 1f;
         private int _lastColliderIndex;
 
-        public Snake(Vector2 startPosition, Color headColor, Color bodyColor, float speed, Grid grid)
+        public Snake(SnakeConfig snakeConfig, Grid grid)
         {
-            MoveSpeed = speed;
+            MoveSpeed = snakeConfig.MoveSpeed;
             _grid = grid;
             _lastColliderIndex = InitialBodyLength;
-            _bodyColor = bodyColor;
+            _bodyColor = snakeConfig.BodyColor;
+            SlewingTime = snakeConfig.SlewingTime;
 
             for (var i = 0; i <= InitialBodyLength; i++)
             {
@@ -38,12 +39,12 @@ namespace SnakeGameSource.Model
                 Transform bodyPartTransform = bodyPart.AddComponent<Transform>();
                 TextureConfig bodyPartTexture = bodyPart.AddComponent<TextureConfig>();
                 bodyPartTransform.Scale = Scale;
-                bodyPartTransform.Position = startPosition - Vector2.UnitX * Scale * i;
+                bodyPartTransform.Position = snakeConfig.StartPosition - Vector2.UnitX * Scale * i;
 
                 if (i == 0)
                 {
 
-                    bodyPartTexture.Color = headColor;
+                    bodyPartTexture.Color = snakeConfig.HeadColor;
                     bodyPartTexture.Name = TextureName.SnakeHead;
                 }
                 else
@@ -66,6 +67,8 @@ namespace SnakeGameSource.Model
         public Vector2 Position => Head.GetComponent<Transform>().Position;
 
         public float MoveSpeed { get; private set; }
+
+        public float SlewingTime { get; private set; }
 
         public int Score { get; private set; } = 0;
 

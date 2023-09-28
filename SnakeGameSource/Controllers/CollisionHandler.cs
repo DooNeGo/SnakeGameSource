@@ -2,6 +2,7 @@
 using SnakeGameSource.Components;
 using SnakeGameSource.Components.Colliders;
 using SnakeGameSource.Model;
+using System;
 using System.Collections.Generic;
 
 namespace SnakeGameSource.Controllers
@@ -10,12 +11,7 @@ namespace SnakeGameSource.Controllers
     {
         private readonly List<GameObject> _gameObjects = new();
 
-        public CollisionHandler(Scene initialScene)
-        {
-            ActiveScene = initialScene;
-        }
-
-        public Scene ActiveScene { get; set; }
+        public Scene? ActiveScene { get; set; }
 
         public void Update()
         {
@@ -25,6 +21,9 @@ namespace SnakeGameSource.Controllers
 
         private void UpdateGameObjectsList()
         {
+            if (ActiveScene is null)
+                throw new NullReferenceException(nameof(ActiveScene));
+
             _gameObjects.Clear();
 
             foreach (GameObject gameObject in ActiveScene)
