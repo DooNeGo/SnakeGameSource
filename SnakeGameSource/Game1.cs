@@ -6,6 +6,7 @@ using SnakeGameSource.Model;
 
 namespace SnakeGameSource
 {
+
     public class Game1 : Game
     {
         private GraphicsDeviceManager _graphics;
@@ -31,22 +32,21 @@ namespace SnakeGameSource
         protected override void Initialize()
         {
             _diContainer = new DIContainer();
-            _diContainer.AddSingletone<Grid>()
-                        .AddSingletone<Snake>()
-                        .AddSingletone<FoodController>()
-                        .AddSingletone<CollisionHandler>()
-                        .AddSingletone<SpriteBatch>()
-                        .AddSingletone<SnakeConfig>()
-                        .AddSingletone<PhysicsMovement>()
-                        .AddSingletone<Drawer>()
+            _diContainer.AddSingleton<Grid>()
+                        .AddSingleton<Snake>()
+                        .AddSingleton<FoodController>()
+                        .AddSingleton<CollisionHandler>()
+                        .AddSingleton<SpriteBatch>()
+                        .AddSingleton<SnakeConfig>()
+                        .AddSingleton<PhysicsMovement>()
+                        .AddSingleton<Drawer>()
                         .AddTransient<Scene>()
                         .AddTransient<KeyboardInput>()
-                        .AddSingletone<IMovable, Snake>()
-                        .AddSingletone(Content)
-                        .AddSingletone(Window)
-                        .AddSingletone(GraphicsDevice);
-
-            _diContainer.Build();
+                        .AddSingleton<IMovable, Snake>()
+                        .AddSingleton(Content)
+                        .AddSingleton(Window)
+                        .AddSingleton(GraphicsDevice)
+                        .Build();
 
             Snake snake = _diContainer.GetInstance<Snake>();
             _foodController = _diContainer.GetInstance<FoodController>();

@@ -6,9 +6,9 @@ namespace SnakeGameSource
 {
     internal class DIContainer
     {
-        private readonly Dictionary<Type, Type> _singletoneTypes = new();
-        private readonly Dictionary<Type, Type> _transientTypes = new();
-        private readonly Dictionary<Type, object> _singletoneObjects = new();
+        private readonly Dictionary<Type, Type> _associationTypes = new();
+        private readonly Dictionary<Type, object?> _singletonTypes = new();
+        private readonly HashSet<Type> _transientTypes = new();
 
         public T GetInstance<T>()
         {
@@ -17,66 +17,82 @@ namespace SnakeGameSource
 
         public DIContainer AddTransient<T>() where T : class
         {
-            return AddTransient<T, T>();
+            if (typeof(T).IsInterface)
+                throw new ArgumentException("You can't add an interface as an implementation");
+
+            _transientTypes.Add(typeof(T));
+            return this;
         }
 
         public DIContainer AddTransient<D, S>() where S : class
         {
-            _transientTypes.TryAdd(typeof(D), typeof(S));
+            _associationTypes.Add(typeof(D), typeof(S));
+            return AddTransient<S>();
+        }
+
+        public DIContainer AddSingleton<T>() where T : class
+        {
+            if (typeof(T).IsInterface)
+                throw new ArgumentException("You can't add an interface as an implementation");
+
+            _singletonTypes.TryAdd(typeof(T), null);
             return this;
         }
 
-        public DIContainer AddSingletone<T>() where T : class
+        public DIContainer AddSingleton<D, S>() where S : class
         {
-            return AddSingletone<T, T>();
+            _associationTypes.Add(typeof(D), typeof(S));
+            return AddSingleton<S>();
         }
 
-        public DIContainer AddSingletone<D, S>() where S : class
+        public DIContainer AddSingleton<T>(T instance) where T : class
         {
-            _singletoneTypes.TryAdd(typeof(D), typeof(S));
+            if (typeof(T).IsInterface)
+                throw new ArgumentException("You can't add an interface as an implementation");
+
+            _singletonTypes.Add(typeof(T), instance);
             return this;
         }
 
-        public DIContainer AddSingletone<D, S>(S instance) where S : class
+        public DIContainer AddSingleton<D, S>(S instance) where S : class
         {
-            _singletoneTypes.TryAdd(typeof(D), typeof(S));
-            _singletoneObjects.TryAdd(typeof(S), instance);
-            return this;
-        }
-
-        public DIContainer AddSingletone<T>(T instance) where T : class
-        {
-            return AddSingletone<T, T>(instance);
+            _associationTypes.Add(typeof(D), typeof(S));
+            return AddSingleton(instance);
         }
 
         public void Build()
         {
-            foreach (KeyValuePair<Type, Type> singletoneType in _singletoneTypes)
+            foreach (KeyValuePair<Type, object?> singletonType in _singletonTypes)
             {
-                GetInstance(singletoneType.Value);
+                GetInstance(singletonType.Key);
             }
         }
 
-        public object GetInstance(Type type)
+        private object GetInstance(Type type)
         {
-            if (_singletoneTypes.TryGetValue(type, out Type? singletoneType))
+            if (_associationTypes.TryGetValue(type, out Type? type1))
             {
-                if (_singletoneObjects.TryGetValue(singletoneType, out object? value))
+                type = type1;
+            }
+
+            if (_singletonTypes.TryGetValue(type, out object? instance))
+            {
+                if (instance is not null)
                 {
-                    return value;
+                    return instance;
                 }
 
-                object instance = CreateInstance(singletoneType);
-                _singletoneObjects.Add(type, instance);
+                instance = CreateInstance(type);
+                _singletonTypes[type] = instance;
                 return instance;
             }
 
-            if (_transientTypes.TryGetValue(type, out Type? transientType))
+            if (_transientTypes.Contains(type))
             {
-                return CreateInstance(transientType);
+                return CreateInstance(type);
             }
 
-            throw new NotImplementedException($"{type}");
+            throw new ArgumentException($"You forgot to add {type.Name} in the Container.");
         }
 
         private object CreateInstance(Type type)

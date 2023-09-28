@@ -14,23 +14,13 @@ namespace SnakeGameSource
         private readonly ContentManager _contentManager;
         private readonly Grid _grid;
 
-        private Scene? _scene;
-
         public Drawer(ContentManager content, Grid grid)
         {
             _contentManager = content;
             _grid = grid;
         }
 
-        public Scene? ActiveScene
-        {
-            get { return _scene; }
-            set
-            {
-                _scene = value;
-                //LoadContent();
-            }
-        }
+        public Scene? ActiveScene { get; set; }
 
         public void Draw(SpriteBatch spriteBatch)
         {
@@ -60,22 +50,6 @@ namespace SnakeGameSource
             _textures.Add(TextureName.SnakeHead, _contentManager.Load<Texture2D>(TextureName.SnakeHead.ToString()));
             _textures.Add(TextureName.SnakeBody, _contentManager.Load<Texture2D>(TextureName.SnakeBody.ToString()));
             _textures.Add(TextureName.Food, _contentManager.Load<Texture2D>(TextureName.Food.ToString()));
-
-            //if (ActiveScene is null)
-            //    throw new NullReferenceException(nameof(ActiveScene));
-
-            //UnloadContent();
-
-            //foreach (GameObject gameObject in ActiveScene)
-            //{
-            //    TextureConfig? textureConfig = gameObject.TryGetComponent<TextureConfig>();
-
-            //    if (textureConfig is not null && !_textures.ContainsKey(textureConfig.Name))
-            //    {
-            //        _textures.Add(textureConfig.Name,
-            //            _contentManager.Load<Texture2D>(textureConfig.Name.ToString()));
-            //    }
-            //}
         }
 
         public void UnloadContent()
