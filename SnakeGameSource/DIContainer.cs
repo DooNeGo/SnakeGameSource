@@ -66,6 +66,11 @@ namespace SnakeGameSource
             {
                 GetInstance(singletonType.Key);
             }
+
+            foreach (Type type in _transientTypes)
+            {
+                GetInstance(type);
+            }
         }
 
         private object GetInstance(Type type)
