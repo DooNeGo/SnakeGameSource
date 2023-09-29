@@ -1,12 +1,12 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Input.Touch;
 using SnakeGameSource.Controllers;
 using SnakeGameSource.Model;
 
 namespace SnakeGameSource
 {
-
     public class Game1 : Game
     {
         private GraphicsDeviceManager _graphics;
@@ -16,10 +16,12 @@ namespace SnakeGameSource
         private Scene _mainScene;
         private CollisionHandler _collisionHandler;
         private PhysicsMovement _snakeMovement;
-        private KeyboardInput _input;
-        private Drawer _drawer;
+        private Input _input;
+        private SpriteDrawer _drawer;
 
         private DIContainer _diContainer;
+
+        private float timeRatio = 0;
 
         public Game1()
         {
@@ -31,17 +33,17 @@ namespace SnakeGameSource
 
         protected override void Initialize()
         {
-            _diContainer = new DIContainer();
-            _diContainer.AddSingleton<Grid>()
+            _diContainer = new DIContainer()
+                        .AddSingleton<Grid>()
                         .AddSingleton<Snake>()
                         .AddSingleton<FoodController>()
                         .AddSingleton<CollisionHandler>()
                         .AddSingleton<SpriteBatch>()
                         .AddSingleton<SnakeConfig>()
                         .AddSingleton<PhysicsMovement>()
-                        .AddSingleton<Drawer>()
+                        .AddSingleton<SpriteDrawer>()
                         .AddTransient<Scene>()
-                        .AddTransient<KeyboardInput>()
+                        .AddTransient<Input>()
                         .AddSingleton<IMovable, Snake>()
                         .AddSingleton(Content)
                         .AddSingleton(Window)
@@ -53,8 +55,8 @@ namespace SnakeGameSource
             _mainScene = _diContainer.GetInstance<Scene>();
             _collisionHandler = _diContainer.GetInstance<CollisionHandler>();
             _snakeMovement = _diContainer.GetInstance<PhysicsMovement>();
-            _input = _diContainer.GetInstance<KeyboardInput>();
-            _drawer = _diContainer.GetInstance<Drawer>();
+            _input = _diContainer.GetInstance<Input>();
+            _drawer = _diContainer.GetInstance<SpriteDrawer>();
             _spriteBatch = _diContainer.GetInstance<SpriteBatch>();
 
             _mainScene.Add(snake, _foodController);
@@ -75,12 +77,17 @@ namespace SnakeGameSource
             if (!IsActive)
                 return;
 
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
+                || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            if (timeRatio == 0 && (TouchPanel.IsGestureAvailable
+                || Keyboard.GetState().GetPressedKeyCount() > 0))
+                timeRatio = 1;
+
             _input.Update();
-            _snakeMovement.Move(_input.ReadMovement(), gameTime.ElapsedGameTime);
-            _foodController.Update(gameTime.ElapsedGameTime);
+            _snakeMovement.Move(_input.ReadMovement(), gameTime.ElapsedGameTime * timeRatio);
+            _foodController.Update(gameTime.ElapsedGameTime * timeRatio);
             _mainScene.Update();
             _collisionHandler.Update();
 

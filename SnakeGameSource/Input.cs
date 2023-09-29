@@ -1,16 +1,17 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Input.Touch;
 
 namespace SnakeGameSource
 {
-    internal class KeyboardInput
+    internal class Input
     {
 #if ANDROID
         GestureSample _gesture = default;
 #else
         private Keys _pressedKey = new();
-#endif
         private Vector2 _lastDirection = Vector2.Zero;
+#endif
 
         public void Update()
         {
@@ -20,21 +21,6 @@ namespace SnakeGameSource
                 return;
 
             _gesture = TouchPanel.ReadGesture();
-
-            if (_gesture.GestureType == GestureType.HorizontalDrag)
-            {
-                if (_gesture.Delta.X > 0)
-                    _lastDirection = Vector2.UnitX;
-                else
-                    _lastDirection = -Vector2.UnitX;
-            }
-            else if (_gesture.GestureType == GestureType.VerticalDrag)
-            {
-                if (_gesture.Delta.Y > 0)
-                    _lastDirection = Vector2.UnitY;
-                else
-                    _lastDirection = -Vector2.UnitY;
-            }
 #else
 
             Keys[] keys = Keyboard.GetState().GetPressedKeys();
@@ -55,7 +41,7 @@ namespace SnakeGameSource
 #if ANDROID
             if (System.MathF.Abs(_gesture.Delta.X) > System.MathF.Abs(_gesture.Delta.Y))
             {
-                return _gesture.Delta.X > 0 ? Vector2.UnitX : -Vector2.UnitY;
+                return _gesture.Delta.X > 0 ? Vector2.UnitX : -Vector2.UnitX;
             }
             else
             {

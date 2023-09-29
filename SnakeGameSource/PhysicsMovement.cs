@@ -13,6 +13,8 @@ namespace SnakeGameSource
 
         public float SlewingTime { get; }
 
+        public Vector2 Direction { get; }
+
         public void MoveTo(Vector2 position);
     }
 
@@ -20,13 +22,16 @@ namespace SnakeGameSource
     {
         private readonly IMovable _snake;
 
-        private Vector2 _smoothDirection = Vector2.Zero;
-        private Vector2 _lastDirection = Vector2.Zero;
-        private Vector2 _penultimateDirection = Vector2.UnitX;
+        private Vector2 _smoothDirection;
+        private Vector2 _lastDirection;
+        private Vector2 _penultimateDirection;
 
         public PhysicsMovement(IMovable snake)
         {
             _snake = snake;
+            _smoothDirection = _snake.Direction;
+            _lastDirection = _snake.Direction;
+            _penultimateDirection = _snake.Direction;
         }
 
         public void Move(Vector2 direction, TimeSpan delta)
@@ -43,12 +48,7 @@ namespace SnakeGameSource
             }
 
             float lastDirectionImpact = (float)delta.TotalSeconds / _snake.SlewingTime * _snake.MoveSpeed / _snake.Scale;
-
-            if (_lastDirection != Vector2.Zero)
-                _smoothDirection = Vector2.Normalize(_smoothDirection + _lastDirection * lastDirectionImpact);
-            else
-                _smoothDirection = Vector2.Zero;
-
+            _smoothDirection = Vector2.Normalize(_smoothDirection + _lastDirection * lastDirectionImpact);
             Vector2 offset = (float)delta.TotalSeconds * _snake.MoveSpeed * _smoothDirection;
             _snake.MoveTo(_snake.Position + offset);
         }

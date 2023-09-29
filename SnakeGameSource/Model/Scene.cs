@@ -13,11 +13,19 @@ namespace SnakeGameSource.Model
             _compositeObjects.AddRange(compositeObjects);
         }
 
+        public void Remove(params IEnumerable<GameObject>[] compositeObjects)
+        {
+            for (var i = 0; i < compositeObjects.Length; i++)
+            {
+                _compositeObjects.Remove(compositeObjects[i]);
+            }
+        }
+
         public void Update()
         {
             _gameObjects.Clear();
 
-            for (int i = 0; i < _compositeObjects.Count; i++)
+            for (var i = 0; i < _compositeObjects.Count; i++)
             {
                 _gameObjects.AddRange(_compositeObjects[i]);
             }

@@ -60,7 +60,7 @@ namespace SnakeGameSource
             return AddSingleton(instance);
         }
 
-        public void Build()
+        public DIContainer Build()
         {
             foreach (KeyValuePair<Type, object?> singletonType in _singletonTypes)
             {
@@ -71,6 +71,8 @@ namespace SnakeGameSource
             {
                 GetInstance(type);
             }
+
+            return this;
         }
 
         private object GetInstance(Type type)

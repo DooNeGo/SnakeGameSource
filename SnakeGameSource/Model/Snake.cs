@@ -87,6 +87,8 @@ namespace SnakeGameSource.Model
 
         private GameObject Head => _body[0];
 
+        public Vector2 Direction => Vector2.UnitX;
+
         public void MoveTo(Vector2 nextPosition)
         {
             if (nextPosition == Position)

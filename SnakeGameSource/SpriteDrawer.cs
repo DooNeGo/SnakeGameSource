@@ -8,13 +8,13 @@ using System.Collections.Generic;
 
 namespace SnakeGameSource
 {
-    internal class Drawer
+    internal class SpriteDrawer
     {
         private readonly Dictionary<TextureName, Texture2D> _textures = new();
         private readonly ContentManager _contentManager;
         private readonly Grid _grid;
 
-        public Drawer(ContentManager content, Grid grid)
+        public SpriteDrawer(ContentManager content, Grid grid)
         {
             _contentManager = content;
             _grid = grid;
