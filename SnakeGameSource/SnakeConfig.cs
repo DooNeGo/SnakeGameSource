@@ -13,5 +13,9 @@ namespace SnakeGameSource
         public float MoveSpeed { get; } = 4f;
 
         public float SlewingTime { get; } = 0.5f;
+
+        public Vector2 StartDirection { get; } = -Vector2.UnitY;
+
+        public int StartBodyLength { get; } = 2;
     }
 }

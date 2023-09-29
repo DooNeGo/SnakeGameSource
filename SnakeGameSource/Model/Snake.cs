@@ -11,8 +11,6 @@ namespace SnakeGameSource.Model
     {
         public event Action? Die;
 
-        private const int InitialBodyLength = 2;
-
         private readonly List<GameObject> _body = new();
         private readonly List<GameObject> _projectedBody = new();
         private readonly Grid _grid;
@@ -24,12 +22,13 @@ namespace SnakeGameSource.Model
         public Snake(SnakeConfig snakeConfig, Grid grid)
         {
             MoveSpeed = snakeConfig.MoveSpeed;
-            _grid = grid;
-            _lastColliderIndex = InitialBodyLength;
-            _bodyColor = snakeConfig.BodyColor;
             SlewingTime = snakeConfig.SlewingTime;
+            Direction = snakeConfig.StartDirection;
+            _lastColliderIndex = snakeConfig.StartBodyLength;
+            _bodyColor = snakeConfig.BodyColor;
+            _grid = grid;
 
-            for (var i = 0; i <= InitialBodyLength; i++)
+            for (var i = 0; i <= snakeConfig.StartBodyLength; i++)
             {
                 GameObject bodyPart = i switch
                 {
@@ -39,11 +38,10 @@ namespace SnakeGameSource.Model
                 Transform bodyPartTransform = bodyPart.AddComponent<Transform>();
                 TextureConfig bodyPartTexture = bodyPart.AddComponent<TextureConfig>();
                 bodyPartTransform.Scale = Scale;
-                bodyPartTransform.Position = snakeConfig.StartPosition - Vector2.UnitX * Scale * i;
+                bodyPartTransform.Position = snakeConfig.StartPosition - Direction * Scale * i;
 
                 if (i == 0)
                 {
-
                     bodyPartTexture.Color = snakeConfig.HeadColor;
                     bodyPartTexture.Name = TextureName.SnakeHead;
                 }
@@ -70,6 +68,8 @@ namespace SnakeGameSource.Model
 
         public float SlewingTime { get; private set; }
 
+        public Vector2 Direction { get; private set; }
+
         public int Score { get; private set; } = 0;
 
         public float Scale
@@ -87,12 +87,12 @@ namespace SnakeGameSource.Model
 
         private GameObject Head => _body[0];
 
-        public Vector2 Direction => Vector2.UnitX;
-
         public void MoveTo(Vector2 nextPosition)
         {
             if (nextPosition == Position)
                 return;
+
+            Direction = Vector2.Normalize(nextPosition - Position);
 
             ApplyOffsets(CalculateOffsets(nextPosition));
             CheckColliders();

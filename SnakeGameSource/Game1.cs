@@ -21,7 +21,7 @@ namespace SnakeGameSource
 
         private DIContainer _diContainer;
 
-        private float timeRatio = 0;
+        private float _timeRatio = 0;
 
         public Game1()
         {
@@ -63,6 +63,7 @@ namespace SnakeGameSource
             SetActiveScene(_mainScene);
 
             snake.Die += Exit;
+            _input.KeyDown += OnKeyDown;
 
             base.Initialize();
         }
@@ -77,17 +78,9 @@ namespace SnakeGameSource
             if (!IsActive)
                 return;
 
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed
-                || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
-            if (timeRatio == 0 && (TouchPanel.IsGestureAvailable
-                || Keyboard.GetState().GetPressedKeyCount() > 0))
-                timeRatio = 1;
-
             _input.Update();
-            _snakeMovement.Move(_input.ReadMovement(), gameTime.ElapsedGameTime * timeRatio);
-            _foodController.Update(gameTime.ElapsedGameTime * timeRatio);
+            _snakeMovement.Move(_input.GetMoveDirection(), gameTime.ElapsedGameTime * _timeRatio);
+            _foodController.Update(gameTime.ElapsedGameTime * _timeRatio);
             _mainScene.Update();
             _collisionHandler.Update();
 
@@ -111,6 +104,24 @@ namespace SnakeGameSource
             _diContainer.GetInstance<Grid>().ActiveScene = scene;
             _drawer.ActiveScene = scene;
             _collisionHandler.ActiveScene = scene;
+        }
+
+        private void OnKeyDown(Keys key)
+        {
+            if (key == Keys.Escape)
+                Exit();
+            else if (_timeRatio == 1 && key == Keys.Space)
+                _timeRatio = 0;
+            else if (_timeRatio == 0)
+                _timeRatio = 1;
+        }
+
+        private void OnGesture(GestureSample gesture)
+        {
+            if (_timeRatio == 1 && gesture.GestureType == GestureType.DoubleTap)
+                _timeRatio = 0;
+            else if (_timeRatio == 0)
+                _timeRatio = 1;
         }
     }
 }
