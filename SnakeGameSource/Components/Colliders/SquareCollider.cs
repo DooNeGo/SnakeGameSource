@@ -3,7 +3,7 @@ using System;
 
 namespace SnakeGameSource.Components.Colliders
 {
-    internal class BoxCollider : Collider
+    internal class SquareCollider : Collider
     {
         public override float GetDistanceToEdge(Vector2 position)
         {

@@ -259,7 +259,7 @@ namespace SnakeGameSource.Model
             {
                 collider2 = collider1 switch
                 {
-                    BoxCollider => dest.AddComponent<BoxCollider>(),
+                    SquareCollider => dest.AddComponent<SquareCollider>(),
                     CircleCollider => dest.AddComponent<CircleCollider>(),
                     _ => throw new NotImplementedException()
                 };
