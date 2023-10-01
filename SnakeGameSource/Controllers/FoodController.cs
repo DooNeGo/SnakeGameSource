@@ -98,7 +98,7 @@ namespace SnakeGameSource.Controllers
 
             while (true)
             {
-                Vector2 position = new(_random.Next(0, _grid.Size.X), _random.Next(0, _grid.Size.Y));
+                Vector2 position = new(_random.Next(1, _grid.Size.X - 1), _random.Next(1, _grid.Size.Y - 1));
                 if (_grid.IsPositionOccupied(position, foodScale) is false)
                 {
                     ActiveFood.GetComponent<Transform>().Position = position;

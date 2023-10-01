@@ -15,11 +15,10 @@ namespace SnakeGameSource.Model
 
         public Grid(GameWindow window)
         {
-            Point screenSize = window.ClientBounds.Size;
-            CellSize = new Point(screenSize.X / 15);
-            Size = window.ClientBounds.Size.Divide(CellSize);
+            CellSize = new Point(window.ClientBounds.Size.X / 15);
+            Size = window.ClientBounds.Size.Divide(CellSize).Add(2);
             _cells = new bool[Size.Y, Size.X];
-            Center = new Vector2((Size.X - 1) / 2f, (Size.Y - 1) / 2f);
+            Center = new Vector2(Size.X / 2f - 1, Size.Y / 2f - 1);
             //_gameObjects = new GameObject[Size.Height, Size.Width];
             //InitializeGameObjects();
         }
@@ -60,7 +59,7 @@ namespace SnakeGameSource.Model
 
         public Vector2 Project(Vector2 position)
         {
-            Vector2 projection = new(position.X % (Size.X - 1), position.Y % (Size.Y - 1));
+            Vector2 projection = new(position.X % Size.X, position.Y % Size.Y);
 
             if (projection.X < 0)
                 projection.X += Size.X - 1;
@@ -96,12 +95,11 @@ namespace SnakeGameSource.Model
 
         public Vector2 GetAbsolutePosition(Vector2 relativePosition, float scale)
         {
-            Vector2 offset = new(CellSize.X * scale - CellSize.X,
-                                 CellSize.Y * scale - CellSize.Y);
-            offset /= 2;
+            var offset = new Vector2(CellSize.X * (scale - 1),
+                                 CellSize.Y * (scale - 1)) / 2;
 
-            return new(relativePosition.X * CellSize.X - offset.X,
-                       relativePosition.Y * CellSize.Y - offset.Y);
+            return new((relativePosition.X - 1) * CellSize.X - offset.X,
+                       (relativePosition.Y - 1) * CellSize.Y - offset.Y);
         }
 
         private void TryAddToGrid(GameObject gameObject)

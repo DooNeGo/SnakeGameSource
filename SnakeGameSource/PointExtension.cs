@@ -13,5 +13,10 @@ namespace SnakeGameSource
         {
             return new Point(point.X / value.X, point.Y / value.Y);
         }
+
+        public static Point Add(this Point point, int value)
+        {
+            return new Point(point.X + value, point.Y + value);
+        }
     }
 }
