@@ -10,11 +10,11 @@ namespace SnakeGameSource.Components
 
         public float Scale { get; set; }
 
-        public void CopyTo(Transform component)
+        public void CopyTo(Transform transform)
         {
-            component.Position = Position;
-            component.Rotation = Rotation;
-            component.Scale = Scale;
+            transform.Position = Position;
+            transform.Rotation = Rotation;
+            transform.Scale = Scale;
         }
     }
 }

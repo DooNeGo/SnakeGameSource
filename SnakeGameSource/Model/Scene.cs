@@ -15,7 +15,7 @@ namespace SnakeGameSource.Model
 
         public void Remove(params IEnumerable<GameObject>[] compositeObjects)
         {
-            for (var i = 0; i < compositeObjects.Length; i++)
+            for (int i = 0; i < compositeObjects.Length; i++)
             {
                 _compositeObjects.Remove(compositeObjects[i]);
             }
@@ -25,7 +25,7 @@ namespace SnakeGameSource.Model
         {
             _gameObjects.Clear();
 
-            for (var i = 0; i < _compositeObjects.Count; i++)
+            for (int i = 0; i < _compositeObjects.Count; i++)
             {
                 _gameObjects.AddRange(_compositeObjects[i]);
             }

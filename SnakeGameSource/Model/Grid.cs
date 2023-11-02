@@ -18,7 +18,7 @@ namespace SnakeGameSource.Model
             CellSize = new Point(window.ClientBounds.Size.X / 15);
             Size = window.ClientBounds.Size.Divide(CellSize).Add(2);
             _cells = new bool[Size.Y, Size.X];
-            Center = new Vector2(Size.X / 2f - 1, Size.Y / 2f - 1);
+            Center = new Vector2((Size.X / 2f) - 1, (Size.Y / 2f) - 1);
             //_gameObjects = new GameObject[Size.Height, Size.Width];
             //InitializeGameObjects();
         }
@@ -41,7 +41,20 @@ namespace SnakeGameSource.Model
 
             Update();
 
-            return _cells[(int)MathF.Round(position.Y), (int)MathF.Round(position.X)];
+            int checkSize = (int)MathF.Ceiling(scale);
+            Vector2 startPosition = new(position.X - (checkSize / 2),
+                                        position.Y - (checkSize / 2));
+
+            for (int y = (int)startPosition.Y; y < checkSize; y++)
+            {
+                for (int x = (int)startPosition.X; x < checkSize; x++)
+                {
+                    if (_cells[y, x] is true)
+                        return true;
+                }
+            }
+
+            return false;
         }
 
         private void Update()
@@ -95,11 +108,11 @@ namespace SnakeGameSource.Model
 
         public Vector2 GetAbsolutePosition(Vector2 relativePosition, float scale)
         {
-            var offset = new Vector2(CellSize.X * (scale - 1),
+            Vector2 offset = new Vector2(CellSize.X * (scale - 1),
                                  CellSize.Y * (scale - 1)) / 2;
 
-            return new((relativePosition.X - 1) * CellSize.X - offset.X,
-                       (relativePosition.Y - 1) * CellSize.Y - offset.Y);
+            return new(((relativePosition.X - 1) * CellSize.X) - offset.X,
+                       ((relativePosition.Y - 1) * CellSize.Y) - offset.Y);
         }
 
         private void TryAddToGrid(GameObject gameObject)
@@ -115,14 +128,14 @@ namespace SnakeGameSource.Model
                 || transform.Position.Y < 0)
                 return;
 
-            _cells[(int)MathF.Round(transform.Position.Y), (int)MathF.Round(transform.Position.X)] = true;
+            _cells[(int)transform.Position.Y, (int)transform.Position.X] = true;
         }
 
         private void Clear()
         {
-            for (var y = 0; y < _cells.GetLength(0); y++)
+            for (int y = 0; y < _cells.GetLength(0); y++)
             {
-                for (var x = 0; x < _cells.GetLength(1); x++)
+                for (int x = 0; x < _cells.GetLength(1); x++)
                 {
                     if (_cells[y, x] is true)
                         _cells[y, x] = false;

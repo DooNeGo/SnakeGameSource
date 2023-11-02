@@ -38,7 +38,16 @@ namespace SnakeGameSource
                 {
                     Vector2 absolutePosition = _grid.GetAbsolutePosition(transform.Position, transform.Scale);
                     float scale = _grid.CellSize.X * textureConfig.Scale / _textures[textureConfig.Name].Bounds.Size.X;
-                    spriteBatch.Draw(_textures[textureConfig.Name], absolutePosition, null, textureConfig.Color, 0, Vector2.Zero, scale, SpriteEffects.None, 1);
+                    Vector2 spriteCenter = _textures[textureConfig.Name].Bounds.Center.ToVector2();
+                    spriteBatch.Draw(_textures[textureConfig.Name],
+                                     absolutePosition,
+                                     null,
+                                     textureConfig.Color,
+                                     transform.Rotation.Z,
+                                     spriteCenter,
+                                     scale,
+                                     SpriteEffects.None,
+                                     1);
                 }
             }
 

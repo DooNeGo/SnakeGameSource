@@ -16,6 +16,7 @@ namespace SnakeGameSource.Model
         private readonly Grid _grid;
         private readonly Color _bodyColor;
 
+        private Vector2[] _directions;
         private float _scale = 1f;
         private int _lastColliderIndex;
 
@@ -23,23 +24,29 @@ namespace SnakeGameSource.Model
         {
             MoveSpeed = snakeConfig.MoveSpeed;
             SlewingTime = snakeConfig.SlewingTime;
-            Direction = snakeConfig.StartDirection;
             _lastColliderIndex = snakeConfig.StartBodyLength;
             _bodyColor = snakeConfig.BodyColor;
             _grid = grid;
+            _directions = new Vector2[snakeConfig.StartBodyLength + 1];
 
-            for (var i = 0; i <= snakeConfig.StartBodyLength; i++)
+            for (int i = 0; i < _directions.Length; i++)
+            {
+                _directions[i] = snakeConfig.StartDirection;
+            }
+
+            for (int i = 0; i <= snakeConfig.StartBodyLength; i++)
             {
                 GameObject bodyPart = i switch
                 {
                     0 => new("Snake head"),
                     _ => new()
                 };
-                Transform bodyPartTransform = bodyPart.AddComponent<Transform>();
-                TextureConfig bodyPartTexture = bodyPart.AddComponent<TextureConfig>();
-                bodyPartTransform.Scale = Scale;
-                bodyPartTransform.Position = snakeConfig.StartPosition - Direction * Scale * i;
 
+                Transform bodyPartTransform = bodyPart.AddComponent<Transform>();
+                bodyPartTransform.Position = snakeConfig.StartPosition - (Direction * Scale * i);
+                bodyPartTransform.Scale = Scale;
+
+                TextureConfig bodyPartTexture = bodyPart.AddComponent<TextureConfig>();
                 if (i == 0)
                 {
                     bodyPartTexture.Color = snakeConfig.HeadColor;
@@ -59,6 +66,10 @@ namespace SnakeGameSource.Model
                 _body.Add(bodyPart);
             }
 
+            GameObject headClone = Head.Clone();
+            headClone.GetComponent<Collider>().CollisionEnter += OnCollisionEnter;
+            _projectedBody.Add(headClone);
+
             UpdateProjectedBody();
         }
 
@@ -68,7 +79,11 @@ namespace SnakeGameSource.Model
 
         public float SlewingTime { get; private set; }
 
-        public Vector2 Direction { get; private set; }
+        public Vector2 Direction
+        {
+            get { return _directions[0]; }
+            private set { _directions[0] = value; }
+        }
 
         public int Score { get; private set; } = 0;
 
@@ -92,64 +107,25 @@ namespace SnakeGameSource.Model
             if (nextPosition == Position)
                 return;
 
-            Direction = Vector2.Normalize(nextPosition - Position);
+            Vector2[] offsets = CalculateOffsets(nextPosition);
+            Vector2[] nextDirections = CalculateDirections(offsets);
+            float[] rotations = CalculateRotations(nextDirections);
 
-            ApplyOffsets(CalculateOffsets(nextPosition));
+            ApplyOffsets(offsets);
+            ApplyDirections(nextDirections);
+            ApplyRotations(rotations);
+
             CheckColliders();
             UpdateProjectedBody();
         }
 
-        private void UpdateProjectedBody()
-        {
-            if (_body.Count > _projectedBody.Count)
-            {
-                for (var i = _projectedBody.Count; i < _body.Count; i++)
-                {
-                    _projectedBody.Add(CloneWithProjection(_body[i]));
-                }
-            }
-            else if (_body.Count < _projectedBody.Count)
-            {
-                for (var i = _body.Count; i < _projectedBody.Count; i++)
-                {
-                    _projectedBody.RemoveAt(i);
-                }
-            }
-
-            for (int i = 0; i < _projectedBody.Count; i++)
-            {
-                Transform transform1 = _body[i].GetComponent<Transform>();
-                Transform transform2 = _projectedBody[i].GetComponent<Transform>();
-
-                TryCloneCollider(_projectedBody[i], _body[i]);
-                transform1.CopyTo(transform2);
-                transform2.Position = _grid.Project(transform2.Position);
-            }
-        }
-
-        private void CheckColliders()
-        {
-            for (int i = _lastColliderIndex + 1; i < _body.Count; i++)
-            {
-                Transform transform1 = _body[i].GetComponent<Transform>();
-                Transform transform2 = _body[i - 1].GetComponent<Transform>();
-
-                if (_body[i].TryGetComponent<Collider>() is null
-                    && Vector2.Distance(transform1.Position, transform2.Position) <= 0.6f * Scale)
-                {
-                    _body[i].AddComponent<CircleCollider>();
-                    _lastColliderIndex = i;
-                }
-            }
-        }
-
         private Vector2[] CalculateOffsets(Vector2 nextPosition)
         {
-            var offsets = new Vector2[_body.Count];
+            Vector2[] offsets = new Vector2[_body.Count];
 
             offsets[0] = nextPosition - Position;
 
-            for (var i = 1; i < _body.Count; i++)
+            for (int i = 1; i < _body.Count; i++)
             {
                 Transform transform1 = _body[i].GetComponent<Transform>();
                 Transform transform2 = _body[i - 1].GetComponent<Transform>();
@@ -161,13 +137,108 @@ namespace SnakeGameSource.Model
             return offsets;
         }
 
+        private Vector2[] CalculateDirections(Vector2[] offsets)
+        {
+            Vector2[] directions = new Vector2[offsets.Length];
+
+            for (int i = 0; i < directions.Length; i++)
+            {
+                directions[i] = offsets[i] != Vector2.Zero ? Vector2.Normalize(offsets[i]) : Vector2.Zero;
+            }
+
+            return directions;
+        }
+
+        private float[] CalculateRotations(Vector2[] nextDirections)
+        {
+            float[] rotations = new float[nextDirections.Length];
+
+            for (int i = 0; i < rotations.Length; i++)
+            {
+                if (_directions.Length <= i)
+                {
+                    rotations[i] = 0;
+                }
+                else
+                {
+                    float cosa = Vector2.Dot(_directions[i], nextDirections[i]);
+                    Vector2 vector = _directions[i] - nextDirections[i];
+                    bool isNegative;
+                    rotations[i] = MathF.Asin(cosa);
+                }
+            }
+
+            return rotations;
+        }
+
         private void ApplyOffsets(Vector2[] offsets)
         {
             Head.GetComponent<Transform>().Position += offsets[0];
 
-            for (var i = 1; i < offsets.Length; i++)
+            for (int i = 1; i < offsets.Length; i++)
             {
                 _body[i].GetComponent<Transform>().Position += offsets[i] * offsets[0].Length();
+            }
+        }
+
+        private void ApplyDirections(Vector2[] nextDirections)
+        {
+            _directions = nextDirections;
+        }
+
+        private void ApplyRotations(float[] rotations)
+        {
+            for (int i = 0; i < _body.Count; i++)
+            {
+                Transform transform = _body[i].GetComponent<Transform>();
+                Quaternion rotation = transform.Rotation;
+                transform.Rotation = rotation;
+            }
+        }
+
+        private void UpdateProjectedBody()
+        {
+            if (_body.Count > _projectedBody.Count)
+            {
+                for (int i = _projectedBody.Count; i < _body.Count; i++)
+                {
+                    _projectedBody.Add(_body[i].Clone());
+                }
+            }
+            else if (_body.Count < _projectedBody.Count)
+            {
+                for (int i = _body.Count; i < _projectedBody.Count; i++)
+                {
+                    _projectedBody.RemoveAt(i);
+                }
+            }
+
+            for (int i = 0; i < _projectedBody.Count; i++)
+            {
+                Transform transform1 = _body[i].GetComponent<Transform>();
+                Transform transform2 = _projectedBody[i].GetComponent<Transform>();
+
+                transform1.CopyTo(transform2);
+                transform2.Position = _grid.Project(transform2.Position);
+
+                TryCloneCollider(_projectedBody[i], _body[i]);
+            }
+        }
+
+        private void CheckColliders()
+        {
+            for (int i = _lastColliderIndex + 1; i < _body.Count; i++)
+            {
+                Transform transform1 = _body[i].GetComponent<Transform>();
+                Transform transform2 = _body[i - 1].GetComponent<Transform>();
+                Collider collider = _body[i - 1].GetComponent<Collider>();
+
+                if (_body[i].TryGetComponent<Collider>() is null
+                    && Vector2.Distance(transform1.Position, transform2.Position) <= 0.6f * Scale)
+                {
+                    _body[i].AddComponent(collider.GetType());
+                    _lastColliderIndex = i;
+                }
             }
         }
 
@@ -227,29 +298,6 @@ namespace SnakeGameSource.Model
             _body.Add(newBodyPart);
         }
 
-        private GameObject CloneWithProjection(GameObject gameObject)
-        {
-            Transform bodyTransform = gameObject.GetComponent<Transform>();
-            TextureConfig bodyTexture = gameObject.GetComponent<TextureConfig>();
-
-            GameObject clone = gameObject.Name switch
-            {
-                null => new(),
-                _ => new(gameObject.Name)
-            };
-
-            Transform transform = clone.AddComponent<Transform>();
-            bodyTransform.CopyTo(transform);
-            transform.Position = _grid.Project(transform.Position);
-
-            TryCloneCollider(clone, gameObject);
-
-            TextureConfig texture = clone.AddComponent<TextureConfig>();
-            bodyTexture.CopyTo(texture);
-
-            return clone;
-        }
-
         private void TryCloneCollider(GameObject dest, GameObject source)
         {
             Collider? collider1 = source.TryGetComponent<Collider>();
@@ -257,15 +305,7 @@ namespace SnakeGameSource.Model
 
             if (collider2 is null && collider1 is not null)
             {
-                collider2 = collider1 switch
-                {
-                    SquareCollider => dest.AddComponent<SquareCollider>(),
-                    CircleCollider => dest.AddComponent<CircleCollider>(),
-                    _ => throw new NotImplementedException()
-                };
-
-                if (source == Head)
-                    collider2.CollisionEntry += OnCollisionEnter;
+                dest.AddComponent(collider1.GetType());
             }
         }
 

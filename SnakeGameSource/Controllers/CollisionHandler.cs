@@ -37,12 +37,12 @@ namespace SnakeGameSource.Controllers
 
         private void CheckCollisions()
         {
-            for (var i = 0; i < _gameObjects.Count - 1; i++)
+            for (int i = 0; i < _gameObjects.Count - 1; i++)
             {
                 Collider collider1 = _gameObjects[i].GetComponent<Collider>();
                 Transform transform1 = _gameObjects[i].GetComponent<Transform>();
 
-                for (var j = i + 1; j < _gameObjects.Count; j++)
+                for (int j = i + 1; j < _gameObjects.Count; j++)
                 {
                     Collider collider2 = _gameObjects[j].GetComponent<Collider>();
                     Transform transform2 = _gameObjects[j].GetComponent<Transform>();

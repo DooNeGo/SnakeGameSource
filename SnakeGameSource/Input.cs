@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using Microsoft.Xna.Framework.Input.Touch;
 using System;
 
 namespace SnakeGameSource
@@ -19,7 +18,6 @@ namespace SnakeGameSource
 
         public void Update()
         {
-
 #if ANDROID
             if (!TouchPanel.IsGestureAvailable)
                 return;
@@ -30,14 +28,14 @@ namespace SnakeGameSource
             _pressedKey = default;
             Keys[] keys = Keyboard.GetState().GetPressedKeys();
 
-            for (var i = 0; i < keys.Length; i++)
+            for (int i = 0; i < keys.Length; i++)
             {
                 KeyDown?.Invoke(keys[i]);
 
-                if (keys[i] == Keys.Up
-                    || keys[i] == Keys.Down
-                    || keys[i] == Keys.Left
-                    || keys[i] == Keys.Right)
+                if (keys[i] is Keys.Up
+                    or Keys.Down
+                    or Keys.Left
+                    or Keys.Right)
                     _pressedKey = keys[i];
             }
 #endif

@@ -8,26 +8,12 @@ namespace SnakeGameSource.Components
 
         public T GetComponent<T>() where T : Component
         {
-            if (this is GameObject gameObject)
-            {
-                return gameObject.GetComponent<T>();
-            }
-            else
-            {
-                return Parent!.GetComponent<T>();
-            }
+            return this is GameObject gameObject ? gameObject.GetComponent<T>() : Parent!.GetComponent<T>();
         }
 
         public T AddComponent<T>() where T : Component, new()
         {
-            if (this is GameObject gameObject)
-            {
-                return gameObject.AddComponent<T>();
-            }
-            else
-            {
-                return Parent!.AddComponent<T>();
-            }
+            return this is GameObject gameObject ? gameObject.AddComponent<T>() : Parent!.AddComponent<T>();
         }
     }
 }

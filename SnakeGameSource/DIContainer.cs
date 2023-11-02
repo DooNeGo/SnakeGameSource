@@ -94,12 +94,9 @@ namespace SnakeGameSource
                 return instance;
             }
 
-            if (_transientTypes.Contains(type))
-            {
-                return CreateInstance(type);
-            }
-
-            throw new ArgumentException($"You forgot to add {type.Name} in the Container.");
+            return _transientTypes.Contains(type)
+                ? CreateInstance(type)
+                : throw new ArgumentException($"You forgot to add {type.Name} in the Container.");
         }
 
         private object CreateInstance(Type type)
@@ -113,7 +110,7 @@ namespace SnakeGameSource
             {
                 objects = new object[parameters.Length];
 
-                for (var i = 0; i < objects.Length; i++)
+                for (int i = 0; i < objects.Length; i++)
                 {
                     Type parameterType = parameters[i].ParameterType;
                     objects[i] = GetInstance(parameterType);

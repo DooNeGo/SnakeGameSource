@@ -26,20 +26,14 @@ namespace SnakeGameSource.Components
 
         public static bool operator ==(TextureConfig left, TextureConfig right)
         {
-            if (left.Color == right.Color
+            return left.Color == right.Color
                 && left.Name == right.Name
-                && left.Scale == right.Scale)
-                return true;
-
-            return false;
+                && left.Scale == right.Scale;
         }
 
         public static bool operator !=(TextureConfig left, TextureConfig right)
         {
-            if (left == right)
-                return false;
-
-            return true;
+            return !(left == right);
         }
 
         public override bool Equals(object? obj)

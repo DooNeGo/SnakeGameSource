@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
+using SnakeGameSource.Components;
 using SnakeGameSource.Controllers;
 using SnakeGameSource.Model;
 
@@ -39,7 +40,7 @@ namespace SnakeGameSource
                         .AddSingleton<FoodController>()
                         .AddSingleton<CollisionHandler>()
                         .AddSingleton<SpriteBatch>()
-                        .AddSingleton<SnakeConfig>()
+                        .AddTransient<SnakeConfig>()
                         .AddSingleton<PhysicsMovement>()
                         .AddSingleton<SpriteDrawer>()
                         .AddTransient<Scene>()

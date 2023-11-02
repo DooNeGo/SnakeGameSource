@@ -1,6 +1,7 @@
 ﻿using SnakeGameSource.Components;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace SnakeGameSource.Model
 {
@@ -8,9 +9,7 @@ namespace SnakeGameSource.Model
     {
         private readonly List<Component> _components = new();
 
-        public GameObject() { }
-
-        public GameObject(string name)
+        public GameObject(string? name = null)
         {
             Name = name;
         }
@@ -21,6 +20,17 @@ namespace SnakeGameSource.Model
         {
             T component = new() { Parent = this };
             _components.Add(component);
+            return component;
+        }
+
+        public Component AddComponent(Type type)
+        {
+            ConstructorInfo[] constructors = type.GetConstructors();
+            Component component = (Component)constructors[0].Invoke(null);
+
+            type.GetProperty("Parent")!.SetValue(component, this);
+            _components.Add(component);
+
             return component;
         }
 
@@ -41,7 +51,7 @@ namespace SnakeGameSource.Model
                     return value;
             }
 
-            throw new Exception();
+            throw new Exception($"There is no {nameof(T)} component");
         }
 
         public T? TryGetComponent<T>() where T : Component
@@ -53,6 +63,20 @@ namespace SnakeGameSource.Model
             }
 
             return null;
+        }
+
+        public GameObject Clone()
+        {
+            GameObject gameObject = new(Name);
+
+            foreach (Component component in _components)
+            {
+                Type type = component.GetType();
+                Component cloneComponent = gameObject.AddComponent(type);
+                type.GetMethod("CopyTo")?.Invoke(component, new object?[] { cloneComponent });
+            }
+
+            return gameObject;
         }
 
         public IEnumerator<T> GetComponents<T>() where T : Component

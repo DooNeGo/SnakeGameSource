@@ -9,13 +9,7 @@ namespace SnakeGameSource.Components.Colliders
         {
             Vector2 VectorToCollider = Vector2.Normalize(GetComponent<Transform>().Position - position);
             VectorToCollider = new Vector2(MathF.Abs(VectorToCollider.X), MathF.Abs(VectorToCollider.Y));
-            Vector2 UnitVector;
-
-            if (VectorToCollider.X > VectorToCollider.Y)
-                UnitVector = Vector2.UnitX;
-            else
-                UnitVector = Vector2.UnitY;
-
+            Vector2 UnitVector = VectorToCollider.X > VectorToCollider.Y ? Vector2.UnitX : Vector2.UnitY;
             float cosBeetweenVectors = Vector2.Dot(UnitVector, VectorToCollider);
 
             return GetComponent<Transform>().Scale / 2 / cosBeetweenVectors;

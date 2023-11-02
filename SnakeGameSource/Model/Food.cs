@@ -9,6 +9,7 @@ namespace SnakeGameSource.Model
         public Food(Vector2 position, float scale, Color color, int lifeTime)
         {
             LifeTime = lifeTime;
+
             Transform transform = AddComponent<Transform>();
             transform.Position = position;
             transform.Scale = scale;

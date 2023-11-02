@@ -41,7 +41,7 @@ namespace SnakeGameSource
                 _lastDirection = direction;
 
             float lastDirectionImpact = (float)delta.TotalSeconds / _snake.SlewingTime * _snake.MoveSpeed / _snake.Scale;
-            _smoothDirection = Vector2.Normalize(_smoothDirection + _lastDirection * lastDirectionImpact);
+            _smoothDirection = Vector2.Normalize(_smoothDirection + (_lastDirection * lastDirectionImpact));
             Vector2 offset = (float)delta.TotalSeconds * _snake.MoveSpeed * _smoothDirection;
             _snake.MoveTo(_snake.Position + offset);
         }

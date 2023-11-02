@@ -55,7 +55,7 @@ namespace SnakeGameSource.Controllers
 
             for (int i = 0; i < _foods.Length; i++)
             {
-                _foods[i].GetComponent<Collider>().CollisionEntry += OnCollisionEntry;
+                _foods[i].GetComponent<Collider>().CollisionEnter += OnCollisionEnter;
             }
 
             _remainTime = TimeSpan.FromSeconds(ActiveFood.LifeTime);
@@ -73,7 +73,7 @@ namespace SnakeGameSource.Controllers
             }
         }
 
-        public void OnCollisionEntry(GameObject gameObject)
+        public void OnCollisionEnter(GameObject gameObject)
         {
             if (gameObject.Name == "Snake head")
                 RandFood();
@@ -87,7 +87,7 @@ namespace SnakeGameSource.Controllers
             {
                 _activeFoodIndex = 0;
             }
-            else if (number > 0 && number <= 4)
+            else if (number is > 0 and <= 4)
             {
                 _activeFoodIndex = _random.Next(1, _foods.Length - 1);
             }
@@ -116,7 +116,7 @@ namespace SnakeGameSource.Controllers
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return _foods.GetEnumerator();
+            yield return ActiveFood;
         }
     }
 }
