@@ -19,6 +19,7 @@ namespace SnakeGameSource
         public void Update()
         {
 #if ANDROID
+            _gesture = default;
             if (!TouchPanel.IsGestureAvailable)
                 return;
 
@@ -44,14 +45,17 @@ namespace SnakeGameSource
         public Vector2 GetMoveDirection()
         {
 #if ANDROID
-            if (System.MathF.Abs(_gesture.Delta.X) > System.MathF.Abs(_gesture.Delta.Y))
-            {
-                return _gesture.Delta.X > 0 ? Vector2.UnitX : -Vector2.UnitX;
-            }
-            else
+    
+            if (_gesture.GestureType == GestureType.VerticalDrag)
             {
                 return _gesture.Delta.Y > 0 ? Vector2.UnitY : -Vector2.UnitY;
             }
+            else if (_gesture.GestureType == GestureType.HorizontalDrag)
+            {
+                return _gesture.Delta.X > 0 ? Vector2.UnitX : -Vector2.UnitX;
+            }
+
+            return Vector2.Zero;
 #else
             return _pressedKey switch
             {
