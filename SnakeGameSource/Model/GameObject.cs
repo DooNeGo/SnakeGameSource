@@ -25,6 +25,10 @@ namespace SnakeGameSource.Model
 
         public Component AddComponent(Type type)
         {
+            if (type != typeof(Component)
+                && type.BaseType != typeof(Component))
+                throw new ArgumentException(null, nameof(type));
+
             ConstructorInfo[] constructors = type.GetConstructors();
             Component component = (Component)constructors[0].Invoke(null);
 
@@ -34,7 +38,7 @@ namespace SnakeGameSource.Model
             return component;
         }
 
-        public void RemoveComponent<T>()
+        public void RemoveComponent<T>() where T : Component
         {
             for (int i = 0; i < _components.Count; i++)
             {
