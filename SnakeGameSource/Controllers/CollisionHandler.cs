@@ -51,7 +51,7 @@ namespace SnakeGameSource.Controllers
                     float distanceToEdge2 = collider2.GetDistanceToEdge(transform1.Position);
                     float distanceBeetween = Vector2.Distance(transform1.Position, transform2.Position);
 
-                    if (distanceBeetween <= distanceToEdge1 + distanceToEdge2)
+                    if (distanceToEdge1 + distanceToEdge2 >= distanceBeetween)
                     {
                         collider1.InvokeCollision(_gameObjects[j]);
                         collider2.InvokeCollision(_gameObjects[i]);

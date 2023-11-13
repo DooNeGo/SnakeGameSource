@@ -16,9 +16,9 @@ namespace SnakeGameSource.Model
 
             TextureConfig textureConfig = AddComponent<TextureConfig>();
             textureConfig.Color = color;
-            textureConfig.Name = TextureName.Food;
+            textureConfig.Name = TextureName.SnakeBody;
 
-            AddComponent<SquareCollider>();
+            AddComponent<CircleCollider>();
         }
 
         public int LifeTime { get; }

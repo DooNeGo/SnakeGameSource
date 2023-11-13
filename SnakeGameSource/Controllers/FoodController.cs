@@ -10,7 +10,7 @@ namespace SnakeGameSource.Controllers
 {
     internal class FoodController : IEnumerable<GameObject>
     {
-        private const float foodScale = 0.5f;
+        private const float foodScale = 1f;
 
         private readonly Food[] _foods;
         private readonly Random _random = new();
@@ -33,25 +33,30 @@ namespace SnakeGameSource.Controllers
                 new Food(_grid.Center, foodScale, Color.White, 5),
             };
 
-            Effect effect0 = _foods[0].AddComponent<Effect>();
-            Effect effect1 = _foods[1].AddComponent<Effect>();
-            Effect effect2 = _foods[2].AddComponent<Effect>();
-            Effect effect3 = _foods[3].AddComponent<Effect>();
-            Effect effect4 = _foods[4].AddComponent<Effect>();
-            Effect effect5 = _foods[5].AddComponent<Effect>();
+            Effect[] effects = new Effect[_foods.Length];
 
-            effect0.Type = EffectType.Length;
-            effect0.Value = 1;
-            effect1.Type = EffectType.Speed;
-            effect1.Value = 0.5f;
-            effect2.Type = EffectType.Speed;
-            effect2.Value = 0.5f;
-            effect3.Type = EffectType.Scale;
-            effect3.Value = 0.1f;
-            effect4.Type = EffectType.Scale;
-            effect4.Value = -0.1f;
-            effect5.Type = EffectType.Length;
-            effect5.Value = -1;
+            for (int i = 0; i < effects.Length; i++)
+            {
+                effects[i] = _foods[i].AddComponent<Effect>();
+            }
+
+            effects[0].Type = EffectType.Length;
+            effects[0].Value = 1;
+
+            effects[1].Type = EffectType.Speed;
+            effects[1].Value = 0.5f;
+
+            effects[2].Type = EffectType.Speed;
+            effects[2].Value = 0.5f;
+
+            effects[3].Type = EffectType.Scale;
+            effects[3].Value = 0.1f;
+
+            effects[4].Type = EffectType.Scale;
+            effects[4].Value = -0.1f;
+
+            effects[5].Type = EffectType.Length;
+            effects[5].Value = -1;
 
             for (int i = 0; i < _foods.Length; i++)
             {

@@ -47,10 +47,10 @@ namespace SnakeGameSource.Model
                 bodyPartTransform.Scale = Scale;
 
                 TextureConfig bodyPartTexture = bodyPart.AddComponent<TextureConfig>();
-                if (i == 0)
+                if (i is 0)
                 {
                     bodyPartTexture.Color = snakeConfig.HeadColor;
-                    bodyPartTexture.Name = TextureName.SnakeHead;
+                    bodyPartTexture.Name = TextureName.SnakeBody;
                 }
                 else
                 {
@@ -58,7 +58,7 @@ namespace SnakeGameSource.Model
                     bodyPartTexture.Name = TextureName.SnakeBody;
                 }
 
-                if (i != 1)
+                if (i is not 1)
                 {
                     bodyPart.AddComponent<CircleCollider>();
                 }
@@ -109,11 +109,11 @@ namespace SnakeGameSource.Model
 
             Vector2[] offsets = CalculateOffsets(nextPosition);
             Vector2[] nextDirections = CalculateDirections(offsets);
-            float[] rotations = CalculateRotations(nextDirections);
+            //float[] rotations = CalculateRotations(nextDirections);
 
             ApplyOffsets(offsets);
             ApplyDirections(nextDirections);
-            ApplyRotations(rotations);
+            //ApplyRotations(rotations);
 
             CheckColliders();
             UpdateProjectedBody();
@@ -231,7 +231,7 @@ namespace SnakeGameSource.Model
             {
                 Transform transform1 = _body[i].GetComponent<Transform>();
                 Transform transform2 = _body[i - 1].GetComponent<Transform>();
-                Collider collider = _body[i - 1].GetComponent<Collider>();
+                Collider collider = _body[_lastColliderIndex].GetComponent<Collider>();
 
                 if (_body[i].TryGetComponent<Collider>() is null
                     && Vector2.Distance(transform1.Position, transform2.Position) <= 0.6f * Scale)
@@ -270,11 +270,18 @@ namespace SnakeGameSource.Model
                     if (effectValue > 0)
                         AddNewBodyPart();
                     else if (_body.Count - 1 > 2)
-                        _body.RemoveAt(_body.Count - 1);
+                        RemoveLastBodyPart();
                     break;
             }
 
             Score++;
+        }
+
+        private void RemoveLastBodyPart()
+        {
+            if (_body.Count - 1 == _lastColliderIndex)
+                _lastColliderIndex--;
+            _body.RemoveAt(_body.Count - 1);
         }
 
         private void AddNewBodyPart()
