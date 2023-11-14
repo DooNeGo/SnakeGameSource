@@ -1,4 +1,6 @@
-﻿namespace SnakeGameSource.Components
+﻿using SnakeGameSource.GameEngine.Components;
+
+namespace SnakeGameSource.Components
 {
     public enum EffectType
     {

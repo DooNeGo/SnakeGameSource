@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
-using SnakeGameSource.Components;
-using SnakeGameSource.Components.Colliders;
+using SnakeGameSource.GameEngine;
+using SnakeGameSource.GameEngine.Components;
+using SnakeGameSource.GameEngine.Components.Colliders;
 
 namespace SnakeGameSource.Model
 {
@@ -19,6 +20,7 @@ namespace SnakeGameSource.Model
             textureConfig.Name = TextureName.SnakeBody;
 
             AddComponent<CircleCollider>();
+            AddComponent<CollisionNotifier>();
         }
 
         public int LifeTime { get; }

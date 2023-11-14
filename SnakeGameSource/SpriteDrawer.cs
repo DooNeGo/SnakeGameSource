@@ -1,10 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using SnakeGameSource.Components;
-using SnakeGameSource.Model;
-using System;
-using System.Collections.Generic;
+using SnakeGameSource.GameEngine;
+using SnakeGameSource.GameEngine.Components;
 
 namespace SnakeGameSource
 {

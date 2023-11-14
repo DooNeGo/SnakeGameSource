@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
+﻿using System.Reflection;
 
-namespace SnakeGameSource
+namespace SnakeGameSource.GameEngine
 {
     internal class DIContainer
     {

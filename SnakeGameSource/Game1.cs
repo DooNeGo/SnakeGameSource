@@ -2,8 +2,8 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
-using SnakeGameSource.Components;
 using SnakeGameSource.Controllers;
+using SnakeGameSource.GameEngine;
 using SnakeGameSource.Model;
 
 namespace SnakeGameSource

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace SnakeGameSource.Components.Colliders
+namespace SnakeGameSource.GameEngine.Components.Colliders
 {
     internal class CircleCollider : Collider
     {

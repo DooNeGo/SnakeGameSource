@@ -1,6 +1,4 @@
-﻿using SnakeGameSource.Model;
-
-namespace SnakeGameSource.Components
+﻿namespace SnakeGameSource.GameEngine.Components
 {
     internal abstract class Component
     {

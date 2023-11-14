@@ -1,7 +1,6 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 
-namespace SnakeGameSource.Model
+namespace SnakeGameSource.GameEngine
 {
     internal class Scene : IEnumerable<GameObject>
     {

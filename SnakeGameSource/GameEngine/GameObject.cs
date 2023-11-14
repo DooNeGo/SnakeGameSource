@@ -1,9 +1,7 @@
-﻿using SnakeGameSource.Components;
-using System;
-using System.Collections.Generic;
+﻿using SnakeGameSource.GameEngine.Components;
 using System.Reflection;
 
-namespace SnakeGameSource.Model
+namespace SnakeGameSource.GameEngine
 {
     internal class GameObject : Component
     {
@@ -25,9 +23,8 @@ namespace SnakeGameSource.Model
 
         public Component AddComponent(Type type)
         {
-            if (type != typeof(Component)
-                && type.BaseType != typeof(Component))
-                throw new ArgumentException(null, nameof(type));
+            if (!type.IsSubclassOf(typeof(Component)))
+                throw new Exception();
 
             ConstructorInfo[] constructors = type.GetConstructors();
             Component component = (Component)constructors[0].Invoke(null);
@@ -89,6 +86,14 @@ namespace SnakeGameSource.Model
             {
                 if (_components[i] is T component)
                     yield return component;
+            }
+        }
+
+        public IEnumerable<Component> GetComponents()
+        {
+            for (int i = 0; i < _components.Count; i++)
+            {
+                yield return _components[i];
             }
         }
     }

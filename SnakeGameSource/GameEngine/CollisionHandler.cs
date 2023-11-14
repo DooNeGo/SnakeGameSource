@@ -1,11 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
-using SnakeGameSource.Components;
-using SnakeGameSource.Components.Colliders;
-using SnakeGameSource.Model;
-using System;
-using System.Collections.Generic;
+using SnakeGameSource.GameEngine.Components;
+using SnakeGameSource.GameEngine.Components.Colliders;
+using System.Reflection;
 
-namespace SnakeGameSource.Controllers
+namespace SnakeGameSource.GameEngine
 {
     internal class CollisionHandler
     {
@@ -53,8 +51,20 @@ namespace SnakeGameSource.Controllers
 
                     if (distanceToEdge1 + distanceToEdge2 >= distanceBeetween)
                     {
-                        collider1.InvokeCollision(_gameObjects[j]);
-                        collider2.InvokeCollision(_gameObjects[i]);
+                        foreach (Component component in _gameObjects[i].GetComponents())
+                        {
+                            Type type = component.GetType();
+                            MethodInfo? methodInfo = type.GetRuntimeMethod("OnCollisionEnter", new Type[] { typeof(GameObject) });
+                            component.GetType().GetMethod("OnCollisionEnter")?.Invoke(component, new object[] { _gameObjects[j] });
+                        }
+
+                        foreach (Component component in _gameObjects[j].GetComponents())
+                        {
+                            component.GetType().GetMethod("OnCollisionEnter")?.Invoke(component, new object[] { _gameObjects[i] });
+                        }
+
+                        //collider1.InvokeCollision(_gameObjects[j]);
+                        //collider2.InvokeCollision(_gameObjects[i]);
                     }
                 }
             }

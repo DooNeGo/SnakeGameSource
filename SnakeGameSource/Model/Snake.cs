@@ -1,9 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using SnakeGameSource.Components;
-using SnakeGameSource.Components.Colliders;
-using System;
+using SnakeGameSource.GameEngine;
+using SnakeGameSource.GameEngine.Components;
+using SnakeGameSource.GameEngine.Components.Colliders;
 using System.Collections;
-using System.Collections.Generic;
 
 namespace SnakeGameSource.Model
 {
@@ -67,7 +67,7 @@ namespace SnakeGameSource.Model
             }
 
             GameObject headClone = Head.Clone();
-            headClone.GetComponent<Collider>().CollisionEnter += OnCollisionEnter;
+            headClone.AddComponent<CollisionNotifier>().CollisionEnter += OnCollisionEnter;
             _projectedBody.Add(headClone);
 
             UpdateProjectedBody();
@@ -81,15 +81,15 @@ namespace SnakeGameSource.Model
 
         public Vector2 Direction
         {
-            get { return _directions[0]; }
-            private set { _directions[0] = value; }
+            get => _directions[0];
+            private set => _directions[0] = value;
         }
 
         public int Score { get; private set; } = 0;
 
         public float Scale
         {
-            get { return _scale; }
+            get => _scale;
             private set
             {
                 _scale = value;

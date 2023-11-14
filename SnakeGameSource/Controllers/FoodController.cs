@@ -1,10 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using SnakeGameSource.Components;
-using SnakeGameSource.Components.Colliders;
+using SnakeGameSource.GameEngine;
+using SnakeGameSource.GameEngine.Components;
+using SnakeGameSource.GameEngine.Components.Colliders;
 using SnakeGameSource.Model;
-using System;
 using System.Collections;
-using System.Collections.Generic;
 
 namespace SnakeGameSource.Controllers
 {
@@ -60,7 +60,7 @@ namespace SnakeGameSource.Controllers
 
             for (int i = 0; i < _foods.Length; i++)
             {
-                _foods[i].GetComponent<Collider>().CollisionEnter += OnCollisionEnter;
+                _foods[i].GetComponent<CollisionNotifier>().CollisionEnter += OnCollisionEnter;
             }
 
             _remainTime = TimeSpan.FromSeconds(ActiveFood.LifeTime);

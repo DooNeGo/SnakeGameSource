@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
-using System;
 
-namespace SnakeGameSource.Components
+namespace SnakeGameSource.GameEngine.Components
 {
     internal enum TextureName
     {

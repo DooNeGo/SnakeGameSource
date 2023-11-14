@@ -1,10 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
-using SnakeGameSource.Components;
-using SnakeGameSource.Components.Colliders;
-using System;
-using System.Linq;
+using SnakeGameSource.GameEngine.Components;
+using SnakeGameSource.GameEngine.Components.Colliders;
 
-namespace SnakeGameSource.Model
+namespace SnakeGameSource.GameEngine
 {
     internal class Grid
     {
