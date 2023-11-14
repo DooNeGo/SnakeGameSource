@@ -25,8 +25,7 @@ namespace SnakeGameSource.Model
 
         public Component AddComponent(Type type)
         {
-            if (type != typeof(Component)
-                && type.BaseType != typeof(Component))
+            if (!type.IsSubclassOf(typeof(Component)))
                 throw new ArgumentException(null, nameof(type));
 
             ConstructorInfo[] constructors = type.GetConstructors();

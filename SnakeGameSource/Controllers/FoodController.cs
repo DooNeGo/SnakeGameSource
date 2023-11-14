@@ -10,7 +10,7 @@ namespace SnakeGameSource.Controllers
 {
     internal class FoodController : IEnumerable<GameObject>
     {
-        private const float foodScale = 1f;
+        private const float foodScale = 0.5f;
 
         private readonly Food[] _foods;
         private readonly Random _random = new();
