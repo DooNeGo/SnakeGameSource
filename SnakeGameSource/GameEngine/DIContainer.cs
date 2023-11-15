@@ -2,7 +2,7 @@
 
 namespace SnakeGameSource.GameEngine
 {
-    internal class DIContainer
+    public class DIContainer
     {
         private readonly Dictionary<Type, Type> _associationTypes = new();
         private readonly Dictionary<Type, object?> _singletonTypes = new();

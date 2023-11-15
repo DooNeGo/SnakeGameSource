@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace SnakeGameSource.GameEngine
 {
-    internal class GameObject : Component
+    public class GameObject : Component
     {
         private readonly List<Component> _components = new();
 

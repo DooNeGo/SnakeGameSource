@@ -1,31 +1,30 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
-using SnakeGameSource.GameEngine;
 using SnakeGameSource.GameEngine.Components;
 
-namespace SnakeGameSource
+namespace SnakeGameSource.GameEngine
 {
     internal class SpriteDrawer
     {
         private readonly Dictionary<TextureName, Texture2D> _textures = new();
         private readonly ContentManager _contentManager;
+        private readonly SpriteBatch _spriteBatch;
         private readonly Grid _grid;
 
-        public SpriteDrawer(ContentManager content, Grid grid)
+        public SpriteDrawer(ContentManager content, SpriteBatch spriteBatch, Grid grid, Scene scene)
         {
             _contentManager = content;
+            _spriteBatch = spriteBatch;
             _grid = grid;
+            ActiveScene = scene;
         }
 
-        public Scene? ActiveScene { get; set; }
+        public Scene ActiveScene { get; set; }
 
-        public void Draw(SpriteBatch spriteBatch)
+        public void Draw()
         {
-            if (ActiveScene is null)
-                throw new NullReferenceException(nameof(ActiveScene));
-
-            spriteBatch.Begin();
+            _spriteBatch.Begin();
 
             foreach (GameObject gameObject in ActiveScene)
             {
@@ -36,20 +35,20 @@ namespace SnakeGameSource
                 {
                     Vector2 absolutePosition = _grid.GetAbsolutePosition(transform.Position, transform.Scale);
                     float scale = _grid.CellSize.X * textureConfig.Scale / _textures[textureConfig.Name].Bounds.Size.X;
-                    Vector2 spriteCenter = _textures[textureConfig.Name].Bounds.Center.ToVector2();
-                    spriteBatch.Draw(_textures[textureConfig.Name],
+                    Point spriteCenter = _textures[textureConfig.Name].Bounds.Center;
+                    _spriteBatch.Draw(_textures[textureConfig.Name],
                                      absolutePosition,
                                      null,
                                      textureConfig.Color,
                                      transform.Rotation.Z,
-                                     spriteCenter,
+                                     spriteCenter.ToVector2(),
                                      scale,
                                      SpriteEffects.None,
                                      1);
                 }
             }
 
-            spriteBatch.End();
+            _spriteBatch.End();
         }
 
         public void LoadContent()

@@ -91,7 +91,7 @@ namespace SnakeGameSource
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.MediumPurple);
-            _drawer.Draw(_spriteBatch);
+            _drawer.Draw();
             base.Draw(gameTime);
         }
 

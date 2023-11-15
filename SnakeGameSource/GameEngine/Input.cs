@@ -1,44 +1,67 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Input.Touch;
 
 namespace SnakeGameSource.GameEngine
 {
-    internal class Input
+    public class Input
     {
-#if ANDROID
+//#if ANDROID
         public event Action<GestureSample>? Gesture;
 
         private GestureSample _gesture = default;
-#else
+//#else
         public event Action<Keys>? KeyDown;
 
         private Keys _pressedKey = default;
-#endif
+//#endif
 
         public void Update()
         {
-#if ANDROID
-            _gesture = default;
-            if (!TouchPanel.IsGestureAvailable)
-                return;
+            //#if ANDROID
+            UpdateGesture();
 
-            _gesture = TouchPanel.ReadGesture();
-            Gesture?.Invoke(_gesture);
-#else
-            _pressedKey = default;
-            Keys[] keys = Keyboard.GetState().GetPressedKeys();
+            //#else
 
-            for (int i = 0; i < keys.Length; i++)
+            UpdateKey();
+
+            //#endif
+        }
+
+        private void UpdateKey()
+        {
+            if (Keyboard.GetState().GetPressedKeyCount() > 0)
             {
-                KeyDown?.Invoke(keys[i]);
+                Keys[] keys = Keyboard.GetState().GetPressedKeys();
 
-                if (keys[i] is Keys.Up
-                    or Keys.Down
-                    or Keys.Left
-                    or Keys.Right)
-                    _pressedKey = keys[i];
+                for (int i = 0; i < keys.Length; i++)
+                {
+                    KeyDown?.Invoke(keys[i]);
+
+                    if (keys[i] is Keys.Up
+                        or Keys.Down
+                        or Keys.Left
+                        or Keys.Right)
+                        _pressedKey = keys[i];
+                }
             }
-#endif
+            else
+            {
+                _pressedKey = default;
+            }
+        }
+
+        private void UpdateGesture()
+        {
+            if (TouchPanel.IsGestureAvailable)
+            {
+                _gesture = TouchPanel.ReadGesture();
+                Gesture?.Invoke(_gesture);
+            }
+            else
+            {
+                _gesture = default;
+            }
         }
 
         public Vector2 GetMoveDirection()

@@ -2,7 +2,7 @@
 
 namespace SnakeGameSource.GameEngine
 {
-    internal class Scene : IEnumerable<GameObject>
+    public class Scene : IEnumerable<GameObject>
     {
         private readonly List<IEnumerable<GameObject>> _compositeObjects = new();
         private readonly List<GameObject> _gameObjects = new();

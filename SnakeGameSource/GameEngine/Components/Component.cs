@@ -1,6 +1,6 @@
 ﻿namespace SnakeGameSource.GameEngine.Components
 {
-    internal abstract class Component
+    public abstract class Component
     {
         public GameObject? Parent { get; init; }
 

@@ -4,15 +4,16 @@ using SnakeGameSource.GameEngine.Components.Colliders;
 
 namespace SnakeGameSource.GameEngine
 {
-    internal class Grid
+    public class Grid
     {
         //private const float Scale = 1.0f;
 
         private readonly bool[,] _cells;
         //private readonly GameObject[,] _gameObjects;
 
-        public Grid(GameWindow window)
+        public Grid(GameWindow window, Scene scene)
         {
+            ActiveScene = scene;
             CellSize = new Point(window.ClientBounds.Size.X / 15);
             Size = window.ClientBounds.Size.Divide(CellSize).Add(2);
             _cells = new bool[Size.Y, Size.X];
@@ -27,7 +28,7 @@ namespace SnakeGameSource.GameEngine
 
         public Vector2 Center { get; }
 
-        public Scene? ActiveScene { get; set; }
+        public Scene ActiveScene { get; set; }
 
         public bool IsPositionOccupied(Vector2 position, float scale)
         {
@@ -58,9 +59,6 @@ namespace SnakeGameSource.GameEngine
         private void Update()
         {
             Clear();
-
-            if (ActiveScene is null)
-                throw new NullReferenceException(nameof(ActiveScene));
 
             foreach (GameObject gameObject in ActiveScene)
             {
