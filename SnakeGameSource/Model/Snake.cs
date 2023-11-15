@@ -16,7 +16,6 @@ namespace SnakeGameSource.Model
         private readonly Grid _grid;
         private readonly Color _bodyColor;
 
-        private Vector2[] _directions;
         private float _scale = 1f;
         private int _lastColliderIndex;
 
@@ -27,12 +26,6 @@ namespace SnakeGameSource.Model
             _lastColliderIndex = snakeConfig.StartBodyLength;
             _bodyColor = snakeConfig.BodyColor;
             _grid = grid;
-            _directions = new Vector2[snakeConfig.StartBodyLength + 1];
-
-            for (int i = 0; i < _directions.Length; i++)
-            {
-                _directions[i] = snakeConfig.StartDirection;
-            }
 
             for (int i = 0; i <= snakeConfig.StartBodyLength; i++)
             {
@@ -79,11 +72,7 @@ namespace SnakeGameSource.Model
 
         public float SlewingTime { get; private set; }
 
-        public Vector2 Direction
-        {
-            get { return _directions[0]; }
-            private set { _directions[0] = value; }
-        }
+        public Vector2 Direction { get; private set; }
 
         public int Score { get; private set; } = 0;
 
@@ -108,13 +97,8 @@ namespace SnakeGameSource.Model
                 return;
 
             Vector2[] offsets = CalculateOffsets(nextPosition);
-            Vector2[] nextDirections = CalculateDirections(offsets);
-            //float[] rotations = CalculateRotations(nextDirections);
 
             ApplyOffsets(offsets);
-            ApplyDirections(nextDirections);
-            //ApplyRotations(rotations);
-
             CheckColliders();
             UpdateProjectedBody();
         }
@@ -137,40 +121,6 @@ namespace SnakeGameSource.Model
             return offsets;
         }
 
-        private Vector2[] CalculateDirections(Vector2[] offsets)
-        {
-            Vector2[] directions = new Vector2[offsets.Length];
-
-            for (int i = 0; i < directions.Length; i++)
-            {
-                directions[i] = offsets[i] != Vector2.Zero ? Vector2.Normalize(offsets[i]) : Vector2.Zero;
-            }
-
-            return directions;
-        }
-
-        private float[] CalculateRotations(Vector2[] nextDirections)
-        {
-            float[] rotations = new float[nextDirections.Length];
-
-            for (int i = 0; i < rotations.Length; i++)
-            {
-                if (_directions.Length <= i)
-                {
-                    rotations[i] = 0;
-                }
-                else
-                {
-                    float cosa = Vector2.Dot(_directions[i], nextDirections[i]);
-                    Vector2 vector = _directions[i] - nextDirections[i];
-                    bool isNegative;
-                    rotations[i] = MathF.Asin(cosa);
-                }
-            }
-
-            return rotations;
-        }
-
         private void ApplyOffsets(Vector2[] offsets)
         {
             Head.GetComponent<Transform>().Position += offsets[0];
@@ -178,21 +128,6 @@ namespace SnakeGameSource.Model
             for (int i = 1; i < offsets.Length; i++)
             {
                 _body[i].GetComponent<Transform>().Position += offsets[i] * offsets[0].Length();
-            }
-        }
-
-        private void ApplyDirections(Vector2[] nextDirections)
-        {
-            _directions = nextDirections;
-        }
-
-        private void ApplyRotations(float[] rotations)
-        {
-            for (int i = 0; i < _body.Count; i++)
-            {
-                Transform transform = _body[i].GetComponent<Transform>();
-                Quaternion rotation = transform.Rotation;
-                transform.Rotation = rotation;
             }
         }
 
