@@ -4,8 +4,8 @@ namespace SnakeGameSource.GameEngine
 {
     public class Scene : IEnumerable<GameObject>
     {
-        private readonly List<IEnumerable<GameObject>> _compositeObjects = new();
-        private readonly List<GameObject> _gameObjects = new();
+        private readonly List<IEnumerable<GameObject>> _compositeObjects = [];
+        private readonly List<GameObject> _gameObjects = [];
 
         public void Add(params IEnumerable<GameObject>[] compositeObjects)
         {

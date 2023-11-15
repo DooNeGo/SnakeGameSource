@@ -4,9 +4,9 @@ namespace SnakeGameSource.GameEngine
 {
     public class DIContainer
     {
-        private readonly Dictionary<Type, Type> _associationTypes = new();
-        private readonly Dictionary<Type, object?> _singletonTypes = new();
-        private readonly HashSet<Type> _transientTypes = new();
+        private readonly Dictionary<Type, Type> _associationTypes = [];
+        private readonly Dictionary<Type, object?> _singletonTypes = [];
+        private readonly HashSet<Type> _transientTypes = [];
 
         public T GetInstance<T>()
         {

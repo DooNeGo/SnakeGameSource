@@ -6,15 +6,15 @@ namespace SnakeGameSource.GameEngine
 {
     public class Input
     {
-//#if ANDROID
+        //#if ANDROID
         public event Action<GestureSample>? Gesture;
 
         private GestureSample _gesture = default;
-//#else
+        //#else
         public event Action<Keys>? KeyDown;
 
         private Keys _pressedKey = default;
-//#endif
+        //#endif
 
         public void Update()
         {

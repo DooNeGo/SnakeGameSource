@@ -3,28 +3,30 @@ using System.Reflection;
 
 namespace SnakeGameSource.GameEngine
 {
-    public class GameObject : Component
+    public class GameObject(string? name = null) : Component
     {
-        private readonly List<Component> _components = new();
+        private readonly List<Component> _components = [];
 
-        public GameObject(string? name = null)
-        {
-            Name = name;
-        }
-
-        public string? Name { get; }
+        public string? Name { get; } = name;
 
         public new T AddComponent<T>() where T : Component, new()
         {
+            if (TryGetComponent<T>() is not null)
+                throw new Exception($"{nameof(T)} has already added in components");
+
             T component = new() { Parent = this };
             _components.Add(component);
+
             return component;
         }
 
         public Component AddComponent(Type type)
         {
+            if (TryGetComponent(type) is not null)
+                throw new Exception($"{type.FullName} has already added in components");
+
             if (!type.IsSubclassOf(typeof(Component)))
-                throw new Exception();
+                throw new Exception($"{type.FullName} is not subclass of Component");
 
             ConstructorInfo[] constructors = type.GetConstructors();
             Component component = (Component)constructors[0].Invoke(null);
@@ -46,21 +48,28 @@ namespace SnakeGameSource.GameEngine
 
         public new T GetComponent<T>() where T : Component
         {
-            for (int i = 0; i < _components.Count; i++)
-            {
-                if (_components[i] is T value)
-                    return value;
-            }
-
-            throw new Exception($"There is no {nameof(T)} component");
+            T? component = TryGetComponent<T>() 
+                ?? throw new Exception($"There is no {nameof(T)} component");
+            return component;
         }
 
         public T? TryGetComponent<T>() where T : Component
         {
             for (int i = 0; i < _components.Count; i++)
             {
-                if (_components[i] is T value)
-                    return value;
+                if (_components[i] is T component)
+                    return component;
+            }
+
+            return null;
+        }
+
+        public object? TryGetComponent(Type type)
+        {
+            for (int i = 0; i < _components.Count; i++)
+            {
+                if (_components[i].GetType() == type)
+                    return _components[i];
             }
 
             return null;
@@ -74,19 +83,10 @@ namespace SnakeGameSource.GameEngine
             {
                 Type type = component.GetType();
                 Component cloneComponent = gameObject.AddComponent(type);
-                type.GetMethod("CopyTo")?.Invoke(component, new object?[] { cloneComponent });
+                type.GetMethod("CopyTo")?.Invoke(component, [cloneComponent]);
             }
 
             return gameObject;
-        }
-
-        public IEnumerator<T> GetComponents<T>() where T : Component
-        {
-            for (int i = 0; i < _components.Count; i++)
-            {
-                if (_components[i] is T component)
-                    yield return component;
-            }
         }
 
         public IEnumerable<Component> GetComponents()

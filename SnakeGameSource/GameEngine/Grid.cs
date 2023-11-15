@@ -28,7 +28,7 @@ namespace SnakeGameSource.GameEngine
 
         public Vector2 Center { get; }
 
-        public Scene ActiveScene { get; set; }
+        public Scene ActiveScene { get; }
 
         public bool IsPositionOccupied(Vector2 position, float scale)
         {
@@ -64,6 +64,22 @@ namespace SnakeGameSource.GameEngine
             {
                 TryAddToGrid(gameObject);
             }
+        }
+
+        private void TryAddToGrid(GameObject gameObject)
+        {
+            Transform? transform = gameObject.TryGetComponent<Transform>();
+            Collider? collider = gameObject.TryGetComponent<Collider>();
+
+            if (transform is null
+                || collider is null
+                || transform.Position.X >= _cells.GetLength(1)
+                || transform.Position.Y >= _cells.GetLength(0)
+                || transform.Position.X < 0
+                || transform.Position.Y < 0)
+                return;
+
+            _cells[(int)transform.Position.Y, (int)transform.Position.X] = true;
         }
 
         public Vector2 Project(Vector2 position)
@@ -109,22 +125,6 @@ namespace SnakeGameSource.GameEngine
 
             return new(((relativePosition.X - 1) * CellSize.X) - offset.X,
                        ((relativePosition.Y - 1) * CellSize.Y) - offset.Y);
-        }
-
-        private void TryAddToGrid(GameObject gameObject)
-        {
-            Transform? transform = gameObject.TryGetComponent<Transform>();
-            Collider? collider = gameObject.TryGetComponent<Collider>();
-
-            if (transform is null
-                || collider is null
-                || transform.Position.X >= _cells.GetLength(1)
-                || transform.Position.Y >= _cells.GetLength(0)
-                || transform.Position.X < 0
-                || transform.Position.Y < 0)
-                return;
-
-            _cells[(int)transform.Position.Y, (int)transform.Position.X] = true;
         }
 
         private void Clear()

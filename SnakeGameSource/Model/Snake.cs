@@ -11,10 +11,12 @@ namespace SnakeGameSource.Model
     {
         public event Action? Die;
 
-        private readonly List<GameObject> _body = new();
-        private readonly List<GameObject> _projectedBody = new();
+        private readonly List<GameObject> _snakeParts = [];
+        private readonly List<GameObject> _projectedSnakeParts = [];
         private readonly Grid _grid;
         private readonly Color _bodyColor;
+        private readonly Type _bodyColliderType;
+        private readonly Type _headColliderType;
 
         private Vector2[] _directions;
         private float _scale = 1f;
@@ -24,53 +26,50 @@ namespace SnakeGameSource.Model
         {
             MoveSpeed = snakeConfig.MoveSpeed;
             SlewingTime = snakeConfig.SlewingTime;
-            _lastColliderIndex = snakeConfig.StartBodyLength;
+            _lastColliderIndex = snakeConfig.InitialLength;
             _bodyColor = snakeConfig.BodyColor;
+            _bodyColliderType = snakeConfig.BodyColliderType;
+            _headColliderType = snakeConfig.HeadColliderType;
             _grid = grid;
-            _directions = new Vector2[snakeConfig.StartBodyLength + 1];
+            _directions = new Vector2[snakeConfig.InitialLength + 1];
 
             for (int i = 0; i < _directions.Length; i++)
             {
                 _directions[i] = snakeConfig.StartDirection;
             }
 
-            for (int i = 0; i <= snakeConfig.StartBodyLength; i++)
+            for (int i = 0; i <= snakeConfig.InitialLength; i++)
             {
-                GameObject bodyPart = i switch
-                {
-                    0 => new("Snake head"),
-                    _ => new()
-                };
+                GameObject snakePart = i is 0
+                    ? new("Snake head")
+                    : new();
 
-                Transform bodyPartTransform = bodyPart.AddComponent<Transform>();
-                bodyPartTransform.Position = snakeConfig.StartPosition - (Direction * Scale * i);
-                bodyPartTransform.Scale = Scale;
+                Transform transform = snakePart.AddComponent<Transform>();
+                transform.Position = snakeConfig.StartPosition - (Direction * Scale * i);
+                transform.Scale = Scale;
 
-                TextureConfig bodyPartTexture = bodyPart.AddComponent<TextureConfig>();
+                TextureConfig texture = snakePart.AddComponent<TextureConfig>();
                 if (i is 0)
                 {
-                    bodyPartTexture.Color = snakeConfig.HeadColor;
-                    bodyPartTexture.Name = TextureName.SnakeBody;
+                    texture.Color = snakeConfig.HeadColor;
+                    texture.Name = TextureName.SnakeBody;
                 }
                 else
                 {
-                    bodyPartTexture.Color = _bodyColor;
-                    bodyPartTexture.Name = TextureName.SnakeBody;
+                    texture.Color = _bodyColor;
+                    texture.Name = TextureName.SnakeBody;
                 }
 
                 if (i is not 1)
                 {
-                    bodyPart.AddComponent<CircleCollider>();
+                    snakePart.AddComponent(_bodyColliderType);
                 }
 
-                _body.Add(bodyPart);
+                _snakeParts.Add(snakePart);
             }
 
-            GameObject headClone = Head.Clone();
-            headClone.AddComponent<CollisionNotifier>().CollisionEnter += OnCollisionEnter;
-            _projectedBody.Add(headClone);
-
-            UpdateProjectedBody();
+            UpdateProjectedSnakeParts();
+            ProjectedHead.AddComponent<CollisionNotifier>().CollisionEnter += OnCollisionEnter;
         }
 
         public Vector2 Position => Head.GetComponent<Transform>().Position;
@@ -93,14 +92,16 @@ namespace SnakeGameSource.Model
             private set
             {
                 _scale = value;
-                foreach (GameObject body in _body)
+                for (int i = 0; i < _snakeParts.Count; i++)
                 {
-                    body.GetComponent<Transform>().Scale = _scale;
+                    _snakeParts[i].GetComponent<Transform>().Scale = _scale;
                 }
             }
         }
 
-        private GameObject Head => _body[0];
+        private GameObject Head => _snakeParts[0];
+
+        private GameObject ProjectedHead => _projectedSnakeParts[0];
 
         public void MoveTo(Vector2 nextPosition)
         {
@@ -116,19 +117,19 @@ namespace SnakeGameSource.Model
             //ApplyRotations(rotations);
 
             CheckColliders();
-            UpdateProjectedBody();
+            UpdateProjectedSnakeParts();
         }
 
         private Vector2[] CalculateOffsets(Vector2 nextPosition)
         {
-            Vector2[] offsets = new Vector2[_body.Count];
+            Vector2[] offsets = new Vector2[_snakeParts.Count];
 
             offsets[0] = nextPosition - Position;
 
-            for (int i = 1; i < _body.Count; i++)
+            for (int i = 1; i < _snakeParts.Count; i++)
             {
-                Transform transform1 = _body[i].GetComponent<Transform>();
-                Transform transform2 = _body[i - 1].GetComponent<Transform>();
+                Transform transform1 = _snakeParts[i].GetComponent<Transform>();
+                Transform transform2 = _snakeParts[i - 1].GetComponent<Transform>();
 
                 offsets[i] = transform2.Position - transform1.Position;
                 offsets[i] /= Scale;
@@ -143,7 +144,9 @@ namespace SnakeGameSource.Model
 
             for (int i = 0; i < directions.Length; i++)
             {
-                directions[i] = offsets[i] != Vector2.Zero ? Vector2.Normalize(offsets[i]) : Vector2.Zero;
+                directions[i] = offsets[i] != Vector2.Zero
+                    ? Vector2.Normalize(offsets[i])
+                    : Vector2.Zero;
             }
 
             return directions;
@@ -177,7 +180,7 @@ namespace SnakeGameSource.Model
 
             for (int i = 1; i < offsets.Length; i++)
             {
-                _body[i].GetComponent<Transform>().Position += offsets[i] * offsets[0].Length();
+                _snakeParts[i].GetComponent<Transform>().Position += offsets[i] * offsets[0].Length();
             }
         }
 
@@ -188,55 +191,68 @@ namespace SnakeGameSource.Model
 
         private void ApplyRotations(float[] rotations)
         {
-            for (int i = 0; i < _body.Count; i++)
+            for (int i = 0; i < _snakeParts.Count; i++)
             {
-                Transform transform = _body[i].GetComponent<Transform>();
+                Transform transform = _snakeParts[i].GetComponent<Transform>();
                 Quaternion rotation = transform.Rotation;
                 transform.Rotation = rotation;
             }
         }
 
-        private void UpdateProjectedBody()
+        private void UpdateProjectedSnakeParts()
         {
-            if (_body.Count > _projectedBody.Count)
+            if (_snakeParts.Count > _projectedSnakeParts.Count)
             {
-                for (int i = _projectedBody.Count; i < _body.Count; i++)
+                for (int i = _projectedSnakeParts.Count; i < _snakeParts.Count; i++)
                 {
-                    _projectedBody.Add(_body[i].Clone());
+                    _projectedSnakeParts.Add(_snakeParts[i].Clone());
                 }
             }
-            else if (_body.Count < _projectedBody.Count)
+            else if (_snakeParts.Count < _projectedSnakeParts.Count)
             {
-                for (int i = _body.Count; i < _projectedBody.Count; i++)
+                for (int i = _snakeParts.Count; i < _projectedSnakeParts.Count; i++)
                 {
-                    _projectedBody.RemoveAt(i);
+                    _projectedSnakeParts.RemoveAt(i);
                 }
             }
 
-            for (int i = 0; i < _projectedBody.Count; i++)
+            for (int i = 0; i < _projectedSnakeParts.Count; i++)
             {
-                Transform transform1 = _body[i].GetComponent<Transform>();
-                Transform transform2 = _projectedBody[i].GetComponent<Transform>();
+                CloneTransform(i);
+                TryCloneCollider(i);
+            }
+        }
 
-                transform1.CopyTo(transform2);
-                transform2.Position = _grid.Project(transform2.Position);
+        private void CloneTransform(int snakePartIndex)
+        {
+            Transform transform1 = _snakeParts[snakePartIndex].GetComponent<Transform>();
+            Transform transform2 = _projectedSnakeParts[snakePartIndex].GetComponent<Transform>();
 
-                TryCloneCollider(_projectedBody[i], _body[i]);
+            transform1.CopyTo(transform2);
+            transform2.Position = _grid.Project(transform2.Position);
+        }
+
+        private void TryCloneCollider(int snakePartIndex)
+        {
+            Collider? collider1 = _snakeParts[snakePartIndex].TryGetComponent<Collider>();
+            Collider? collider2 = _projectedSnakeParts[snakePartIndex].TryGetComponent<Collider>();
+
+            if (collider2 is null && collider1 is not null)
+            {
+                _projectedSnakeParts[snakePartIndex].AddComponent(collider1.GetType());
             }
         }
 
         private void CheckColliders()
         {
-            for (int i = _lastColliderIndex + 1; i < _body.Count; i++)
+            for (int i = _lastColliderIndex + 1; i < _snakeParts.Count; i++)
             {
-                Transform transform1 = _body[i].GetComponent<Transform>();
-                Transform transform2 = _body[i - 1].GetComponent<Transform>();
-                Collider collider = _body[_lastColliderIndex].GetComponent<Collider>();
+                Transform transform1 = _snakeParts[i].GetComponent<Transform>();
+                Transform transform2 = _snakeParts[i - 1].GetComponent<Transform>();
 
-                if (_body[i].TryGetComponent<Collider>() is null
-                    && Vector2.Distance(transform1.Position, transform2.Position) <= 0.6f * Scale)
+                if (Vector2.Distance(transform1.Position, transform2.Position) <= 0.6f * Scale)
                 {
-                    _body[i].AddComponent(collider.GetType());
+                    _snakeParts[i].AddComponent(_bodyColliderType);
                     _lastColliderIndex = i;
                 }
             }
@@ -268,62 +284,51 @@ namespace SnakeGameSource.Model
 
                 case EffectType.Length:
                     if (effectValue > 0)
-                        AddNewBodyPart();
-                    else if (_body.Count - 1 > 2)
-                        RemoveLastBodyPart();
+                        AddSnakePart();
+                    else if (_snakeParts.Count - 1 > 2)
+                        RemoveSnakePart(_snakeParts.Count - 1);
                     break;
             }
 
             Score++;
         }
 
-        private void RemoveLastBodyPart()
+        private void RemoveSnakePart(int snakePartIndex)
         {
-            if (_body.Count - 1 == _lastColliderIndex)
+            if (snakePartIndex <= _lastColliderIndex)
                 _lastColliderIndex--;
-            _body.RemoveAt(_body.Count - 1);
+            _snakeParts.RemoveAt(snakePartIndex);
         }
 
-        private void AddNewBodyPart()
+        private void AddSnakePart()
         {
-            Transform tailTransform = _body[^1].GetComponent<Transform>();
-            TextureConfig tailTexture = _body[^1].GetComponent<TextureConfig>();
+            Transform tailTransform = _snakeParts[^1].GetComponent<Transform>();
+            TextureConfig tailTexture = _snakeParts[^1].GetComponent<TextureConfig>();
 
             Vector2 tailProjection = _grid.Project(tailTransform.Position);
-            Vector2 offset = new(tailTransform.Position.X - tailProjection.X, tailTransform.Position.Y - tailProjection.Y);
+            Vector2 offset = tailTransform.Position - tailProjection;
             Vector2 projectionOnTheEdge = _grid.GetTheClosestProjectionOnTheEdge(tailProjection);
 
-            GameObject newBodyPart = new();
+            GameObject newSnakePart = new();
 
-            Transform newBodyPartTransform = newBodyPart.AddComponent<Transform>();
-            tailTransform.CopyTo(newBodyPartTransform);
-            newBodyPartTransform.Position = projectionOnTheEdge + offset;
+            Transform newSnakePartTransform = newSnakePart.AddComponent<Transform>();
+            tailTransform.CopyTo(newSnakePartTransform);
+            newSnakePartTransform.Position = projectionOnTheEdge + offset;
 
-            TextureConfig newBodyPartTexture = newBodyPart.AddComponent<TextureConfig>();
-            tailTexture.CopyTo(newBodyPartTexture);
+            TextureConfig newSnakePartTexture = newSnakePart.AddComponent<TextureConfig>();
+            tailTexture.CopyTo(newSnakePartTexture);
 
-            _body.Add(newBodyPart);
-        }
-
-        private void TryCloneCollider(GameObject dest, GameObject source)
-        {
-            Collider? collider1 = source.TryGetComponent<Collider>();
-            Collider? collider2 = dest.TryGetComponent<Collider>();
-
-            if (collider2 is null && collider1 is not null)
-            {
-                dest.AddComponent(collider1.GetType());
-            }
+            _snakeParts.Add(newSnakePart);
         }
 
         public IEnumerator<GameObject> GetEnumerator()
         {
-            return _projectedBody.GetEnumerator();
+            return _projectedSnakeParts.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return _projectedBody.GetEnumerator();
+            return _projectedSnakeParts.GetEnumerator();
         }
     }
 }

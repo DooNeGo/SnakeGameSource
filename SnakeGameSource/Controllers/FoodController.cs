@@ -2,7 +2,6 @@
 using SnakeGameSource.Components;
 using SnakeGameSource.GameEngine;
 using SnakeGameSource.GameEngine.Components;
-using SnakeGameSource.GameEngine.Components.Colliders;
 using SnakeGameSource.Model;
 using System.Collections;
 
@@ -23,15 +22,15 @@ namespace SnakeGameSource.Controllers
         {
             _grid = grid;
 
-            _foods = new Food[]
-            {
+            _foods =
+            [
                 new Food(_grid.Center, foodScale, Color.Red, 15),
                 new Food(_grid.Center, foodScale, Color.Blue, 10),
                 new Food(_grid.Center, foodScale, Color.Blue, 10),
                 new Food(_grid.Center, foodScale, Color.Lime, 10),
                 new Food(_grid.Center, foodScale, Color.Lime, 10),
                 new Food(_grid.Center, foodScale, Color.White, 5),
-            };
+            ];
 
             Effect[] effects = new Effect[_foods.Length];
 

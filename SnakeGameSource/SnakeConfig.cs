@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using SnakeGameSource.GameEngine.Components.Colliders;
 
 namespace SnakeGameSource
 {
@@ -10,12 +11,16 @@ namespace SnakeGameSource
 
         public Color BodyColor { get; } = new(255, 241, 64);
 
+        public Type HeadColliderType { get; } = typeof(CircleCollider);
+
+        public Type BodyColliderType { get; } = typeof(CircleCollider);
+
         public float MoveSpeed { get; } = 4f;
 
         public float SlewingTime { get; } = 0.5f;
 
         public Vector2 StartDirection { get; } = -Vector2.UnitY;
 
-        public int StartBodyLength { get; } = 2;
+        public int InitialLength { get; } = 2;
     }
 }

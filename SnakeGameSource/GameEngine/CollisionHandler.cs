@@ -5,16 +5,9 @@ using System.Reflection;
 
 namespace SnakeGameSource.GameEngine
 {
-    internal class CollisionHandler
+    internal class CollisionHandler(Scene scene)
     {
-        private readonly List<GameObject> _gameObjects = new();
-
-        public CollisionHandler(Scene scene)
-        {
-            ActiveScene = scene;
-        }
-
-        public Scene ActiveScene { get; set; }
+        private readonly List<GameObject> _gameObjects = [];
 
         public void Update()
         {
@@ -26,7 +19,7 @@ namespace SnakeGameSource.GameEngine
         {
             _gameObjects.Clear();
 
-            foreach (GameObject gameObject in ActiveScene)
+            foreach (GameObject gameObject in scene)
             {
                 if (gameObject.TryGetComponent<Collider>() is not null)
                 {
@@ -53,32 +46,23 @@ namespace SnakeGameSource.GameEngine
 
                     if (distanceToEdge1 + distanceToEdge2 >= distanceBeetween)
                     {
-                        foreach (Component component in _gameObjects[i].GetComponents())
-                        {
-                            Type type = component.GetType();
-                            foreach (MethodInfo method in type.GetRuntimeMethods())
-                            {
-                                if (method.Name is "OnCollisionEnter")
-                                {
-                                    method.Invoke(component, new object[] { _gameObjects[j] });
-                                }
-                            }
-                        }
+                        TryInvokeCollision(i, j);
+                        TryInvokeCollision(j, i);
+                    }
+                }
+            }
+        }
 
-                        foreach (Component component in _gameObjects[j].GetComponents())
-                        {
-                            Type type = component.GetType();
-                            foreach (MethodInfo method in type.GetRuntimeMethods())
-                            {
-                                if (method.Name is "OnCollisionEnter")
-                                {
-                                    method.Invoke(component, new object[] { _gameObjects[i] });
-                                }
-                            }
-                        }
-
-                        //collider1.InvokeCollision(_gameObjects[j]);
-                        //collider2.InvokeCollision(_gameObjects[i]);
+        private void TryInvokeCollision(int i, int j)
+        {
+            foreach (Component component in _gameObjects[i].GetComponents())
+            {
+                Type type = component.GetType();
+                foreach (MethodInfo method in type.GetRuntimeMethods())
+                {
+                    if (method.Name is "OnCollisionEnter")
+                    {
+                        method.Invoke(component, [_gameObjects[j]]);
                     }
                 }
             }
