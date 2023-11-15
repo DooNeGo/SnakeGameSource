@@ -48,7 +48,7 @@ namespace SnakeGameSource.GameEngine
 
         public new T GetComponent<T>() where T : Component
         {
-            T? component = TryGetComponent<T>() 
+            T? component = TryGetComponent<T>()
                 ?? throw new Exception($"There is no {nameof(T)} component");
             return component;
         }

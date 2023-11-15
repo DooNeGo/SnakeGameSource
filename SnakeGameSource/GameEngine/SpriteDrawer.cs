@@ -49,7 +49,7 @@ namespace SnakeGameSource.GameEngine
                 Texture2D texture = content.Load<Texture2D>(values[i].ToString());
                 textures.Add(values[i], texture);
             }
-            
+
             _textures = textures.ToFrozenDictionary();
         }
 

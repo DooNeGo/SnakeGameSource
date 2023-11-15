@@ -6,26 +6,16 @@ namespace SnakeGameSource.GameEngine
 {
     public class Input
     {
-        //#if ANDROID
         public event Action<GestureSample>? Gesture;
-
-        private GestureSample _gesture = default;
-        //#else
         public event Action<Keys>? KeyDown;
 
+        private GestureSample _gesture = default;
         private Keys _pressedKey = default;
-        //#endif
 
         public void Update()
         {
-            //#if ANDROID
             UpdateGesture();
-
-            //#else
-
             UpdateKey();
-
-            //#endif
         }
 
         private void UpdateKey()
@@ -66,28 +56,36 @@ namespace SnakeGameSource.GameEngine
 
         public Vector2 GetMoveDirection()
         {
-#if ANDROID
-    
-            if (_gesture.GestureType == GestureType.VerticalDrag)
+            Vector2 moveDirection = Vector2.Zero;
+
+            if (_pressedKey is not default(Keys))
             {
-                return _gesture.Delta.Y > 0 ? Vector2.UnitY : -Vector2.UnitY;
+                moveDirection = _pressedKey switch
+                {
+                    Keys.Up => -Vector2.UnitY,
+                    Keys.Down => Vector2.UnitY,
+                    Keys.Left => -Vector2.UnitX,
+                    Keys.Right => Vector2.UnitX,
+                    _ => Vector2.Zero
+                };
             }
-            else if (_gesture.GestureType == GestureType.HorizontalDrag)
+            else
             {
-                return _gesture.Delta.X > 0 ? Vector2.UnitX : -Vector2.UnitX;
+                if (_gesture.GestureType is GestureType.VerticalDrag)
+                {
+                    moveDirection = _gesture.Delta.Y > 0
+                        ? Vector2.UnitY
+                        : -Vector2.UnitY;
+                }
+                else if (_gesture.GestureType is GestureType.HorizontalDrag)
+                {
+                    moveDirection = _gesture.Delta.X > 0
+                        ? Vector2.UnitX
+                        : -Vector2.UnitX;
+                }
             }
 
-            return Vector2.Zero;
-#else
-            return _pressedKey switch
-            {
-                Keys.Up => -Vector2.UnitY,
-                Keys.Down => Vector2.UnitY,
-                Keys.Left => -Vector2.UnitX,
-                Keys.Right => Vector2.UnitX,
-                _ => Vector2.Zero
-            };
-#endif
+            return moveDirection;
         }
     }
 }
