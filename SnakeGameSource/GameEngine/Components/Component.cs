@@ -4,14 +4,21 @@
     {
         public GameObject? Parent { get; init; }
 
+        private GameObject GetBaseGameObject()
+        {
+            return this is GameObject gameObject
+                ? gameObject
+                : Parent!;
+        }
+
         public T GetComponent<T>() where T : Component
         {
-            return this is GameObject gameObject ? gameObject.GetComponent<T>() : Parent!.GetComponent<T>();
+            return GetBaseGameObject().GetComponent<T>();
         }
 
         public T AddComponent<T>() where T : Component, new()
         {
-            return this is GameObject gameObject ? gameObject.AddComponent<T>() : Parent!.AddComponent<T>();
+            return GetBaseGameObject().AddComponent<T>();
         }
     }
 }

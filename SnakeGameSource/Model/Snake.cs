@@ -166,7 +166,6 @@ namespace SnakeGameSource.Model
                 {
                     float cosa = Vector2.Dot(_directions[i], nextDirections[i]);
                     Vector2 vector = _directions[i] - nextDirections[i];
-                    bool isNegative;
                     rotations[i] = MathF.Asin(cosa);
                 }
             }
@@ -260,30 +259,28 @@ namespace SnakeGameSource.Model
 
         private void OnCollisionEnter(GameObject gameObject)
         {
-            if (gameObject is Food food)
-                Eat(food);
+            if (gameObject.TryGetComponent<Effect>() is not null)
+                ApplyEffect(gameObject.GetComponent<Effect>());
             else
                 Die?.Invoke();
         }
 
-        private void Eat(Food food)
+        private void ApplyEffect(Effect effect)
         {
-            float effectValue = food.GetComponent<Effect>().Value;
-
-            switch (food.GetComponent<Effect>().Type)
+            switch (effect.Type)
             {
                 case EffectType.Speed:
-                    if (MoveSpeed + effectValue > 2)
-                        MoveSpeed += effectValue;
+                    if (MoveSpeed + effect.Value > 2)
+                        MoveSpeed += effect.Value;
                     break;
 
                 case EffectType.Scale:
-                    if (Scale + effectValue > 0.5f)
-                        Scale += effectValue;
+                    if (Scale + effect.Value > 0.5f)
+                        Scale += effect.Value;
                     break;
 
                 case EffectType.Length:
-                    if (effectValue > 0)
+                    if (effect.Value > 0)
                         AddSnakePart();
                     else if (_snakeParts.Count - 1 > 2)
                         RemoveSnakePart(_snakeParts.Count - 1);

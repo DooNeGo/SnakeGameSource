@@ -40,7 +40,7 @@ namespace SnakeGameSource
             _physicsMovement = Container.GetInstance<PhysicsMovement>();
             Snake snake = Container.GetInstance<Snake>();
             FoodController foodController = Container.GetInstance<FoodController>();
-            Container.GetInstance<Scene>().Add(snake, foodController);
+            Container.GetInstance<Scene>().Add(snake, [foodController.Food]);
             snake.Die += OnSnakeDie;
         }
 
@@ -54,7 +54,6 @@ namespace SnakeGameSource
             if (_isStop)
                 return;
 
-            _foodController.Update(gameTime.ElapsedGameTime * _timeRatio);
             _physicsMovement.Move(Input.GetMoveDirection(), gameTime.ElapsedGameTime * _timeRatio);
         }
 

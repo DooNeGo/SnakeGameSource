@@ -43,6 +43,7 @@ namespace SnakeGameSource.GameEngine
                      .AddSingleton(Window)
                      .AddSingleton(Content)
                      .AddSingleton(GraphicsDevice)
+                     .AddSingleton(Container)
                      .Build();
 
             _collisionHandler = Container.GetInstance<CollisionHandler>();
@@ -77,7 +78,7 @@ namespace SnakeGameSource.GameEngine
             if (!IsActive)
                 return;
 
-            Scene.Update();
+            Scene.Update(gameTime.ElapsedGameTime);
             _collisionHandler.Update();
             Input.Update();
             Updating?.Invoke(gameTime);

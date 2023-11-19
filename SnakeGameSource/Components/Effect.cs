@@ -14,5 +14,11 @@ namespace SnakeGameSource.Components
         public float Value { get; set; }
 
         public EffectType Type { get; set; }
+
+        public void CopyTo(Effect effect)
+        {
+            effect.Value = Value;
+            effect.Type = Type;
+        }
     }
 }
