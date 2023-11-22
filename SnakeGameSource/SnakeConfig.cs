@@ -19,7 +19,9 @@ namespace SnakeGameSource
 
         public float SlewingTime { get; } = 0.5f;
 
-        public Vector2 StartDirection { get; } = -Vector2.UnitY;
+        public float SlewingSpeed { get; } = 20;
+
+        public Vector2 StartDirection { get; } = Vector2.UnitX;
 
         public int InitialLength { get; } = 2;
     }

@@ -26,6 +26,7 @@ namespace SnakeGameSource.Model
         {
             MoveSpeed = snakeConfig.MoveSpeed;
             SlewingTime = snakeConfig.SlewingTime;
+            SlewingSpeed = snakeConfig.SlewingSpeed;
             _lastColliderIndex = snakeConfig.InitialLength;
             _bodyColor = snakeConfig.BodyColor;
             _bodyColliderType = snakeConfig.BodyColliderType;
@@ -102,6 +103,8 @@ namespace SnakeGameSource.Model
         private GameObject Head => _snakeParts[0];
 
         private GameObject ProjectedHead => _projectedSnakeParts[0];
+
+        public float SlewingSpeed { get; }
 
         public void MoveTo(Vector2 nextPosition)
         {

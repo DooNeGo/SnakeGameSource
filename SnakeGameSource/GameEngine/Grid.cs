@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using SnakeGameSource.GameEngine.Components;
-using SnakeGameSource.GameEngine.Components.Colliders;
 
 namespace SnakeGameSource.GameEngine
 {
@@ -15,7 +14,7 @@ namespace SnakeGameSource.GameEngine
         {
             ActiveScene = scene;
             CellSize = new Point(window.ClientBounds.Size.X / 15);
-            Size = window.ClientBounds.Size.Divide(CellSize).Add(2);
+            Size = window.ClientBounds.Size.Divide(CellSize);
             _cells = new bool[Size.Y, Size.X];
             Center = new Vector2((Size.X / 2f) - 1, (Size.Y / 2f) - 1);
             //_gameObjects = new GameObject[Size.Height, Size.Width];
@@ -69,17 +68,25 @@ namespace SnakeGameSource.GameEngine
         private void TryAddToGrid(GameObject gameObject)
         {
             Transform? transform = gameObject.TryGetComponent<Transform>();
-            Collider? collider = gameObject.TryGetComponent<Collider>();
 
             if (transform is null
-                || collider is null
                 || transform.Position.X >= _cells.GetLength(1)
                 || transform.Position.Y >= _cells.GetLength(0)
                 || transform.Position.X < 0
                 || transform.Position.Y < 0)
                 return;
 
-            _cells[(int)transform.Position.Y, (int)transform.Position.X] = true;
+            int checkSize = (int)MathF.Ceiling(transform.Scale);
+            Vector2 startPosition = new(transform.Position.X - (checkSize / 2.0f),
+                                        transform.Position.Y - (checkSize / 2.0f));
+
+            for (int y = (int)startPosition.Y; y < checkSize; y++)
+            {
+                for (int x = (int)startPosition.X; x < checkSize; x++)
+                {
+                    _cells[y, x] = true;
+                }
+            }
         }
 
         public Vector2 Project(Vector2 position)
@@ -87,10 +94,10 @@ namespace SnakeGameSource.GameEngine
             Vector2 projection = new(position.X % Size.X, position.Y % Size.Y);
 
             if (projection.X < 0)
-                projection.X += Size.X - 1;
+                projection.X += Size.X;
 
             if (projection.Y < 0)
-                projection.Y += Size.Y - 1;
+                projection.Y += Size.Y;
 
             return projection;
         }
@@ -120,11 +127,10 @@ namespace SnakeGameSource.GameEngine
 
         public Vector2 GetAbsolutePosition(Vector2 relativePosition, float scale)
         {
-            Vector2 offset = new Vector2(CellSize.X * (scale - 1),
-                                 CellSize.Y * (scale - 1)) / 2;
+            Vector2 offset = CellSize.ToVector2() * scale / 2;
 
-            return new(((relativePosition.X - 1) * CellSize.X) - offset.X,
-                       ((relativePosition.Y - 1) * CellSize.Y) - offset.Y);
+            return new((relativePosition.X * CellSize.X) - offset.X,
+                       (relativePosition.Y * CellSize.Y) - offset.Y);
         }
 
         private void Clear()

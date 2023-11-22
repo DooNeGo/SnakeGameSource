@@ -8,7 +8,7 @@ namespace SnakeGameSource.Controllers
 {
     internal class FoodController
     {
-        private const float FoodScale = 0.5f;
+        private const float FoodScale = 1f;
 
         private readonly Grid _grid;
 
@@ -22,7 +22,7 @@ namespace SnakeGameSource.Controllers
             transform.Scale = FoodScale;
 
             TextureConfig textureConfig = Food.AddComponent<TextureConfig>();
-            textureConfig.Name = TextureName.SnakeBody;
+            textureConfig.Name = TextureName.Food;
             textureConfig.Color = Color.Red;
 
             FoodParametersRandom random = Food.AddComponent<FoodParametersRandom>();

@@ -12,6 +12,8 @@ namespace SnakeGameSource
 
         public float SlewingTime { get; }
 
+        public float SlewingSpeed { get; }
+
         public Vector2 Direction { get; }
 
         public void MoveTo(Vector2 position);
@@ -39,8 +41,9 @@ namespace SnakeGameSource
                 && MathF.Abs(_lastDirection.Y - _smoothDirection.Y) < 1e-1)
                 _lastDirection = direction;
 
-            float lastDirectionImpact = (float)delta.TotalSeconds / _snake.SlewingTime * _snake.MoveSpeed / _snake.Scale;
-            _smoothDirection = Vector2.Normalize(_smoothDirection + (_lastDirection * lastDirectionImpact));
+            float slewingAngel = (float)delta.TotalSeconds * _snake.SlewingSpeed / _snake.MoveSpeed / _snake.Scale;
+            _smoothDirection = Vector2.Lerp(_smoothDirection, direction, slewingAngel);
+            _smoothDirection.Normalize();
             Vector2 offset = (float)delta.TotalSeconds * _snake.MoveSpeed * _smoothDirection;
             _snake.MoveTo(_snake.Position + offset);
         }

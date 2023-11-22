@@ -59,7 +59,9 @@ namespace SnakeGameSource.GameEngine
             foreach (Component component in _gameObjects[targetIndex].GetComponents())
             {
                 Type type = component.GetType();
-                MethodInfo? method = type.GetMethod(CollisionMethodName, BindingFlags.NonPublic | BindingFlags.Instance, [typeof(GameObject)]);
+                MethodInfo? method = type.GetMethod(CollisionMethodName,
+                                                    BindingFlags.NonPublic | BindingFlags.Instance,
+                                                    [typeof(GameObject)]);
                 method?.Invoke(component, [_gameObjects[gameObjectIndex]]);
             }
         }

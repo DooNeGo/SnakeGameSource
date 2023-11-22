@@ -41,10 +41,9 @@ namespace SnakeGameSource.GameEngine
 
         private bool IsValidComponentType(Type type)
         {
-            if (!type.IsSubclassOf(typeof(Component)))
-                throw new Exception($"{type.FullName} is not subclass of Component");
-
-            return TryGetComponent(type) is not null
+            return !type.IsSubclassOf(typeof(Component))
+                ? throw new Exception($"{type.FullName} is not subclass of Component")
+                : TryGetComponent(type) is not null
                 ? throw new Exception($"{type.FullName} has already added in components")
                 : type.IsAbstract ? throw new Exception("You can't add an abstract component") : true;
         }

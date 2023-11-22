@@ -7,7 +7,7 @@ namespace SnakeGameSource.Components
     {
         private readonly Random _random = new();
 
-        private Effect[] _effects;
+        private Effect[]? _effects;
         private TimeSpan _remainLifetime;
 
         public Grid? Grid { get; set; }
@@ -66,6 +66,9 @@ namespace SnakeGameSource.Components
 
         private void RandEffect()
         {
+            if (_effects is null)
+                throw new NullReferenceException(nameof(_effects));
+
             int number = _random.Next(0, _effects.Length);
             SetEffect(_effects[number]);
         }
@@ -77,6 +80,9 @@ namespace SnakeGameSource.Components
 
         private void RandPosition()
         {
+            if (Grid is null)
+                throw new NullReferenceException(nameof(Grid) + "must be not null");
+
             Transform transform = GetComponent<Transform>();
             do
             {
