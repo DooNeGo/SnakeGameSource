@@ -4,35 +4,31 @@ using SnakeGameSource.GameEngine;
 using SnakeGameSource.GameEngine.Components;
 using SnakeGameSource.GameEngine.Components.Colliders;
 
-namespace SnakeGameSource.Controllers
+namespace SnakeGameSource.Controllers;
+
+internal class FoodController
 {
-    internal class FoodController
+    private const float FoodScale = 1f;
+
+    public FoodController(Grid grid)
     {
-        private const float FoodScale = 1f;
+        Food = new GameObject();
 
-        private readonly Grid _grid;
+        var transform = Food.AddComponent<Transform>();
+        transform.Position = grid.Center;
+        transform.Scale    = FoodScale;
 
-        public FoodController(Grid grid)
-        {
-            _grid = grid;
-            Food = new GameObject();
+        var textureConfig = Food.AddComponent<TextureConfig>();
+        textureConfig.Name  = TextureName.Food;
+        textureConfig.Color = Color.Red;
 
-            Transform transform = Food.AddComponent<Transform>();
-            transform.Position = _grid.Center;
-            transform.Scale = FoodScale;
+        var random = Food.AddComponent<FoodParametersRandom>();
+        random.FoodLifetime = 7;
+        random.Grid         = grid;
 
-            TextureConfig textureConfig = Food.AddComponent<TextureConfig>();
-            textureConfig.Name = TextureName.Food;
-            textureConfig.Color = Color.Red;
-
-            FoodParametersRandom random = Food.AddComponent<FoodParametersRandom>();
-            random.FoodLifetime = 7;
-            random.Grid = _grid;
-
-            Food.AddComponent<CircleCollider>();
-            Food.AddComponent<Effect>();
-        }
-
-        public GameObject Food { get; }
+        Food.AddComponent<CircleCollider>();
+        Food.AddComponent<Effect>();
     }
+
+    public GameObject Food { get; }
 }

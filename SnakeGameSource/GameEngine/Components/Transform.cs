@@ -1,20 +1,19 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace SnakeGameSource.GameEngine.Components
+namespace SnakeGameSource.GameEngine.Components;
+
+internal class Transform : Component
 {
-    internal class Transform : Component
+    public Vector2 Position { get; set; }
+
+    public Quaternion Rotation { get; set; }
+
+    public float Scale { get; set; }
+
+    public void CopyTo(Transform transform)
     {
-        public Vector2 Position { get; set; }
-
-        public Quaternion Rotation { get; set; }
-
-        public float Scale { get; set; }
-
-        public void CopyTo(Transform transform)
-        {
-            transform.Position = Position;
-            transform.Rotation = Rotation;
-            transform.Scale = Scale;
-        }
+        transform.Position = Position;
+        transform.Rotation = Rotation;
+        transform.Scale    = Scale;
     }
 }

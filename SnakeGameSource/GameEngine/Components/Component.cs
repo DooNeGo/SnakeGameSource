@@ -1,24 +1,21 @@
-﻿namespace SnakeGameSource.GameEngine.Components
+﻿namespace SnakeGameSource.GameEngine.Components;
+
+public abstract class Component
 {
-    public abstract class Component
+    public GameObject? Parent { get; init; }
+
+    private GameObject GetBaseGameObject()
     {
-        public GameObject? Parent { get; init; }
+        return this as GameObject ?? Parent!;
+    }
 
-        private GameObject GetBaseGameObject()
-        {
-            return this is GameObject gameObject
-                ? gameObject
-                : Parent!;
-        }
+    public T GetComponent<T>() where T : Component
+    {
+        return GetBaseGameObject().GetComponent<T>();
+    }
 
-        public T GetComponent<T>() where T : Component
-        {
-            return GetBaseGameObject().GetComponent<T>();
-        }
-
-        public T AddComponent<T>() where T : Component, new()
-        {
-            return GetBaseGameObject().AddComponent<T>();
-        }
+    public T AddComponent<T>() where T : Component, new()
+    {
+        return GetBaseGameObject().AddComponent<T>();
     }
 }

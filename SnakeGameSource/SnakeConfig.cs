@@ -1,28 +1,27 @@
 ﻿using Microsoft.Xna.Framework;
 using SnakeGameSource.GameEngine.Components.Colliders;
 
-namespace SnakeGameSource
+namespace SnakeGameSource;
+
+internal class SnakeConfig
 {
-    internal class SnakeConfig
-    {
-        public Vector2 StartPosition { get; } = new(3, 4);
+    public Vector2 StartPosition { get; } = new(3, 4);
 
-        public Color HeadColor { get; } = new(131, 240, 60);
+    public Color HeadColor { get; } = new(131, 240, 60);
 
-        public Color BodyColor { get; } = new(255, 241, 64);
+    public Color BodyColor { get; } = new(255, 241, 64);
 
-        public Type HeadColliderType { get; } = typeof(CircleCollider);
+    public Type HeadColliderType { get; } = typeof(CircleCollider);
 
-        public Type BodyColliderType { get; } = typeof(CircleCollider);
+    public Type BodyColliderType { get; } = typeof(CircleCollider);
 
-        public float MoveSpeed { get; } = 4f;
+    public float MoveSpeed { get; } = 4f;
 
-        public float SlewingTime { get; } = 0.5f;
+    public float SlewingTime { get; } = 0.5f;
 
-        public float SlewingSpeed { get; } = 20;
+    public float SlewingSpeed { get; } = 20;
 
-        public Vector2 StartDirection { get; } = Vector2.UnitX;
+    public Vector2 StartDirection { get; } = Vector2.UnitX;
 
-        public int InitialLength { get; } = 2;
-    }
+    public int InitialLength { get; } = 2;
 }

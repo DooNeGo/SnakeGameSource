@@ -1,121 +1,128 @@
 ﻿using System.Reflection;
 
-namespace SnakeGameSource.GameEngine
+namespace SnakeGameSource.GameEngine;
+
+public class DiContainer
 {
-    public class DIContainer
+    private readonly Dictionary<Type, Type>    _associationTypes = [];
+    private readonly Dictionary<Type, object?> _singletonTypes   = [];
+    private readonly HashSet<Type>             _transientTypes   = [];
+
+    public T GetInstance<T>()
     {
-        private readonly Dictionary<Type, Type> _associationTypes = [];
-        private readonly Dictionary<Type, object?> _singletonTypes = [];
-        private readonly HashSet<Type> _transientTypes = [];
+        return (T)GetInstance(typeof(T));
+    }
 
-        public T GetInstance<T>()
+    public DiContainer AddTransient<T>() where T : class
+    {
+        if (typeof(T).IsInterface)
         {
-            return (T)GetInstance(typeof(T));
+            throw new ArgumentException("You can't add an interface as an implementation");
         }
 
-        public DIContainer AddTransient<T>() where T : class
-        {
-            if (typeof(T).IsInterface)
-                throw new ArgumentException("You can't add an interface as an implementation");
+        _transientTypes.Add(typeof(T));
+        return this;
+    }
 
-            _transientTypes.Add(typeof(T));
-            return this;
+    public DiContainer AddTransient<TAssociation, TImplementation>() where TImplementation : class
+    {
+        _associationTypes.Add(typeof(TAssociation), typeof(TImplementation));
+        return AddTransient<TImplementation>();
+    }
+
+    public DiContainer AddSingleton<T>() where T : class
+    {
+        if (typeof(T).IsInterface)
+        {
+            throw new ArgumentException("You can't add an interface as an implementation");
         }
 
-        public DIContainer AddTransient<D, S>() where S : class
+        _singletonTypes.TryAdd(typeof(T), null);
+        return this;
+    }
+
+    public DiContainer AddSingleton<TAssociation, TImplementation>() where TImplementation : class
+    {
+        _associationTypes.Add(typeof(TAssociation), typeof(TImplementation));
+        return AddSingleton<TImplementation>();
+    }
+
+    public DiContainer AddSingleton<T>(T instance) where T : class
+    {
+        if (typeof(T).IsInterface)
         {
-            _associationTypes.Add(typeof(D), typeof(S));
-            return AddTransient<S>();
+            throw new ArgumentException("You can't add an interface as an implementation");
         }
 
-        public DIContainer AddSingleton<T>() where T : class
-        {
-            if (typeof(T).IsInterface)
-                throw new ArgumentException("You can't add an interface as an implementation");
+        _singletonTypes.Add(typeof(T), instance);
+        return this;
+    }
 
-            _singletonTypes.TryAdd(typeof(T), null);
-            return this;
+    public DiContainer AddSingleton<TAssociation, TImplementation>(TImplementation instance)
+        where TImplementation : class
+    {
+        _associationTypes.Add(typeof(TAssociation), typeof(TImplementation));
+        return AddSingleton(instance);
+    }
+
+    public DiContainer Build()
+    {
+        foreach (KeyValuePair<Type, object?> singletonType in _singletonTypes)
+        {
+            GetInstance(singletonType.Key);
         }
 
-        public DIContainer AddSingleton<D, S>() where S : class
+        foreach (Type type in _transientTypes)
         {
-            _associationTypes.Add(typeof(D), typeof(S));
-            return AddSingleton<S>();
+            GetInstance(type);
         }
 
-        public DIContainer AddSingleton<T>(T instance) where T : class
-        {
-            if (typeof(T).IsInterface)
-                throw new ArgumentException("You can't add an interface as an implementation");
+        return this;
+    }
 
-            _singletonTypes.Add(typeof(T), instance);
-            return this;
+    private object GetInstance(Type type)
+    {
+        if (_associationTypes.TryGetValue(type, out Type? type1))
+        {
+            type = type1;
         }
 
-        public DIContainer AddSingleton<D, S>(S instance) where S : class
+        if (!_singletonTypes.TryGetValue(type, out object? instance))
         {
-            _associationTypes.Add(typeof(D), typeof(S));
-            return AddSingleton(instance);
-        }
-
-        public DIContainer Build()
-        {
-            foreach (KeyValuePair<Type, object?> singletonType in _singletonTypes)
-            {
-                GetInstance(singletonType.Key);
-            }
-
-            foreach (Type type in _transientTypes)
-            {
-                GetInstance(type);
-            }
-
-            return this;
-        }
-
-        private object GetInstance(Type type)
-        {
-            if (_associationTypes.TryGetValue(type, out Type? type1))
-            {
-                type = type1;
-            }
-
-            if (_singletonTypes.TryGetValue(type, out object? instance))
-            {
-                if (instance is not null)
-                {
-                    return instance;
-                }
-
-                instance = CreateInstance(type);
-                _singletonTypes[type] = instance;
-                return instance;
-            }
-
             return _transientTypes.Contains(type)
                 ? CreateInstance(type)
                 : throw new ArgumentException($"You forgot to add {type.Name} in the Container.");
         }
 
-        private object CreateInstance(Type type)
+        if (instance is not null)
         {
-            ConstructorInfo[] constructorInfo = type.GetConstructors();
-            ParameterInfo[] parameters = constructorInfo[0].GetParameters();
-
-            object[]? objects = null;
-
-            if (parameters.Length > 0)
-            {
-                objects = new object[parameters.Length];
-
-                for (int i = 0; i < objects.Length; i++)
-                {
-                    Type parameterType = parameters[i].ParameterType;
-                    objects[i] = GetInstance(parameterType);
-                }
-            }
-
-            return constructorInfo[0].Invoke(objects);
+            return instance;
         }
+
+        instance              = CreateInstance(type);
+        _singletonTypes[type] = instance;
+
+        return instance;
+    }
+
+    private object CreateInstance(Type type)
+    {
+        ConstructorInfo[] constructorInfo = type.GetConstructors();
+        ParameterInfo[]   parameters      = constructorInfo[0].GetParameters();
+
+        object[]? objects = null;
+
+        if (parameters.Length > 0)
+        {
+            objects = new object[parameters.Length];
+
+            for (var i = 0; i < objects.Length; i++)
+            {
+                Type parameterType = parameters[i].ParameterType;
+                objects[i] = GetInstance(parameterType);
+            }
+        }
+
+        return constructorInfo[0].Invoke(objects);
     }
 }

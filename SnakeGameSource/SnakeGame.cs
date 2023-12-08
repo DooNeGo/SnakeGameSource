@@ -5,89 +5,93 @@ using SnakeGameSource.Controllers;
 using SnakeGameSource.GameEngine;
 using SnakeGameSource.Model;
 
-namespace SnakeGameSource
+namespace SnakeGameSource;
+
+public class SnakeGame : Game2D
 {
-    public class SnakeGame : Game2D
+    private bool            _isStop;
+    private PhysicsMovement _physicsMovement;
+    private float           _timeRatio;
+
+    public SnakeGame()
     {
-        private float _timeRatio = 0;
-        private bool _isStop = false;
+        Initializing     += OnInitializing;
+        LoadingContent   += OnLoadingContent;
+        Updating         += OnUpdating;
+        Drawing          += OnDrawing;
+        UnloadingContent += OnUnloadingContent;
+    }
 
-        private PhysicsMovement _physicsMovement;
-        private FoodController _foodController;
+    private void OnInitializing()
+    {
+        Input.KeyDown += OnKeyDown;
+        Input.Gesture += OnGesture;
 
-        public SnakeGame()
+        Container.AddSingleton<Snake>()
+                 .AddTransient<SnakeConfig>()
+                 .AddSingleton<IMovable, Snake>()
+                 .AddSingleton<FoodController>()
+                 .AddSingleton<PhysicsMovement>()
+                 .Build();
+
+        _physicsMovement = Container.GetInstance<PhysicsMovement>();
+        var snake          = Container.GetInstance<Snake>();
+        var foodController = Container.GetInstance<FoodController>();
+        Container.GetInstance<Scene>().Add(snake, [foodController.Food]);
+        snake.Die += OnSnakeDie;
+    }
+
+    private void OnLoadingContent()
+    {
+    }
+
+    private void OnUpdating(GameTime gameTime)
+    {
+        if (_isStop)
         {
-            Initializing += OnInitializing;
-            LoadingContent += OnLoadingContent;
-            Updating += OnUpdating;
-            Drawing += OnDrawing;
-            UnloadingContent += OnUnloadingContent;
+            return;
         }
 
-        private void OnInitializing()
+        _physicsMovement.Move(Input.GetMoveDirection(), gameTime.ElapsedGameTime * _timeRatio);
+    }
+
+    private void OnDrawing(GameTime gameTime)
+    {
+    }
+
+    private void OnUnloadingContent()
+    {
+    }
+
+    private void OnKeyDown(Keys key)
+    {
+        if (key == Keys.Escape)
         {
-            Input.KeyDown += OnKeyDown;
-            Input.Gesture += OnGesture;
-
-            Container.AddSingleton<Snake>()
-                     .AddTransient<SnakeConfig>()
-                     .AddSingleton<IMovable, Snake>()
-                     .AddSingleton<FoodController>()
-                     .AddSingleton<PhysicsMovement>()
-                     .Build();
-
-            _foodController = Container.GetInstance<FoodController>();
-            _physicsMovement = Container.GetInstance<PhysicsMovement>();
-            Snake snake = Container.GetInstance<Snake>();
-            FoodController foodController = Container.GetInstance<FoodController>();
-            Container.GetInstance<Scene>().Add(snake, [foodController.Food]);
-            snake.Die += OnSnakeDie;
+            Exit();
         }
-
-        private void OnLoadingContent()
+        else
         {
-
+            _timeRatio = _timeRatio switch
+            {
+                1 when key is Keys.Space => 0,
+                0                        => 1,
+                _                        => _timeRatio
+            };
         }
+    }
 
-        private void OnUpdating(GameTime gameTime)
+    private void OnGesture(GestureSample gesture)
+    {
+        _timeRatio = _timeRatio switch
         {
-            if (_isStop)
-                return;
+            1 when gesture.GestureType is GestureType.DoubleTap => 0,
+            0                                                   => 1,
+            _                                                   => _timeRatio
+        };
+    }
 
-            _physicsMovement.Move(Input.GetMoveDirection(), gameTime.ElapsedGameTime * _timeRatio);
-        }
-
-        private void OnDrawing(GameTime gameTime)
-        {
-
-        }
-
-        private void OnUnloadingContent()
-        {
-
-        }
-
-        private void OnKeyDown(Keys key)
-        {
-            if (key == Keys.Escape)
-                Exit();
-            else if (_timeRatio is 1 && key is Keys.Space)
-                _timeRatio = 0;
-            else if (_timeRatio is 0)
-                _timeRatio = 1;
-        }
-
-        private void OnGesture(GestureSample gesture)
-        {
-            if (_timeRatio is 1 && gesture.GestureType is GestureType.DoubleTap)
-                _timeRatio = 0;
-            else if (_timeRatio is 0)
-                _timeRatio = 1;
-        }
-
-        private void OnSnakeDie()
-        {
-            _isStop = true;
-        }
+    private void OnSnakeDie()
+    {
+        _isStop = true;
     }
 }
