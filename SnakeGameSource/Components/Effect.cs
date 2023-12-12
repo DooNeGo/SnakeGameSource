@@ -15,9 +15,12 @@ internal class Effect : Component
 
     public EffectType Type { get; set; }
 
+    public float Chance { get; set; }
+
     public void CopyTo(Effect effect)
     {
-        effect.Value = Value;
-        effect.Type  = Type;
+        effect.Value  = Value;
+        effect.Type   = Type;
+        effect.Chance = Chance;
     }
 }

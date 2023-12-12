@@ -2,7 +2,7 @@
 
 public abstract class Component
 {
-    public GameObject? Parent { get; init; }
+    public GameObject? Parent { get; set; }
 
     private GameObject GetBaseGameObject()
     {

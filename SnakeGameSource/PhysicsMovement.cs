@@ -10,8 +10,6 @@ internal interface IMovable
 
     public float Scale { get; }
 
-    public float SlewingTime { get; }
-
     public float SlewingSpeed { get; }
 
     public Vector2 Direction { get; }
@@ -22,8 +20,8 @@ internal interface IMovable
 internal class PhysicsMovement
 {
     private readonly IMovable _snake;
-    private          Vector2  _lastDirection;
 
+    private Vector2 _lastDirection;
     private Vector2 _smoothDirection;
 
     public PhysicsMovement(IMovable snake)
@@ -33,20 +31,41 @@ internal class PhysicsMovement
         _lastDirection   = _snake.Direction;
     }
 
-    public void Move(Vector2 direction, TimeSpan delta)
+    public void Move(Vector2? direction, TimeSpan delta)
     {
-        if (direction                                        != Vector2.Zero &&
-            _lastDirection + direction                       != Vector2.Zero &&
-            MathF.Abs(_lastDirection.X - _smoothDirection.X) < 1e-1          &&
-            MathF.Abs(_lastDirection.Y - _smoothDirection.Y) < 1e-1)
+        if (direction is not null &&
+            direction != Vector2.Zero)
         {
-            _lastDirection = direction;
+            _lastDirection = Vector2.Normalize(direction.Value);
+            float slewingAngle = (float)delta.TotalSeconds * _snake.SlewingSpeed / _snake.Scale;
+            RotateDirection(slewingAngle);
         }
 
-        float slewingAngel = (float)delta.TotalSeconds * _snake.SlewingSpeed / _snake.MoveSpeed / _snake.Scale;
-        _smoothDirection = Vector2.Lerp(_smoothDirection, direction, slewingAngel);
-        _smoothDirection.Normalize();
         Vector2 offset = (float)delta.TotalSeconds * _snake.MoveSpeed * _smoothDirection;
         _snake.MoveTo(_snake.Position + offset);
+    }
+
+    private void RotateDirection(float angle)
+    {
+        float angleBetween = GetRotateAngle();
+        angle = angleBetween > 0 ? angle : -angle;
+
+        _smoothDirection = GetRotatedVector(_smoothDirection, float.MinMagnitude(angle, angleBetween));
+    }
+
+    private Vector2 GetRotatedVector(Vector2 vector, float angle)
+    {
+        return Vector2.Transform(vector, Matrix.CreateRotationZ(angle * MathF.PI / 180f));
+    }
+
+    private float GetRotateAngle()
+    {
+        float angelBetween = MathF.Acos(Vector2.Dot(_smoothDirection, _lastDirection));
+        float angelPlusOne = MathF.Acos(Vector2.Dot(GetRotatedVector(_smoothDirection, 1), _lastDirection));
+
+        angelBetween *= 180f / MathF.PI;
+        angelPlusOne *= 180f / MathF.PI;
+
+        return angelBetween > angelPlusOne ? angelBetween : -angelBetween;
     }
 }

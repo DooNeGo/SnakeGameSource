@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
-using SnakeGameSource.Controllers;
 using SnakeGameSource.GameEngine;
 using SnakeGameSource.Model;
 
@@ -9,17 +8,13 @@ namespace SnakeGameSource;
 
 public class SnakeGame : Game2D
 {
-    private bool            _isStop;
     private PhysicsMovement _physicsMovement;
     private float           _timeRatio;
 
     public SnakeGame()
     {
-        Initializing     += OnInitializing;
-        LoadingContent   += OnLoadingContent;
-        Updating         += OnUpdating;
-        Drawing          += OnDrawing;
-        UnloadingContent += OnUnloadingContent;
+        Initializing += OnInitializing;
+        Updating     += OnUpdating;
     }
 
     private void OnInitializing()
@@ -30,42 +25,25 @@ public class SnakeGame : Game2D
         Container.AddSingleton<Snake>()
                  .AddTransient<SnakeConfig>()
                  .AddSingleton<IMovable, Snake>()
-                 .AddSingleton<FoodController>()
+                 .AddSingleton<FoodCreator>()
                  .AddSingleton<PhysicsMovement>()
                  .Build();
 
         _physicsMovement = Container.GetInstance<PhysicsMovement>();
-        var snake          = Container.GetInstance<Snake>();
-        var foodController = Container.GetInstance<FoodController>();
-        Container.GetInstance<Scene>().Add(snake, [foodController.Food]);
+        var snake       = Container.GetInstance<Snake>();
+        var foodCreator = Container.GetInstance<FoodCreator>();
+        Container.GetInstance<Scene>().Add(snake, [foodCreator.Food]);
         snake.Die += OnSnakeDie;
-    }
-
-    private void OnLoadingContent()
-    {
     }
 
     private void OnUpdating(GameTime gameTime)
     {
-        if (_isStop)
-        {
-            return;
-        }
-
         _physicsMovement.Move(Input.GetMoveDirection(), gameTime.ElapsedGameTime * _timeRatio);
-    }
-
-    private void OnDrawing(GameTime gameTime)
-    {
-    }
-
-    private void OnUnloadingContent()
-    {
     }
 
     private void OnKeyDown(Keys key)
     {
-        if (key == Keys.Escape)
+        if (key is Keys.Escape)
         {
             Exit();
         }
@@ -92,6 +70,6 @@ public class SnakeGame : Game2D
 
     private void OnSnakeDie()
     {
-        _isStop = true;
+        IsStop = true;
     }
 }

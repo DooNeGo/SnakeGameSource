@@ -3,12 +3,11 @@ using SnakeGameSource.GameEngine.Components;
 
 namespace SnakeGameSource.GameEngine;
 
+//TODO: Убрать сетку как основной элемент позиции всех объектов в движке
+
 public class Grid
 {
-    //private const float Scale = 1.0f;
-
     private readonly bool[,] _cells;
-    //private readonly GameObject[,] _gameObjects;
 
     public Grid(GameWindow window, Scene scene)
     {
@@ -17,8 +16,8 @@ public class Grid
         Size        = window.ClientBounds.Size.Divide(CellSize);
         _cells      = new bool[Size.Y, Size.X];
         Center      = new Vector2(Size.X / 2f - 1, Size.Y / 2f - 1);
-        //_gameObjects = new GameObject[Size.Height, Size.Width];
-        //InitializeGameObjects();
+
+        window.ClientSizeChanged += OnClientSizeChanged;
     }
 
     public Point Size { get; }
@@ -27,8 +26,14 @@ public class Grid
 
     public Vector2 Center { get; }
 
-    public Scene ActiveScene { get; }
+    public Scene ActiveScene { get; set; }
 
+    private void OnClientSizeChanged(object? sender, EventArgs e)
+    {
+        //TODO: Implement
+    }
+
+    //TODO: Поменять этот метод на имплементацию в CollisionHandler
     public bool IsPositionOccupied(Vector2 position, float scale)
     {
         if (position.X >= _cells.GetLength(1) ||
@@ -95,6 +100,7 @@ public class Grid
         }
     }
 
+    //TODO: Рассмотреть вариант проекции через матрицу проекций
     public Vector2 Project(Vector2 position)
     {
         Vector2 projection = new(position.X % Size.X, position.Y % Size.Y);
@@ -110,29 +116,6 @@ public class Grid
         }
 
         return projection;
-    }
-
-    public Vector2 GetTheClosestProjectionOnTheEdge(Vector2 position)
-    {
-        Vector2 projectionToUpperEdge  = position with { Y = 0 };
-        Vector2 projectionToLeftEdge   = position with { X = 0 };
-        Vector2 projectionToRightEdge  = position with { X = Size.X - 1 };
-        Vector2 projectionToBottomEdge = position with { Y = Size.Y - 1 };
-
-        float distanceToUpperEdge  = Vector2.Distance(position, projectionToUpperEdge);
-        float distanceToLeftEdge   = Vector2.Distance(position, projectionToLeftEdge);
-        float distanceToRightEdge  = Size.X - distanceToLeftEdge;
-        float distanceToBottomEdge = Size.Y - distanceToUpperEdge;
-
-        ValueTuple<float, Vector2>[] distancesWithProjections =
-        {
-            new(distanceToUpperEdge, projectionToUpperEdge),
-            new(distanceToLeftEdge, projectionToLeftEdge),
-            new(distanceToRightEdge, projectionToRightEdge),
-            new(distanceToBottomEdge, projectionToBottomEdge)
-        };
-
-        return distancesWithProjections.Min().Item2;
     }
 
     public Vector2 GetAbsolutePosition(Vector2 relativePosition, float scale)
@@ -156,36 +139,4 @@ public class Grid
             }
         }
     }
-
-    //private void InitializeGameObjects()
-    //{
-    //    for (var y = 0; y < Size.Height; y++)
-    //    {
-    //        for (var x = 0; x < Size.Width; x++)
-    //        {
-    //            _gameObjects[y, x] = new GameObject();
-
-    //            Transform transform = _gameObjects[y, x].AddComponent<Transform>();
-    //            transform.Position = new Vector2(x, y);
-    //            transform.Scale = Scale;
-
-    //            TextureConfig textureConfig = _gameObjects[y, x].AddComponent<TextureConfig>();
-    //            textureConfig.Name = TextureName.Grid;
-    //            textureConfig.Color = ConsoleColor.White;
-    //        }
-    //    }
-    //}
-
-    //public IEnumerator<GameObject> GetEnumerator()
-    //{
-    //    foreach (GameObject gameObject in _gameObjects)
-    //    {
-    //        yield return gameObject;
-    //    }
-    //}
-
-    //IEnumerator IEnumerable.GetEnumerator()
-    //{
-    //    return _gameObjects.GetEnumerator();
-    //}
 }

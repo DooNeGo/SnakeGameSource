@@ -4,13 +4,14 @@ using SnakeGameSource.GameEngine;
 using SnakeGameSource.GameEngine.Components;
 using SnakeGameSource.GameEngine.Components.Colliders;
 
-namespace SnakeGameSource.Controllers;
+namespace SnakeGameSource.Model;
 
-internal class FoodController
+internal class FoodCreator
 {
-    private const float FoodScale = 1f;
+    private const float FoodScale    = 0.5f;
+    private const int   FoodLifeTime = 7;
 
-    public FoodController(Grid grid)
+    public FoodCreator(Grid grid)
     {
         Food = new GameObject();
 
@@ -23,7 +24,7 @@ internal class FoodController
         textureConfig.Color = Color.Red;
 
         var random = Food.AddComponent<FoodParametersRandom>();
-        random.FoodLifetime = 7;
+        random.FoodLifetime = FoodLifeTime;
         random.Grid         = grid;
 
         Food.AddComponent<CircleCollider>();

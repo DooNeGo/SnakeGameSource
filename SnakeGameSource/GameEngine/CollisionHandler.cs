@@ -7,8 +7,9 @@ namespace SnakeGameSource.GameEngine;
 
 internal class CollisionHandler(Scene scene)
 {
-    private const    string           CollisionMethodName = "OnCollisionEnter";
-    private readonly List<GameObject> _gameObjects        = [];
+    private const string CollisionMethodName = "OnCollisionEnter";
+
+    private readonly List<GameObject> _gameObjects = [];
 
     public void Update()
     {
@@ -60,7 +61,9 @@ internal class CollisionHandler(Scene scene)
         {
             Type type = component.GetType();
             MethodInfo? method = type.GetMethod(CollisionMethodName,
-                                                BindingFlags.NonPublic | BindingFlags.Instance,
+                                                BindingFlags.NonPublic |
+                                                BindingFlags.Instance  |
+                                                BindingFlags.Public,
                                                 [typeof(GameObject)]);
             method?.Invoke(component, [_gameObjects[gameObjectIndex]]);
         }

@@ -9,7 +9,6 @@ namespace SnakeGameSource.Model;
 
 internal class Snake : IMovable, IEnumerable<GameObject>
 {
-    private readonly Type _bodyColliderType;
     private readonly Grid _grid;
 
     private readonly List<GameObject> _projectedSnakeParts = [];
@@ -22,11 +21,10 @@ internal class Snake : IMovable, IEnumerable<GameObject>
     public Snake(SnakeConfig snakeConfig, Grid grid)
     {
         MoveSpeed          = snakeConfig.MoveSpeed;
-        SlewingTime        = snakeConfig.SlewingTime;
         SlewingSpeed       = snakeConfig.SlewingSpeed;
         _lastColliderIndex = snakeConfig.InitialLength;
-        _bodyColliderType  = snakeConfig.BodyColliderType;
         _grid              = grid;
+        Direction          = snakeConfig.StartDirection;
         _directions        = new Vector2[snakeConfig.InitialLength + 1];
 
         for (var i = 0; i < _directions.Length; i++)
@@ -48,7 +46,7 @@ internal class Snake : IMovable, IEnumerable<GameObject>
             if (i is 0)
             {
                 texture.Color = snakeConfig.HeadColor;
-                texture.Name  = TextureName.SnakeBody;
+                texture.Name  = TextureName.SnakeHead;
             }
             else
             {
@@ -58,7 +56,7 @@ internal class Snake : IMovable, IEnumerable<GameObject>
 
             if (i is not 1)
             {
-                snakePart.AddComponent(_bodyColliderType);
+                snakePart.AddComponent(snakeConfig.ColliderType);
             }
 
             _snakeParts.Add(snakePart);
@@ -68,6 +66,7 @@ internal class Snake : IMovable, IEnumerable<GameObject>
         ProjectedHead.AddComponent<CollisionNotifier>().CollisionEnter += OnCollisionEnter;
     }
 
+    //TODO: Каждые 10 очков смена фона и сделать маленькую надпись скора в углу
     public int Score { get; private set; }
 
     private GameObject Head => _snakeParts[0];
@@ -87,8 +86,6 @@ internal class Snake : IMovable, IEnumerable<GameObject>
     public Vector2 Position => Head.GetComponent<Transform>().Position;
 
     public float MoveSpeed { get; private set; }
-
-    public float SlewingTime { get; }
 
     public Vector2 Direction { get; }
 
@@ -122,7 +119,6 @@ internal class Snake : IMovable, IEnumerable<GameObject>
         ApplyDirections(nextDirections);
         //ApplyRotations(rotations);
 
-        CheckColliders();
         UpdateProjectedSnakeParts();
     }
 
@@ -250,23 +246,6 @@ internal class Snake : IMovable, IEnumerable<GameObject>
         }
     }
 
-    private void CheckColliders()
-    {
-        for (int i = _lastColliderIndex + 1; i < _snakeParts.Count; i++)
-        {
-            var transform1 = _snakeParts[i].GetComponent<Transform>();
-            var transform2 = _snakeParts[i - 1].GetComponent<Transform>();
-
-            if (Vector2.Distance(transform1.Position, transform2.Position) > 0.6f * Scale)
-            {
-                continue;
-            }
-
-            _snakeParts[i].AddComponent(_bodyColliderType);
-            _lastColliderIndex = i;
-        }
-    }
-
     private void OnCollisionEnter(GameObject gameObject)
     {
         if (gameObject.TryGetComponent<Effect>() is not null)
@@ -312,7 +291,7 @@ internal class Snake : IMovable, IEnumerable<GameObject>
                 break;
 
             default:
-                throw new ArgumentOutOfRangeException(nameof(effect), 
+                throw new ArgumentOutOfRangeException(nameof(effect),
                                                       $"No such effect type {effect.Type}");
         }
 
@@ -331,22 +310,6 @@ internal class Snake : IMovable, IEnumerable<GameObject>
 
     private void AddSnakePart()
     {
-        var tailTransform = _snakeParts[^1].GetComponent<Transform>();
-        var tailTexture   = _snakeParts[^1].GetComponent<TextureConfig>();
-
-        Vector2 tailProjection      = _grid.Project(tailTransform.Position);
-        Vector2 offset              = tailTransform.Position - tailProjection;
-        Vector2 projectionOnTheEdge = _grid.GetTheClosestProjectionOnTheEdge(tailProjection);
-
-        GameObject newSnakePart = new();
-
-        var newSnakePartTransform = newSnakePart.AddComponent<Transform>();
-        tailTransform.CopyTo(newSnakePartTransform);
-        newSnakePartTransform.Position = projectionOnTheEdge + offset;
-
-        var newSnakePartTexture = newSnakePart.AddComponent<TextureConfig>();
-        tailTexture.CopyTo(newSnakePartTexture);
-
-        _snakeParts.Add(newSnakePart);
+        _snakeParts.Add(_snakeParts[^1].Clone());
     }
 }

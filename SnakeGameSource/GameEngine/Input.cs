@@ -28,7 +28,7 @@ public class Input
             {
                 KeyDown?.Invoke(keys[i]);
 
-                if (keys[i] is Keys.Up 
+                if (keys[i] is Keys.Up
                                or Keys.Down
                                or Keys.Left
                                or Keys.Right)
@@ -56,9 +56,9 @@ public class Input
         }
     }
 
-    public Vector2 GetMoveDirection()
+    public Vector2? GetMoveDirection()
     {
-        Vector2 moveDirection = Vector2.Zero;
+        Vector2? moveDirection;
 
         if (_pressedKey is not default(Keys))
         {
@@ -68,7 +68,7 @@ public class Input
                 Keys.Down  => Vector2.UnitY,
                 Keys.Left  => -Vector2.UnitX,
                 Keys.Right => Vector2.UnitX,
-                _          => Vector2.Zero
+                _          => null
             };
         }
         else
@@ -77,7 +77,7 @@ public class Input
             {
                 GestureType.VerticalDrag   => _gesture.Delta.Y > 0 ? Vector2.UnitY : -Vector2.UnitY,
                 GestureType.HorizontalDrag => _gesture.Delta.X > 0 ? Vector2.UnitX : -Vector2.UnitX,
-                _                          => moveDirection
+                _                          => null
             };
         }
 

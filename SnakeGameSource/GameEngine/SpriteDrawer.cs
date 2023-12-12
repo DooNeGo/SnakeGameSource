@@ -8,10 +8,15 @@ namespace SnakeGameSource.GameEngine;
 
 internal class SpriteDrawer(ContentManager content, SpriteBatch spriteBatch, Grid grid, Scene scene)
 {
-    private FrozenDictionary<TextureName, Texture2D> _textures;
+    private FrozenDictionary<TextureName, Texture2D>? _textures;
 
     public void Draw()
     {
+        if (_textures is null)
+        {
+            throw new NullReferenceException("No sprites");
+        }
+
         spriteBatch.Begin();
 
         foreach (GameObject gameObject in scene)
@@ -43,8 +48,8 @@ internal class SpriteDrawer(ContentManager content, SpriteBatch spriteBatch, Gri
 
     public void LoadContent()
     {
-        Dictionary<TextureName, Texture2D> textures = [];
-        TextureName[]                      values   = Enum.GetValues<TextureName>();
+        var           textures = new Dictionary<TextureName, Texture2D>();
+        TextureName[] values   = Enum.GetValues<TextureName>();
 
         for (var i = 0; i < values.Length; i++)
         {
@@ -57,6 +62,11 @@ internal class SpriteDrawer(ContentManager content, SpriteBatch spriteBatch, Gri
 
     public void UnloadContent()
     {
+        if (_textures is null)
+        {
+            throw new NullReferenceException("No sprites");
+        }
+
         foreach (KeyValuePair<TextureName, Texture2D> keyValue in _textures)
         {
             keyValue.Value.Dispose();

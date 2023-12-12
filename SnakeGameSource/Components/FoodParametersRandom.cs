@@ -6,10 +6,11 @@ namespace SnakeGameSource.Components;
 
 internal class FoodParametersRandom : Component
 {
-    private readonly Random _random = new();
+    private readonly Effect   _commonEffect = new();
+    private readonly Effect[] _effects      = new Effect[5];
+    private readonly Random   _random       = new();
 
-    private Effect[]? _effects;
-    private TimeSpan  _remainLifetime;
+    private TimeSpan _remainLifetime;
 
     public Grid? Grid { get; set; }
 
@@ -17,30 +18,33 @@ internal class FoodParametersRandom : Component
 
     private void Awake()
     {
-        _effects = new Effect[6];
-
         for (var i = 0; i < _effects.Length; i++)
         {
             _effects[i] = new Effect();
         }
 
-        _effects[0].Type  = EffectType.Length;
-        _effects[0].Value = 1;
+        _commonEffect.Type  = EffectType.Length;
+        _commonEffect.Value = 1;
 
-        _effects[1].Type  = EffectType.Speed;
-        _effects[1].Value = 0.5f;
+        _effects[0].Type   = EffectType.Speed;
+        _effects[0].Value  = 0.4f;
+        _effects[0].Chance = 10;
 
-        _effects[2].Type  = EffectType.Speed;
-        _effects[2].Value = 0.5f;
+        _effects[1].Type   = EffectType.Speed;
+        _effects[1].Value  = 0.4f;
+        _effects[1].Chance = 10;
 
-        _effects[3].Type  = EffectType.Scale;
-        _effects[3].Value = 0.1f;
+        _effects[2].Type   = EffectType.Scale;
+        _effects[2].Value  = 0.05f;
+        _effects[3].Chance = 10;
 
-        _effects[4].Type  = EffectType.Scale;
-        _effects[4].Value = -0.1f;
+        _effects[3].Type   = EffectType.Scale;
+        _effects[3].Value  = -0.05f;
+        _effects[3].Chance = 10;
 
-        _effects[5].Type  = EffectType.Length;
-        _effects[5].Value = -1;
+        _effects[4].Type   = EffectType.Length;
+        _effects[4].Value  = -1;
+        _effects[4].Chance = 1;
     }
 
     private void Update(TimeSpan delta)
@@ -76,8 +80,11 @@ internal class FoodParametersRandom : Component
             throw new NullReferenceException(nameof(_effects));
         }
 
-        int number = _random.Next(0, _effects.Length);
-        SetEffect(_effects[number]);
+        int effectIndex = _random.Next(0, _effects.Length);
+        int number      = _random.Next(0, 101);
+        SetEffect(number <= _effects[effectIndex].Chance * _effects.Length
+                      ? _effects[effectIndex]
+                      : _commonEffect);
     }
 
     private void SetEffect(Effect effect)

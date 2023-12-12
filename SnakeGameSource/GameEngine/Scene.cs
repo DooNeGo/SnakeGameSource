@@ -48,7 +48,9 @@ public class Scene : IEnumerable<GameObject>
             {
                 Type type = component.GetType();
                 MethodInfo? method = type.GetMethod(UpdateMethodName,
-                                                    BindingFlags.Instance | BindingFlags.NonPublic,
+                                                    BindingFlags.Instance  |
+                                                    BindingFlags.NonPublic |
+                                                    BindingFlags.Public,
                                                     [typeof(TimeSpan)]);
                 method?.Invoke(component, [delta]);
             }
