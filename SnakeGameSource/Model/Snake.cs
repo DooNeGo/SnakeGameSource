@@ -3,7 +3,6 @@ using Microsoft.Xna.Framework;
 using SnakeGameSource.Components;
 using SnakeGameSource.GameEngine;
 using SnakeGameSource.GameEngine.Components;
-using SnakeGameSource.GameEngine.Components.Colliders;
 
 namespace SnakeGameSource.Model;
 

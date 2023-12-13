@@ -9,7 +9,9 @@ internal class CollisionHandler(Scene scene)
 {
     private const string CollisionMethodName = "OnCollisionEnter";
 
-    private readonly List<GameObject> _gameObjects = [];
+    private readonly List<GameObject>             _gameObjects            = [];
+    private readonly Dictionary<Type, MethodInfo> _collisionMethods       = [];
+    private readonly HashSet<Type>                _withoutCollisionMethod = [];
 
     public void Update()
     {
@@ -60,12 +62,29 @@ internal class CollisionHandler(Scene scene)
         foreach (Component component in _gameObjects[targetIndex].GetComponents())
         {
             Type type = component.GetType();
-            MethodInfo? method = type.GetMethod(CollisionMethodName,
-                                                BindingFlags.NonPublic |
-                                                BindingFlags.Instance  |
-                                                BindingFlags.Public,
-                                                [typeof(GameObject)]);
-            method?.Invoke(component, [_gameObjects[gameObjectIndex]]);
+
+            if (_withoutCollisionMethod.Contains(type))
+            {
+                continue;
+            }
+
+            if (!_collisionMethods.TryGetValue(type, out MethodInfo? method))
+            {
+                method = type.GetMethod(CollisionMethodName,
+                                        BindingFlags.NonPublic |
+                                        BindingFlags.Instance  |
+                                        BindingFlags.Public,
+                                        [typeof(GameObject)]);
+                if (method is null)
+                {
+                    _withoutCollisionMethod.Add(type);
+                    continue;
+                }
+                
+                _collisionMethods.Add(type, method);
+            }
+
+            method.Invoke(component, [_gameObjects[gameObjectIndex]]);
         }
     }
 }

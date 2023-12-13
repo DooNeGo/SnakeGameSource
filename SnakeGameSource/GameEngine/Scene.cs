@@ -8,8 +8,10 @@ public class Scene : IEnumerable<GameObject>
 {
     private const string UpdateMethodName = "Update";
 
-    private readonly List<IEnumerable<GameObject>> _compositeObjects = [];
-    private readonly List<GameObject>              _gameObjects      = [];
+    private readonly List<IEnumerable<GameObject>> _compositeObjects    = [];
+    private readonly List<GameObject>              _gameObjects         = [];
+    private readonly Dictionary<Type, MethodInfo>  _updateMethods       = [];
+    private readonly HashSet<Type>                 _withoutUpdateMethod = [];
 
     public IEnumerator<GameObject> GetEnumerator()
     {
@@ -47,12 +49,30 @@ public class Scene : IEnumerable<GameObject>
             foreach (Component component in _gameObjects[i].GetComponents())
             {
                 Type type = component.GetType();
-                MethodInfo? method = type.GetMethod(UpdateMethodName,
-                                                    BindingFlags.Instance  |
-                                                    BindingFlags.NonPublic |
-                                                    BindingFlags.Public,
-                                                    [typeof(TimeSpan)]);
-                method?.Invoke(component, [delta]);
+
+                if (_withoutUpdateMethod.Contains(type))
+                {
+                    continue;
+                }
+                
+                if (!_updateMethods.TryGetValue(type, out MethodInfo? method))
+                {
+                    method = type.GetMethod(UpdateMethodName,
+                                            BindingFlags.Instance  |
+                                            BindingFlags.NonPublic |
+                                            BindingFlags.Public,
+                                            [typeof(TimeSpan)]);
+
+                    if (method is null)
+                    {
+                        _withoutUpdateMethod.Add(type);
+                        continue;
+                    }
+                    
+                    _updateMethods.Add(type, method);
+                }
+                
+                method.Invoke(component, [delta]);
             }
         }
     }
