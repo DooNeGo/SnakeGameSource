@@ -30,7 +30,7 @@ internal class SpriteDrawer(ContentManager content, SpriteBatch spriteBatch, Gri
             }
 
             Vector2 absolutePosition = grid.GetAbsolutePosition(transform.Position, transform.Scale);
-            float   scale = grid.CellSize.X * textureConfig.Scale / _textures[textureConfig.Name].Bounds.Size.X;
+            Vector2 scale = grid.CellSize.ToVector2() * textureConfig.Scale / _textures[textureConfig.Name].Bounds.Size.ToVector2();
             Point   spriteCenter = _textures[textureConfig.Name].Bounds.Center;
             spriteBatch.Draw(_textures[textureConfig.Name],
                              absolutePosition,

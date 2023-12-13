@@ -15,12 +15,19 @@ internal class TextureConfig : Component
 
     public Color Color { get; set; }
 
-    public float Scale => GetComponent<Transform>().Scale;
+    public Vector2 Scale => GetComponent<Transform>().Scale;
 
-    public void CopyTo(TextureConfig component)
+    public override bool TryCopyTo<T>(T component)
     {
-        component.Name  = Name;
-        component.Color = Color;
+        if (component is not TextureConfig textureConfig)
+        {
+            return false;
+        }
+
+        textureConfig.Name  = Name;
+        textureConfig.Color = Color;
+        
+        return true;
     }
 
     public static bool operator ==(TextureConfig left, TextureConfig right)

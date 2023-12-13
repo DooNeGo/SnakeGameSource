@@ -17,10 +17,17 @@ internal class Effect : Component
 
     public float Chance { get; set; }
 
-    public void CopyTo(Effect effect)
+    public override bool TryCopyTo<T>(T component)
     {
+        if (component is not Effect effect)
+        {
+            return false;
+        }
+        
         effect.Value  = Value;
         effect.Type   = Type;
         effect.Chance = Chance;
+
+        return true;
     }
 }

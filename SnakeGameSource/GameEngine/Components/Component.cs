@@ -18,4 +18,9 @@ public abstract class Component
     {
         return GetBaseGameObject().AddComponent<T>();
     }
+
+    public virtual bool TryCopyTo<T>(T component) where T : Component
+    {
+        return false;
+    }
 }

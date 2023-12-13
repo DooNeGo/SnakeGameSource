@@ -8,12 +8,19 @@ public class Transform : Component
 
     public Quaternion Rotation { get; set; }
 
-    public float Scale { get; set; }
+    public Vector2 Scale { get; set; }
 
-    public void CopyTo(Transform transform)
+    public override bool TryCopyTo<T>(T component)
     {
+        if (component is not Transform transform)
+        {
+            return false;
+        }
+
         transform.Position = Position;
         transform.Rotation = Rotation;
         transform.Scale    = Scale;
+
+        return true;
     }
 }

@@ -6,6 +6,6 @@ internal class CircleCollider : Collider
 {
     public override float GetDistanceToEdge(Vector2 position)
     {
-        return GetComponent<Transform>().Scale / 2;
+        return GetComponent<Transform>().Scale.X / 2;
     }
 }

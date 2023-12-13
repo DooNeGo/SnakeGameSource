@@ -8,7 +8,7 @@ internal interface IMovable
 
     public Vector2 Position { get; }
 
-    public float Scale { get; }
+    public Vector2 Scale { get; }
 
     public float SlewingSpeed { get; }
 
@@ -37,7 +37,9 @@ internal class PhysicsMovement
             direction != Vector2.Zero)
         {
             _lastDirection = Vector2.Normalize(direction.Value);
-            float slewingAngle = (float)delta.TotalSeconds * _snake.SlewingSpeed / _snake.Scale;
+            float slewingAngle = (float)delta.TotalSeconds *
+                                 _snake.SlewingSpeed /
+                                 ((_snake.Scale.X + _snake.Scale.Y) / 2);
             RotateDirection(slewingAngle);
         }
 

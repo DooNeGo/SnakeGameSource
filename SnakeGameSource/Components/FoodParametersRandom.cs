@@ -75,11 +75,6 @@ internal class FoodParametersRandom : Component
 
     private void RandEffect()
     {
-        if (_effects is null)
-        {
-            throw new NullReferenceException(nameof(_effects));
-        }
-
         int effectIndex = _random.Next(0, _effects.Length);
         int number      = _random.Next(0, 101);
         SetEffect(number <= _effects[effectIndex].Chance * _effects.Length
@@ -89,7 +84,7 @@ internal class FoodParametersRandom : Component
 
     private void SetEffect(Effect effect)
     {
-        effect.CopyTo(GetComponent<Effect>());
+        effect.TryCopyTo(GetComponent<Effect>());
     }
 
     private void RandPosition()

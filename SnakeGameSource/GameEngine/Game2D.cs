@@ -10,8 +10,6 @@ public class Game2D : Game
     private CollisionHandler _collisionHandler;
     private SpriteDrawer     _drawer;
 
-    private float _value;
-
     protected Game2D()
     {
         _graphics             = new GraphicsDeviceManager(this);
@@ -25,13 +23,13 @@ public class Game2D : Game
 
     protected Scene Scene { get; set; }
 
-    protected Color BackgroundColor1 { get; set; } = new(224, 172, 213);
-
-    protected Color BackgroundColor2 { get; set; } = new(57, 147, 221);
+    protected Color BackgroundColor { get; set; }
 
     protected Grid Grid { get; private set; }
 
     protected bool IsStop { get; set; } = false;
+
+    protected float TimeRatio { get; set; } = 1f;
 
     public event Action?           Initializing;
     public event Action?           LoadingContent;
@@ -82,6 +80,8 @@ public class Game2D : Game
 
     protected override void Update(GameTime gameTime)
     {
+        gameTime.ElapsedGameTime *= TimeRatio;
+        
         if (!IsActive)
         {
             return;
@@ -102,13 +102,14 @@ public class Game2D : Game
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Color.Lerp(BackgroundColor1, BackgroundColor2, MathF.Cos(_value)));
+        GraphicsDevice.Clear(BackgroundColor);
         _drawer.Draw();
+        
+        gameTime.ElapsedGameTime *= TimeRatio;
 
         if (!IsStop)
         {
             Drawing?.Invoke(gameTime);
-            _value += 0.005f;
         }
 
         base.Draw(gameTime);

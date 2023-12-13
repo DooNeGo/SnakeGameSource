@@ -8,8 +8,9 @@ namespace SnakeGameSource.Model;
 
 internal class FoodCreator
 {
-    private const float FoodScale    = 0.5f;
-    private const int   FoodLifeTime = 7;
+    private const int FoodLifeTime = 7;
+
+    private readonly Vector2 _foodScale = new(0.5f);
 
     public FoodCreator(Grid grid)
     {
@@ -17,7 +18,7 @@ internal class FoodCreator
 
         var transform = Food.AddComponent<Transform>();
         transform.Position = grid.Center;
-        transform.Scale    = FoodScale;
+        transform.Scale    = _foodScale;
 
         var textureConfig = Food.AddComponent<TextureConfig>();
         textureConfig.Name  = TextureName.Food;

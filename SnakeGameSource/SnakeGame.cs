@@ -9,13 +9,17 @@ namespace SnakeGameSource;
 public class SnakeGame : Game2D
 {
     private PhysicsMovement _physicsMovement;
-    private float           _timeRatio;
+    private float           _value;
 
     public SnakeGame()
     {
         Initializing += OnInitializing;
         Updating     += OnUpdating;
+
+        Window.AllowUserResizing = true;
     }
+
+    protected Color[] BackgroundColors { get; set; } = { new(224, 172, 213), new(57, 147, 221) };
 
     private void OnInitializing()
     {
@@ -34,11 +38,14 @@ public class SnakeGame : Game2D
         var foodCreator = Container.GetInstance<FoodCreator>();
         Container.GetInstance<Scene>().Add(snake, [foodCreator.Food]);
         snake.Die += OnSnakeDie;
+        TimeRatio =  0;
     }
 
     private void OnUpdating(GameTime gameTime)
     {
-        _physicsMovement.Move(Input.GetMoveDirection(), gameTime.ElapsedGameTime * _timeRatio);
+        _physicsMovement.Move(Input.GetMoveDirection(), gameTime.ElapsedGameTime);
+        BackgroundColor =  Color.Lerp(BackgroundColors[0], BackgroundColors[1], MathF.Cos(_value));
+        _value          += 0.005f;
     }
 
     private void OnKeyDown(Keys key)
@@ -49,22 +56,22 @@ public class SnakeGame : Game2D
         }
         else
         {
-            _timeRatio = _timeRatio switch
+            TimeRatio = TimeRatio switch
             {
                 1 when key is Keys.Space => 0,
                 0                        => 1,
-                _                        => _timeRatio
+                _                        => TimeRatio
             };
         }
     }
 
     private void OnGesture(GestureSample gesture)
     {
-        _timeRatio = _timeRatio switch
+        TimeRatio = TimeRatio switch
         {
             1 when gesture.GestureType is GestureType.DoubleTap => 0,
             0                                                   => 1,
-            _                                                   => _timeRatio
+            _                                                   => TimeRatio
         };
     }
 

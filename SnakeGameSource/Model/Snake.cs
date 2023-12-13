@@ -15,14 +15,12 @@ internal class Snake : IMovable, IEnumerable<GameObject>
     private readonly List<GameObject> _snakeParts          = [];
 
     private Vector2[] _directions;
-    private int       _lastColliderIndex;
-    private float     _scale = 1f;
+    private Vector2   _scale = new(1f);
 
     public Snake(SnakeConfig snakeConfig, Grid grid)
     {
         MoveSpeed          = snakeConfig.MoveSpeed;
         SlewingSpeed       = snakeConfig.SlewingSpeed;
-        _lastColliderIndex = snakeConfig.InitialLength;
         _grid              = grid;
         Direction          = snakeConfig.StartDirection;
         _directions        = new Vector2[snakeConfig.InitialLength + 1];
@@ -89,7 +87,7 @@ internal class Snake : IMovable, IEnumerable<GameObject>
 
     public Vector2 Direction { get; }
 
-    public float Scale
+    public Vector2 Scale
     {
         get => _scale;
         private set
@@ -222,7 +220,6 @@ internal class Snake : IMovable, IEnumerable<GameObject>
         for (var i = 0; i < _projectedSnakeParts.Count; i++)
         {
             CloneTransform(i);
-            TryCloneCollider(i);
         }
     }
 
@@ -231,19 +228,8 @@ internal class Snake : IMovable, IEnumerable<GameObject>
         var transform1 = _snakeParts[snakePartIndex].GetComponent<Transform>();
         var transform2 = _projectedSnakeParts[snakePartIndex].GetComponent<Transform>();
 
-        transform1.CopyTo(transform2);
+        transform1.TryCopyTo(transform2);
         transform2.Position = _grid.Project(transform2.Position);
-    }
-
-    private void TryCloneCollider(int snakePartIndex)
-    {
-        var collider1 = _snakeParts[snakePartIndex].TryGetComponent<Collider>();
-        var collider2 = _projectedSnakeParts[snakePartIndex].TryGetComponent<Collider>();
-
-        if (collider2 is null && collider1 is not null)
-        {
-            _projectedSnakeParts[snakePartIndex].AddComponent(collider1.GetType());
-        }
     }
 
     private void OnCollisionEnter(GameObject gameObject)
@@ -271,9 +257,10 @@ internal class Snake : IMovable, IEnumerable<GameObject>
                 break;
 
             case EffectType.Scale:
-                if (Scale + effect.Value > 0.5f)
+                if (Scale.X + effect.Value > 0.5f &&
+                    Scale.Y + effect.Value > 0.5f)
                 {
-                    Scale += effect.Value;
+                    Scale.Add(effect.Value);
                 }
 
                 break;
@@ -300,11 +287,6 @@ internal class Snake : IMovable, IEnumerable<GameObject>
 
     private void RemoveSnakePart(int snakePartIndex)
     {
-        if (snakePartIndex <= _lastColliderIndex)
-        {
-            _lastColliderIndex--;
-        }
-
         _snakeParts.RemoveAt(snakePartIndex);
     }
 
