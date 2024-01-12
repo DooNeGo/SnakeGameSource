@@ -10,7 +10,7 @@ public class Transform : Component
 
     public Vector2 Scale { get; set; }
 
-    public override bool TryCopyTo<T>(T component)
+    public override bool TryCopyTo(Component component)
     {
         if (component is not Transform transform)
         {

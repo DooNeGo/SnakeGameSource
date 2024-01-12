@@ -109,11 +109,11 @@ internal class Snake : IMovable, IEnumerable<GameObject>
         }
 
         Vector2[] offsets        = CalculateOffsets(nextPosition);
-        Vector2[] nextDirections = CalculateDirections(offsets);
+        //Vector2[] nextDirections = CalculateDirections(offsets);
         //float[] rotations = CalculateRotations(nextDirections);
 
         ApplyOffsets(offsets);
-        ApplyDirections(nextDirections);
+        //ApplyDirections(nextDirections);
         //ApplyRotations(rotations);
 
         UpdateProjectedSnakeParts();

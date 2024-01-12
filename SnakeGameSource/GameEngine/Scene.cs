@@ -42,7 +42,7 @@ public class Scene : IEnumerable<GameObject>
         InvokeUpdateMethods(delta);
     }
 
-    private void InvokeUpdateMethods(TimeSpan delta)
+    private void InvokeUpdateMethods(TimeSpan delta) // TODO: Вынести класс для вызова метода с запоминанием у кого этот метод есть. Для уменьшения повторения кода.
     {
         for (var i = 0; i < _gameObjects.Count; i++)
         {

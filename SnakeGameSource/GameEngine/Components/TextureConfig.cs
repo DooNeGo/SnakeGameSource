@@ -17,7 +17,7 @@ internal class TextureConfig : Component
 
     public Vector2 Scale => GetComponent<Transform>().Scale;
 
-    public override bool TryCopyTo<T>(T component)
+    public override bool TryCopyTo(Component component)
     {
         if (component is not TextureConfig textureConfig)
         {

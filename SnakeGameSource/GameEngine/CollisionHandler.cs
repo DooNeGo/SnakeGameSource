@@ -1,11 +1,12 @@
 ﻿using System.Reflection;
 using Microsoft.Xna.Framework;
+using SnakeGameSource.GameEngine.Abstractions;
 using SnakeGameSource.GameEngine.Components;
 using SnakeGameSource.GameEngine.Components.Colliders;
 
 namespace SnakeGameSource.GameEngine;
 
-internal class CollisionHandler(Scene scene)
+internal class CollisionHandler(Scene scene) : ICollisionHandler
 {
     private const string CollisionMethodName = "OnCollisionEnter";
 

@@ -128,10 +128,10 @@ public class Grid
 
     public Vector2 GetAbsolutePosition(Vector2 relativePosition, Vector2 scale)
     {
-        Vector2 offset = CellSize.ToVector2() * scale / 2;
+        //Vector2 offset = CellSize.ToVector2() * scale / 2;
 
-        return new Vector2(relativePosition.X * CellSize.X - offset.X,
-                           relativePosition.Y * CellSize.Y - offset.Y);
+        return new Vector2(relativePosition.X * CellSize.X,
+                           relativePosition.Y * CellSize.Y);
     }
 
     private void Clear()

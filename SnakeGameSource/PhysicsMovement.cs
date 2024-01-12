@@ -49,10 +49,11 @@ internal class PhysicsMovement
 
     private void RotateDirection(float angle)
     {
-        float angleBetween = GetRotateAngle();
-        angle = angleBetween > 0 ? angle : -angle;
+        float rotateAngle = GetRotateAngle();
+        angle = rotateAngle > 0 ? angle : -angle;
 
-        _smoothDirection = GetRotatedVector(_smoothDirection, float.MinMagnitude(angle, angleBetween));
+        _smoothDirection = GetRotatedVector(_smoothDirection, float.MinMagnitude(angle, rotateAngle));
+        _smoothDirection.Normalize();
     }
 
     private Vector2 GetRotatedVector(Vector2 vector, float angle)

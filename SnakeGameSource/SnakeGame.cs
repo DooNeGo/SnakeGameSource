@@ -19,7 +19,7 @@ public class SnakeGame : Game2D
         Window.AllowUserResizing = true;
     }
 
-    protected Color[] BackgroundColors { get; set; } = { new(224, 172, 213), new(57, 147, 221) };
+    protected Color[] BackgroundColors { get; set; } = [new(224, 172, 213), new(57, 147, 221)];
 
     private void OnInitializing()
     {

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SnakeGameSource.GameEngine.Abstractions;
 
 namespace SnakeGameSource.GameEngine;
 
@@ -7,7 +8,7 @@ public class Game2D : Game
 {
     private readonly GraphicsDeviceManager _graphics;
 
-    private CollisionHandler _collisionHandler;
+    private ICollisionHandler _collisionHandler;
     private SpriteDrawer     _drawer;
 
     protected Game2D()
@@ -41,7 +42,7 @@ public class Game2D : Game
     {
         Container.AddSingleton<Input>()
                  .AddSingleton<SpriteDrawer>()
-                 .AddSingleton<CollisionHandler>()
+                 .AddSingleton<ICollisionHandler, CollisionHandler>()
                  .AddSingleton<Scene>()
                  .AddSingleton<Grid>()
                  .AddSingleton<SpriteBatch>()
@@ -51,7 +52,7 @@ public class Game2D : Game
                  .AddSingleton(Container)
                  .Build();
 
-        _collisionHandler = Container.GetInstance<CollisionHandler>();
+        _collisionHandler = Container.GetInstance<ICollisionHandler>();
         _drawer           = Container.GetInstance<SpriteDrawer>();
         Input             = Container.GetInstance<Input>();
         Scene             = Container.GetInstance<Scene>();

@@ -2,7 +2,7 @@
 
 namespace SnakeGameSource.GameEngine.Components.Colliders;
 
-internal class SquareCollider : Collider
+public class SquareCollider : Collider
 {
     public override float GetDistanceToEdge(Vector2 position)
     {
@@ -11,5 +11,10 @@ internal class SquareCollider : Collider
         Vector2 unitVector        = vectorToCollider.X > vectorToCollider.Y ? Vector2.UnitX : Vector2.UnitY;
         float   cosBetweenVectors = Vector2.Dot(unitVector, vectorToCollider);
         return GetComponent<Transform>().Scale.X / 2 / cosBetweenVectors;
+    }
+
+    public override bool TryCopyTo(Component component)
+    {
+        return false;
     }
 }

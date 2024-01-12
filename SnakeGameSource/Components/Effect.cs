@@ -9,7 +9,7 @@ public enum EffectType
     Length
 }
 
-internal class Effect : Component
+public class Effect : Component
 {
     public float Value { get; set; }
 
@@ -17,7 +17,7 @@ internal class Effect : Component
 
     public float Chance { get; set; }
 
-    public override bool TryCopyTo<T>(T component)
+    public override bool TryCopyTo(Component component)
     {
         if (component is not Effect effect)
         {

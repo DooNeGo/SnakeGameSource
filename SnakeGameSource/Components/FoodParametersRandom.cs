@@ -4,7 +4,7 @@ using SnakeGameSource.GameEngine.Components;
 
 namespace SnakeGameSource.Components;
 
-internal class FoodParametersRandom : Component
+public class FoodParametersRandom : Component
 {
     private readonly Effect   _commonEffect = new();
     private readonly Effect[] _effects      = new Effect[5];
