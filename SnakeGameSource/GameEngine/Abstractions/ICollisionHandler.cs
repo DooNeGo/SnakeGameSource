@@ -1,7 +1,6 @@
-﻿namespace SnakeGameSource.GameEngine.Abstractions
+﻿namespace SnakeGameSource.GameEngine.Abstractions;
+
+internal interface ICollisionHandler
 {
-    internal interface ICollisionHandler
-    {
-        public void Update();
-    }
+    public void Update();
 }

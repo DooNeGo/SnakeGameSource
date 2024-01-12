@@ -26,7 +26,7 @@ internal class TextureConfig : Component
 
         textureConfig.Name  = Name;
         textureConfig.Color = Color;
-        
+
         return true;
     }
 

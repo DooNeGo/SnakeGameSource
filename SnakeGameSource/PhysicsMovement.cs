@@ -33,13 +33,13 @@ internal class PhysicsMovement
 
     public void Move(Vector2? direction, TimeSpan delta)
     {
-        if (direction is not null &&
-            direction != Vector2.Zero)
+        if (direction is not null
+         && direction != Vector2.Zero)
         {
             _lastDirection = Vector2.Normalize(direction.Value);
-            float slewingAngle = (float)delta.TotalSeconds *
-                                 _snake.SlewingSpeed /
-                                 ((_snake.Scale.X + _snake.Scale.Y) / 2);
+            float slewingAngle = (float)delta.TotalSeconds
+                               * _snake.SlewingSpeed
+                               / ((_snake.Scale.X + _snake.Scale.Y) / 2);
             RotateDirection(slewingAngle);
         }
 

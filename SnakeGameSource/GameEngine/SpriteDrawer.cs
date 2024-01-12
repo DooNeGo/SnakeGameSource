@@ -24,24 +24,20 @@ internal class SpriteDrawer(ContentManager content, SpriteBatch spriteBatch, Gri
             var textureConfig = gameObject.TryGetComponent<TextureConfig>();
             var transform     = gameObject.TryGetComponent<Transform>();
 
-            if (textureConfig is null || transform is null)
+            if (textureConfig is null
+             || transform is null)
             {
                 continue;
             }
 
-            Vector2 absolutePosition = grid.GetAbsolutePosition(transform.Position, transform.Scale);
-            Vector2 scale = grid.CellSize.ToVector2() * textureConfig.Scale / _textures[textureConfig.Name].Bounds.Size.ToVector2();
-            Point   spriteCenter = _textures[textureConfig.Name].Bounds.Center;
+            Vector2 absolutePosition = grid.GetAbsolutePosition(transform.Position);
+            Vector2 scale = grid.CellSize.ToVector2()
+                          * textureConfig.Scale
+                          / _textures[textureConfig.Name].Bounds.Size.ToVector2();
+            Point spriteCenter = _textures[textureConfig.Name].Bounds.Center;
 
-            spriteBatch.Draw(_textures[textureConfig.Name],
-                             absolutePosition,
-                             null,
-                             textureConfig.Color,
-                             transform.Rotation.Z,
-                             spriteCenter.ToVector2(),
-                             scale,
-                             SpriteEffects.None,
-                             1);
+            spriteBatch.Draw(_textures[textureConfig.Name], absolutePosition, null, textureConfig.Color,
+                             transform.Rotation.Z, spriteCenter.ToVector2(), scale, SpriteEffects.None, 1);
         }
 
         spriteBatch.End();
@@ -50,12 +46,12 @@ internal class SpriteDrawer(ContentManager content, SpriteBatch spriteBatch, Gri
     public void LoadContent()
     {
         var           textures = new Dictionary<TextureName, Texture2D>();
-        TextureName[] values   = Enum.GetValues<TextureName>();
+        TextureName[] names    = Enum.GetValues<TextureName>();
 
-        for (var i = 0; i < values.Length; i++)
+        foreach (TextureName name in names)
         {
-            var texture = content.Load<Texture2D>(values[i].ToString());
-            textures.Add(values[i], texture);
+            var texture = content.Load<Texture2D>(name.ToString());
+            textures.Add(name, texture);
         }
 
         _textures = textures.ToFrozenDictionary();
@@ -68,9 +64,9 @@ internal class SpriteDrawer(ContentManager content, SpriteBatch spriteBatch, Gri
             throw new NullReferenceException("No sprites");
         }
 
-        foreach (KeyValuePair<TextureName, Texture2D> keyValue in _textures)
+        foreach (Texture2D texture in _textures.Values)
         {
-            keyValue.Value.Dispose();
+            texture.Dispose();
         }
     }
 }

@@ -21,12 +21,14 @@ public class DiContainer
         }
 
         _transientTypes.Add(typeof(T));
+
         return this;
     }
 
     public DiContainer AddTransient<TAssociation, TImplementation>() where TImplementation : class
     {
         _associationTypes.Add(typeof(TAssociation), typeof(TImplementation));
+
         return AddTransient<TImplementation>();
     }
 
@@ -38,12 +40,14 @@ public class DiContainer
         }
 
         _singletonTypes.TryAdd(typeof(T), null);
+
         return this;
     }
 
     public DiContainer AddSingleton<TAssociation, TImplementation>() where TImplementation : class
     {
         _associationTypes.Add(typeof(TAssociation), typeof(TImplementation));
+
         return AddSingleton<TImplementation>();
     }
 
@@ -55,6 +59,7 @@ public class DiContainer
         }
 
         _singletonTypes.Add(typeof(T), instance);
+
         return this;
     }
 
@@ -62,6 +67,7 @@ public class DiContainer
         where TImplementation : class
     {
         _associationTypes.Add(typeof(TAssociation), typeof(TImplementation));
+
         return AddSingleton(instance);
     }
 

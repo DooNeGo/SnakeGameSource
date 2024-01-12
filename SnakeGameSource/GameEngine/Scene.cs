@@ -30,9 +30,9 @@ public class Scene : IEnumerable<GameObject>
 
     public void Remove(params IEnumerable<GameObject>[] compositeObjects)
     {
-        for (var i = 0; i < compositeObjects.Length; i++)
+        foreach (IEnumerable<GameObject> compositeObject in compositeObjects)
         {
-            _compositeObjects.Remove(compositeObjects[i]);
+            _compositeObjects.Remove(compositeObject);
         }
     }
 
@@ -42,11 +42,12 @@ public class Scene : IEnumerable<GameObject>
         InvokeUpdateMethods(delta);
     }
 
-    private void InvokeUpdateMethods(TimeSpan delta) // TODO: Вынести класс для вызова метода с запоминанием у кого этот метод есть. Для уменьшения повторения кода.
+    // TODO: Вынести класс для вызова метода с запоминанием у кого этот метод есть. Для уменьшения повторения кода.
+    private void InvokeUpdateMethods(TimeSpan delta)
     {
-        for (var i = 0; i < _gameObjects.Count; i++)
+        foreach (GameObject gameObject in _gameObjects)
         {
-            foreach (Component component in _gameObjects[i].GetComponents())
+            foreach (Component component in gameObject.GetComponents())
             {
                 Type type = component.GetType();
 
@@ -54,24 +55,23 @@ public class Scene : IEnumerable<GameObject>
                 {
                     continue;
                 }
-                
+
                 if (!_updateMethods.TryGetValue(type, out MethodInfo? method))
                 {
                     method = type.GetMethod(UpdateMethodName,
-                                            BindingFlags.Instance  |
-                                            BindingFlags.NonPublic |
-                                            BindingFlags.Public,
+                                            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
                                             [typeof(TimeSpan)]);
 
                     if (method is null)
                     {
                         _withoutUpdateMethod.Add(type);
+
                         continue;
                     }
-                    
+
                     _updateMethods.Add(type, method);
                 }
-                
+
                 method.Invoke(component, [delta]);
             }
         }
@@ -81,9 +81,9 @@ public class Scene : IEnumerable<GameObject>
     {
         _gameObjects.Clear();
 
-        for (var i = 0; i < _compositeObjects.Count; i++)
+        foreach (IEnumerable<GameObject> compositeObject in _compositeObjects)
         {
-            _gameObjects.AddRange(_compositeObjects[i]);
+            _gameObjects.AddRange(compositeObject);
         }
     }
 }

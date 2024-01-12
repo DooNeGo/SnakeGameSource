@@ -16,7 +16,8 @@ public class Input
     }
 
     public event Action<GestureSample>? Gesture;
-    public event Action<Keys>?          KeyDown;
+
+    public event Action<Keys>? KeyDown;
 
     private void UpdateKey()
     {
@@ -24,22 +25,19 @@ public class Input
         {
             Keys[] keys = Keyboard.GetState().GetPressedKeys();
 
-            for (var i = 0; i < keys.Length; i++)
+            foreach (Keys key in keys)
             {
-                KeyDown?.Invoke(keys[i]);
+                KeyDown?.Invoke(key);
 
-                if (keys[i] is Keys.Up
-                               or Keys.Down
-                               or Keys.Left
-                               or Keys.Right)
+                if (key is Keys.Up or Keys.Down or Keys.Left or Keys.Right)
                 {
-                    _pressedKey = keys[i];
+                    _pressedKey = key;
                 }
             }
         }
         else
         {
-            _pressedKey = default;
+            _pressedKey = default(Keys);
         }
     }
 
@@ -52,7 +50,7 @@ public class Input
         }
         else
         {
-            _gesture = default;
+            _gesture = default(GestureSample);
         }
     }
 

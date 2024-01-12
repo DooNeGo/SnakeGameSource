@@ -12,7 +12,7 @@ public class FoodParametersRandom : Component
 
     public Grid? Grid { get; set; }
 
-    public TimeSpan FoodLifetime { get; private set; } = TimeSpan.FromSeconds(7);
+    public TimeSpan FoodLifetime { get; } = TimeSpan.FromSeconds(7);
 
     public TimeSpan RemainFoodLifetime { get; private set; }
 
@@ -97,9 +97,9 @@ public class FoodParametersRandom : Component
         var transform = GetComponent<Transform>();
         do
         {
-            transform.Position = new Vector2(_random.Next(1, Grid.Size.X - 1),
-                                             _random.Next(1, Grid.Size.Y - 1));
-        } while (Grid.IsPositionOccupied(transform.Position, transform.Scale));
+            transform.Position = new Vector2(_random.Next(1, Grid.Size.X - 1), _random.Next(1, Grid.Size.Y - 1));
+        }
+        while (Grid.IsPositionOccupied(transform.Position, transform.Scale));
     }
 
     public override bool TryCopyTo(Component component)
@@ -109,7 +109,7 @@ public class FoodParametersRandom : Component
             return false;
         }
 
-        random.Grid = Grid;
+        random.Grid               = Grid;
         random.RemainFoodLifetime = RemainFoodLifetime;
 
         return true;

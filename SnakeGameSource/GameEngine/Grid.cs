@@ -7,7 +7,7 @@ namespace SnakeGameSource.GameEngine;
 
 public class Grid
 {
-    private bool[,] _cells;
+    private bool[,] _cells = new bool[0, 0];
 
     public Grid(GameWindow window, Scene scene)
     {
@@ -44,19 +44,18 @@ public class Grid
     //TODO: Поменять этот метод на имплементацию в CollisionHandler
     public bool IsPositionOccupied(Vector2 position, Vector2 scale)
     {
-        if (position.X >= _cells.GetLength(1) ||
-            position.Y >= _cells.GetLength(0) ||
-            position.X < 0                    ||
-            position.Y < 0)
+        if (position.X >= _cells.GetLength(1)
+         || position.Y >= _cells.GetLength(0)
+         || position.X < 0
+         || position.Y < 0)
         {
             return false;
         }
 
         Update();
 
-        Vector2 checkSize = Vector2.Ceiling(scale);
-        Vector2 startPosition = new(position.X - checkSize.X / 2,
-                                    position.Y - checkSize.Y / 2);
+        Vector2 checkSize     = Vector2.Ceiling(scale);
+        Vector2 startPosition = new(position.X - checkSize.X / 2, position.Y - checkSize.Y / 2);
 
         for (var y = (int)startPosition.Y; y < checkSize.Y; y++)
         {
@@ -86,18 +85,17 @@ public class Grid
     {
         var transform = gameObject.TryGetComponent<Transform>();
 
-        if (transform is null                           ||
-            transform.Position.X >= _cells.GetLength(1) ||
-            transform.Position.Y >= _cells.GetLength(0) ||
-            transform.Position.X < 0                    ||
-            transform.Position.Y < 0)
+        if (transform is null
+         || transform.Position.X >= _cells.GetLength(1)
+         || transform.Position.Y >= _cells.GetLength(0)
+         || transform.Position.X < 0
+         || transform.Position.Y < 0)
         {
             return;
         }
 
-        Vector2 checkSize = Vector2.Ceiling(transform.Scale);
-        Vector2 startPosition = new(transform.Position.X - checkSize.X / 2,
-                                    transform.Position.Y - checkSize.Y / 2);
+        Vector2 checkSize     = Vector2.Ceiling(transform.Scale);
+        Vector2 startPosition = new(transform.Position.X - checkSize.X / 2, transform.Position.Y - checkSize.Y / 2);
 
         for (var y = (int)startPosition.Y; y < checkSize.Y; y++)
         {
@@ -126,12 +124,9 @@ public class Grid
         return projection;
     }
 
-    public Vector2 GetAbsolutePosition(Vector2 relativePosition, Vector2 scale)
+    public Vector2 GetAbsolutePosition(Vector2 relativePosition)
     {
-        //Vector2 offset = CellSize.ToVector2() * scale / 2;
-
-        return new Vector2(relativePosition.X * CellSize.X,
-                           relativePosition.Y * CellSize.Y);
+        return new Vector2(relativePosition.X * CellSize.X, relativePosition.Y * CellSize.Y);
     }
 
     private void Clear()

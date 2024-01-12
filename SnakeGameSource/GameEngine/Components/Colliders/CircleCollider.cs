@@ -18,8 +18,6 @@ public class CircleCollider : Collider
             throw new NullReferenceException("There is no Transform component in GameObject");
         }
 
-
-
         return _transform.Scale.X / 2;
     }
 

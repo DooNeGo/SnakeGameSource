@@ -23,7 +23,7 @@ public class Effect : Component
         {
             return false;
         }
-        
+
         effect.Value  = Value;
         effect.Type   = Type;
         effect.Chance = Chance;

@@ -8,7 +8,7 @@ public static class Vector2Extension
     {
         vector.X += value;
         vector.Y += value;
-        
+
         return vector;
     }
 }

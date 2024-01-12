@@ -18,11 +18,11 @@ internal class Snake : IMovable, IEnumerable<GameObject>
 
     public Snake(SnakeConfig snakeConfig, Grid grid)
     {
-        MoveSpeed          = snakeConfig.MoveSpeed;
-        SlewingSpeed       = snakeConfig.SlewingSpeed;
-        _grid              = grid;
-        Direction          = snakeConfig.StartDirection;
-        _directions        = new Vector2[snakeConfig.InitialLength + 1];
+        MoveSpeed    = snakeConfig.MoveSpeed;
+        SlewingSpeed = snakeConfig.SlewingSpeed;
+        _grid        = grid;
+        Direction    = snakeConfig.StartDirection;
+        _directions  = new Vector2[snakeConfig.InitialLength + 1];
 
         for (var i = 0; i < _directions.Length; i++)
         {
@@ -31,9 +31,7 @@ internal class Snake : IMovable, IEnumerable<GameObject>
 
         for (var i = 0; i <= snakeConfig.InitialLength; i++)
         {
-            GameObject snakePart = i is 0
-                ? new GameObject("Snake head")
-                : new GameObject();
+            GameObject snakePart = i is 0 ? new GameObject("Snake head") : new GameObject();
 
             var transform = snakePart.AddComponent<Transform>();
             transform.Position = snakeConfig.StartPosition - Direction * Scale * i;
@@ -89,12 +87,13 @@ internal class Snake : IMovable, IEnumerable<GameObject>
     public Vector2 Scale
     {
         get => _scale;
+
         private set
         {
             _scale = value;
-            for (var i = 0; i < _snakeParts.Count; i++)
+            foreach (GameObject gameObject in _snakeParts)
             {
-                _snakeParts[i].GetComponent<Transform>().Scale = _scale;
+                gameObject.GetComponent<Transform>().Scale = _scale;
             }
         }
     }
@@ -108,11 +107,13 @@ internal class Snake : IMovable, IEnumerable<GameObject>
             return;
         }
 
-        Vector2[] offsets        = CalculateOffsets(nextPosition);
+        Vector2[] offsets = CalculateOffsets(nextPosition);
+
         //Vector2[] nextDirections = CalculateDirections(offsets);
         //float[] rotations = CalculateRotations(nextDirections);
 
         ApplyOffsets(offsets);
+
         //ApplyDirections(nextDirections);
         //ApplyRotations(rotations);
 
@@ -145,9 +146,7 @@ internal class Snake : IMovable, IEnumerable<GameObject>
 
         for (var i = 0; i < directions.Length; i++)
         {
-            directions[i] = offsets[i] != Vector2.Zero
-                ? Vector2.Normalize(offsets[i])
-                : Vector2.Zero;
+            directions[i] = offsets[i] != Vector2.Zero ? Vector2.Normalize(offsets[i]) : Vector2.Zero;
         }
 
         return directions;
@@ -191,9 +190,9 @@ internal class Snake : IMovable, IEnumerable<GameObject>
 
     private void ApplyRotations(float[] rotations)
     {
-        for (var i = 0; i < _snakeParts.Count; i++)
+        foreach (GameObject gameObject in _snakeParts)
         {
-            var        transform = _snakeParts[i].GetComponent<Transform>();
+            var        transform = gameObject.GetComponent<Transform>();
             Quaternion rotation  = transform.Rotation;
             transform.Rotation = rotation;
         }
@@ -218,11 +217,11 @@ internal class Snake : IMovable, IEnumerable<GameObject>
 
         for (var i = 0; i < _projectedSnakeParts.Count; i++)
         {
-            CloneTransform(i);
+            UpdateProjectedTransform(i);
         }
     }
 
-    private void CloneTransform(int snakePartIndex)
+    private void UpdateProjectedTransform(int snakePartIndex)
     {
         var transform1 = _snakeParts[snakePartIndex].GetComponent<Transform>();
         var transform2 = _projectedSnakeParts[snakePartIndex].GetComponent<Transform>();
@@ -256,8 +255,8 @@ internal class Snake : IMovable, IEnumerable<GameObject>
                 break;
 
             case EffectType.Scale:
-                if (Scale.X + effect.Value > 0.5f &&
-                    Scale.Y + effect.Value > 0.5f)
+                if (Scale.X + effect.Value > 0.5f
+                 && Scale.Y + effect.Value > 0.5f)
                 {
                     Scale.Add(effect.Value);
                 }
@@ -277,8 +276,7 @@ internal class Snake : IMovable, IEnumerable<GameObject>
                 break;
 
             default:
-                throw new ArgumentOutOfRangeException(nameof(effect),
-                                                      $"No such effect type {effect.Type}");
+                throw new ArgumentOutOfRangeException(nameof(effect), $"No such effect type {effect.Type}");
         }
 
         Score++;

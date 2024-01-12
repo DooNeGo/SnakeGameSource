@@ -5,12 +5,13 @@ namespace SnakeGameSource.GameEngine;
 
 public sealed class GameObject(string? name = null)
 {
-    private static readonly PropertyInfo ParentProperty = typeof(Component).GetProperty(ParentPropertyName)
-                                                            ?? throw new NullReferenceException("There is no Parent property in Component class");
-
     private const string TryCopyToMethodName = "TryCopyTo";
     private const string ParentPropertyName  = "Parent";
     private const string AwakeMethodName     = "Awake";
+
+    private static readonly PropertyInfo ParentProperty = typeof(Component).GetProperty(ParentPropertyName)
+                                                       ?? throw new NullReferenceException(
+                                                              "There is no Parent property in Component class");
 
     private readonly List<Component> _components = [];
 
@@ -32,12 +33,10 @@ public sealed class GameObject(string? name = null)
 
     public Component AddComponent(Type type)
     {
-        IsValidComponentType(type);
+        CheckComponentType(type);
 
-        ConstructorInfo? constructor = type.GetConstructor(BindingFlags.Instance |
-                                                           BindingFlags.Public   |
-                                                           BindingFlags.NonPublic,
-                                                           []);
+        ConstructorInfo? constructor =
+            type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, []);
 
         if (constructor is null)
         {
@@ -53,25 +52,30 @@ public sealed class GameObject(string? name = null)
         return component;
     }
 
-    private bool IsValidComponentType(Type type)
+    private void CheckComponentType(Type type)
     {
-        return !type.IsSubclassOf(typeof(Component))
-            ? throw new Exception($"{type.FullName} is not subclass of Component")
-            : TryGetComponent(type) is not null
-                ? throw new Exception($"{type.FullName} has already added in components")
-                : type.IsAbstract
-                    ? throw new Exception("You can't add an abstract component")
-                    : true;
+        if (!type.IsSubclassOf(typeof(Component)))
+        {
+            throw new Exception($"{type.FullName} is not subclass of Component");
+        }
+
+        if (TryGetComponent(type) is not null)
+        {
+            throw new Exception($"{type.FullName} has already added in components");
+        }
+
+        if (type.IsAbstract
+         || type.IsInterface)
+        {
+            throw new Exception("You can't add an abstract component or interface");
+        }
     }
 
-    private void TryInvokeAwakeMethod(Component component)
+    private static void TryInvokeAwakeMethod(Component component)
     {
         Type type = component.GetType();
         MethodInfo? method = type.GetMethod(AwakeMethodName,
-                                            BindingFlags.NonPublic |
-                                            BindingFlags.Public    |
-                                            BindingFlags.Instance,
-                                            []);
+                                            BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, []);
         method?.Invoke(component, []);
     }
 
@@ -88,8 +92,7 @@ public sealed class GameObject(string? name = null)
 
     public T GetComponent<T>() where T : Component
     {
-        return TryGetComponent<T>() 
-            ?? throw new Exception($"There is no {typeof(T).Name} component");
+        return TryGetComponent<T>() ?? throw new Exception($"There is no {typeof(T).Name} component");
     }
 
     public T? TryGetComponent<T>() where T : Component
@@ -99,15 +102,7 @@ public sealed class GameObject(string? name = null)
 
     public object? TryGetComponent(Type type)
     {
-        foreach (Component component in _components)
-        {
-            if (type.IsAssignableFrom(component.GetType()))
-            {
-                return component;
-            }
-        }
-
-        return null;
+        return _components.FirstOrDefault(type.IsInstanceOfType);
     }
 
     public GameObject Clone()

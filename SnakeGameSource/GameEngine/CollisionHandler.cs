@@ -10,8 +10,8 @@ internal class CollisionHandler(Scene scene) : ICollisionHandler
 {
     private const string CollisionMethodName = "OnCollisionEnter";
 
-    private readonly List<GameObject>             _gameObjects            = [];
     private readonly Dictionary<Type, MethodInfo> _collisionMethods       = [];
+    private readonly List<GameObject>             _gameObjects            = [];
     private readonly HashSet<Type>                _withoutCollisionMethod = [];
 
     public void Update()
@@ -49,11 +49,13 @@ internal class CollisionHandler(Scene scene) : ICollisionHandler
                 float distanceToEdge2 = collider2.GetDistanceToEdge(transform1.Position);
                 float distanceBetween = Vector2.Distance(transform1.Position, transform2.Position);
 
-                if (distanceToEdge1 + distanceToEdge2 >= distanceBetween)
+                if (!(distanceToEdge1 + distanceToEdge2 >= distanceBetween))
                 {
-                    TryInvokeCollision(i, j);
-                    TryInvokeCollision(j, i);
+                    continue;
                 }
+
+                TryInvokeCollision(i, j);
+                TryInvokeCollision(j, i);
             }
         }
     }
@@ -72,16 +74,15 @@ internal class CollisionHandler(Scene scene) : ICollisionHandler
             if (!_collisionMethods.TryGetValue(type, out MethodInfo? method))
             {
                 method = type.GetMethod(CollisionMethodName,
-                                        BindingFlags.NonPublic |
-                                        BindingFlags.Instance  |
-                                        BindingFlags.Public,
+                                        BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public,
                                         [typeof(GameObject)]);
                 if (method is null)
                 {
                     _withoutCollisionMethod.Add(type);
+
                     continue;
                 }
-                
+
                 _collisionMethods.Add(type, method);
             }
 
