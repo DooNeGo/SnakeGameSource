@@ -59,6 +59,10 @@ public class SnakeGame : Game2D
         {
             TimeRatio = TimeRatio is 1 ? 0 : 1;
         }
+        else if (key is Keys.Up or Keys.Down or Keys.Left or Keys.Right)
+        {
+            TimeRatio = 1;
+        }
     }
 
     private void OnGesture(GestureSample gesture)
