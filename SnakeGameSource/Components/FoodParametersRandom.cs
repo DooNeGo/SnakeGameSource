@@ -10,11 +10,11 @@ public class FoodParametersRandom : Component
     private readonly Effect[] _effects      = new Effect[5];
     private readonly Random   _random       = new();
 
-    private TimeSpan _remainLifetime;
-
     public Grid? Grid { get; set; }
 
-    public int FoodLifetime { get; set; }
+    public TimeSpan FoodLifetime { get; private set; } = TimeSpan.FromSeconds(7);
+
+    public TimeSpan RemainFoodLifetime { get; private set; }
 
     private void Awake()
     {
@@ -36,7 +36,7 @@ public class FoodParametersRandom : Component
 
         _effects[2].Type   = EffectType.Scale;
         _effects[2].Value  = 0.05f;
-        _effects[3].Chance = 10;
+        _effects[2].Chance = 10;
 
         _effects[3].Type   = EffectType.Scale;
         _effects[3].Value  = -0.05f;
@@ -49,9 +49,9 @@ public class FoodParametersRandom : Component
 
     private void Update(TimeSpan delta)
     {
-        _remainLifetime -= delta;
+        RemainFoodLifetime -= delta;
 
-        if (_remainLifetime.TotalSeconds <= 0)
+        if (RemainFoodLifetime.TotalSeconds <= 0)
         {
             RandFoodParameters();
         }
@@ -70,14 +70,14 @@ public class FoodParametersRandom : Component
         RandEffect();
         RandPosition();
 
-        _remainLifetime = TimeSpan.FromSeconds(FoodLifetime);
+        RemainFoodLifetime = FoodLifetime;
     }
 
     private void RandEffect()
     {
-        int effectIndex = _random.Next(0, _effects.Length);
-        int number      = _random.Next(0, 101);
-        SetEffect(number <= _effects[effectIndex].Chance * _effects.Length
+        int effectIndex  = _random.Next(0, _effects.Length);
+        int effectChance = _random.Next(0, 101);
+        SetEffect(effectChance <= _effects[effectIndex].Chance * _effects.Length
                       ? _effects[effectIndex]
                       : _commonEffect);
     }
@@ -100,5 +100,18 @@ public class FoodParametersRandom : Component
             transform.Position = new Vector2(_random.Next(1, Grid.Size.X - 1),
                                              _random.Next(1, Grid.Size.Y - 1));
         } while (Grid.IsPositionOccupied(transform.Position, transform.Scale));
+    }
+
+    public override bool TryCopyTo(Component component)
+    {
+        if (component is not FoodParametersRandom random)
+        {
+            return false;
+        }
+
+        random.Grid = Grid;
+        random.RemainFoodLifetime = RemainFoodLifetime;
+
+        return true;
     }
 }
