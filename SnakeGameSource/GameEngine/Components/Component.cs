@@ -4,7 +4,7 @@ public abstract class Component
 {
     public GameObject? Parent { get; init; }
 
-    public T GetComponent<T>() where T : Component
+    public T? GetComponent<T>() where T : Component
     {
         return Parent!.GetComponent<T>();
     }

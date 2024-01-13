@@ -10,7 +10,7 @@ public class CircleCollider : Collider
 
     private void Awake()
     {
-        _transform = GetComponent<Transform>();
+        _transform = Parent!.Transform;
     }
 
     public override float GetDistanceToEdge(Vector2 position)
@@ -25,6 +25,13 @@ public class CircleCollider : Collider
 
     public override bool TryCopyTo(Component component)
     {
+        if (component is not CircleCollider collider)
+        {
+            return false;
+        }
+
+        collider.Scale = Scale;
+
         return false;
     }
 }

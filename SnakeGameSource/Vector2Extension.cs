@@ -19,4 +19,12 @@ public static class Vector2Extension
 
         return vector;
     }
+
+    public static Vector2 Rotate(this Vector2 vector, float angle)
+    {
+        Matrix matrix = Matrix.CreateRotationZ(angle * MathF.PI / 180f);
+        vector = Vector2.Transform(vector, matrix);
+
+        return vector;
+    }
 }

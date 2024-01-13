@@ -16,8 +16,7 @@ internal class FoodCreator
     {
         Food = new GameObject();
 
-        var transform = Food.AddComponent<Transform>();
-        transform.Position = grid.Center;
+        var transform = Food.Transform;
         transform.Scale    = _foodScale;
 
         var textureConfig = Food.AddComponent<TextureConfig>();

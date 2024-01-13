@@ -21,18 +21,20 @@ public static class MethodInvoker
             return;
         }
 
-        MethodInfo? method = cache.Methods.TryGetValue(type, out MethodInfo? info)
-            ? info
-            : type.GetMethod(methodName, Flags, paramsTypes);
-
-        if (method is null)
+        if (!cache.Methods.TryGetValue(type, out MethodInfo? method))
         {
-            cache.WithoutMethod.Add(type);
+            method = type.GetMethod(methodName, Flags, paramsTypes);
 
-            return;
+            if (method is null)
+            {
+                cache.WithoutMethod.Add(type);
+
+                return;
+            }
+
+            cache.Methods[type] = method;
         }
 
-        cache.Methods[type] = method;
         method.Invoke(obj, parameters);
     }
 

@@ -83,7 +83,7 @@ public class Grid
 
     private void TryAddToGrid(GameObject gameObject)
     {
-        var transform = gameObject.TryGetComponent<Transform>();
+        var transform = gameObject.GetComponent<Transform>();
 
         if (transform is null
          || transform.Position.X >= _cells.GetLength(1)

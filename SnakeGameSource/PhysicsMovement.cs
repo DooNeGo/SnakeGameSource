@@ -56,7 +56,7 @@ internal class PhysicsMovement
         _smoothDirection.Normalize();
     }
 
-    private Vector2 GetRotatedVector(Vector2 vector, float angle)
+    private static Vector2 GetRotatedVector(Vector2 vector, float angle)
     {
         return Vector2.Transform(vector, Matrix.CreateRotationZ(angle * MathF.PI / 180f));
     }

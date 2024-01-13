@@ -10,7 +10,7 @@ public class SquareCollider : Collider
 
     private void Awake()
     {
-        _transform = GetComponent<Transform>();
+        _transform = Parent!.Transform;
     }
 
     public override float GetDistanceToEdge(Vector2 position)
@@ -37,6 +37,13 @@ public class SquareCollider : Collider
 
     public override bool TryCopyTo(Component component)
     {
-        return false;
+        if (component is not SquareCollider collider)
+        {
+            return false;
+        }
+
+        collider.Scale = Scale;
+
+        return true;
     }
 }

@@ -33,7 +33,7 @@ internal class Snake : IMovable, IEnumerable<GameObject>
         {
             GameObject snakePart = i is 0 ? new GameObject("Snake head") : new GameObject();
 
-            var transform = snakePart.AddComponent<Transform>();
+            var transform = snakePart.Transform;
             transform.Position = snakeConfig.StartPosition - Direction * Scale * i;
             transform.Scale    = Scale;
 
@@ -78,7 +78,7 @@ internal class Snake : IMovable, IEnumerable<GameObject>
         return _projectedSnakeParts.GetEnumerator();
     }
 
-    public Vector2 Position => Head.GetComponent<Transform>().Position;
+    public Vector2 Position => Head.Transform.Position;
 
     public float MoveSpeed { get; private set; }
 
@@ -93,7 +93,7 @@ internal class Snake : IMovable, IEnumerable<GameObject>
             _scale = value;
             foreach (GameObject gameObject in _snakeParts)
             {
-                gameObject.GetComponent<Transform>().Scale = _scale;
+                gameObject.Transform.Scale = _scale;
             }
         }
     }
@@ -130,8 +130,8 @@ internal class Snake : IMovable, IEnumerable<GameObject>
 
         for (var i = 1; i < _snakeParts.Count; i++)
         {
-            var transform1 = _snakeParts[i].GetComponent<Transform>();
-            var transform2 = _snakeParts[i - 1].GetComponent<Transform>();
+            var transform1 = _snakeParts[i].Transform;
+            var transform2 = _snakeParts[i - 1].Transform;
 
             offsets[i] =  transform2.Position - transform1.Position;
             offsets[i] /= Scale;
@@ -175,11 +175,11 @@ internal class Snake : IMovable, IEnumerable<GameObject>
 
     private void ApplyOffsets(Vector2[] offsets)
     {
-        Head.GetComponent<Transform>().Position += offsets[0];
+        Head.Transform.Position += offsets[0];
 
         for (var i = 1; i < offsets.Length; i++)
         {
-            _snakeParts[i].GetComponent<Transform>().Position += offsets[i] * offsets[0].Length();
+            _snakeParts[i].Transform.Position += offsets[i] * offsets[0].Length();
         }
     }
 
@@ -192,7 +192,7 @@ internal class Snake : IMovable, IEnumerable<GameObject>
     {
         foreach (GameObject gameObject in _snakeParts)
         {
-            var        transform = gameObject.GetComponent<Transform>();
+            var        transform = gameObject.Transform;
             Quaternion rotation  = transform.Rotation;
             transform.Rotation = rotation;
         }
@@ -223,8 +223,8 @@ internal class Snake : IMovable, IEnumerable<GameObject>
 
     private void UpdateProjectedTransform(int snakePartIndex)
     {
-        var transform1 = _snakeParts[snakePartIndex].GetComponent<Transform>();
-        var transform2 = _projectedSnakeParts[snakePartIndex].GetComponent<Transform>();
+        var transform1 = _snakeParts[snakePartIndex].Transform;
+        var transform2 = _projectedSnakeParts[snakePartIndex].Transform;
 
         transform1.TryCopyTo(transform2);
         transform2.Position = _grid.Project(transform2.Position);
@@ -232,9 +232,9 @@ internal class Snake : IMovable, IEnumerable<GameObject>
 
     private void OnCollisionEnter(GameObject gameObject)
     {
-        if (gameObject.TryGetComponent<Effect>() is not null)
+        if (gameObject.TryGetComponent(out Effect? effect))
         {
-            ApplyEffect(gameObject.GetComponent<Effect>());
+            ApplyEffect(effect);
         }
         else
         {

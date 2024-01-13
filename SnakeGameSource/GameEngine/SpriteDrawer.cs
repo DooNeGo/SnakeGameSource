@@ -21,11 +21,10 @@ internal class SpriteDrawer(ContentManager content, SpriteBatch spriteBatch, Gri
 
         foreach (GameObject gameObject in scene)
         {
-            var textureConfig = gameObject.TryGetComponent<TextureConfig>();
-            var transform     = gameObject.TryGetComponent<Transform>();
+            var textureConfig = gameObject.GetComponent<TextureConfig>();
+            var transform     = gameObject.Transform;
 
-            if (textureConfig is null
-             || transform is null)
+            if (textureConfig is null)
             {
                 continue;
             }
