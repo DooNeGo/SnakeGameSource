@@ -26,7 +26,7 @@ public sealed class GameObject(string? name = null)
 
         T component = new() { Parent = this };
         _components.Add(component);
-        TryInvokeAwakeMethod(component);
+        MethodInvoker.TryInvokeMethod(component, AwakeMethodName, [], null);
 
         return component;
     }
@@ -47,7 +47,7 @@ public sealed class GameObject(string? name = null)
 
         ParentProperty.SetValue(component, this);
         _components.Add(component);
-        TryInvokeAwakeMethod(component);
+        MethodInvoker.TryInvokeMethod(component, AwakeMethodName, [], null);
 
         return component;
     }
@@ -69,14 +69,6 @@ public sealed class GameObject(string? name = null)
         {
             throw new Exception("You can't add an abstract component or interface");
         }
-    }
-
-    private static void TryInvokeAwakeMethod(Component component)
-    {
-        Type type = component.GetType();
-        MethodInfo? method = type.GetMethod(AwakeMethodName,
-                                            BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, []);
-        method?.Invoke(component, []);
     }
 
     public void RemoveComponent<T>() where T : Component
@@ -113,7 +105,7 @@ public sealed class GameObject(string? name = null)
         {
             Type      type           = component.GetType();
             Component cloneComponent = gameObject.AddComponent(type);
-            type.GetMethod(TryCopyToMethodName)?.Invoke(component, [cloneComponent]);
+            MethodInvoker.TryInvokeMethod(component, TryCopyToMethodName, [typeof(Component)], [cloneComponent]);
         }
 
         return gameObject;

@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Reflection;
 using SnakeGameSource.GameEngine.Components;
 
 namespace SnakeGameSource.GameEngine;
@@ -8,10 +7,8 @@ public class Scene : IEnumerable<GameObject>
 {
     private const string UpdateMethodName = "Update";
 
-    private readonly List<IEnumerable<GameObject>> _compositeObjects    = [];
-    private readonly List<GameObject>              _gameObjects         = [];
-    private readonly Dictionary<Type, MethodInfo>  _updateMethods       = [];
-    private readonly HashSet<Type>                 _withoutUpdateMethod = [];
+    private readonly List<IEnumerable<GameObject>> _compositeObjects = [];
+    private readonly List<GameObject>              _gameObjects      = [];
 
     public IEnumerator<GameObject> GetEnumerator()
     {
@@ -42,38 +39,11 @@ public class Scene : IEnumerable<GameObject>
         InvokeUpdateMethods(delta);
     }
 
-    // TODO: Вынести класс для вызова метода с запоминанием у кого этот метод есть. Для уменьшения повторения кода.
     private void InvokeUpdateMethods(TimeSpan delta)
     {
-        foreach (GameObject gameObject in _gameObjects)
+        foreach (Component component in _gameObjects.SelectMany(gameObject => gameObject.GetComponents()))
         {
-            foreach (Component component in gameObject.GetComponents())
-            {
-                Type type = component.GetType();
-
-                if (_withoutUpdateMethod.Contains(type))
-                {
-                    continue;
-                }
-
-                if (!_updateMethods.TryGetValue(type, out MethodInfo? method))
-                {
-                    method = type.GetMethod(UpdateMethodName,
-                                            BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public,
-                                            [typeof(TimeSpan)]);
-
-                    if (method is null)
-                    {
-                        _withoutUpdateMethod.Add(type);
-
-                        continue;
-                    }
-
-                    _updateMethods.Add(type, method);
-                }
-
-                method.Invoke(component, [delta]);
-            }
+            MethodInvoker.TryInvokeMethod(component, UpdateMethodName, [typeof(TimeSpan)], [delta]);
         }
     }
 

@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using SnakeGameSource.GameEngine.Abstractions;
 using SnakeGameSource.GameEngine.Components;
 using SnakeGameSource.GameEngine.Components.Colliders;
@@ -10,9 +9,7 @@ internal class CollisionHandler(Scene scene) : ICollisionHandler
 {
     private const string CollisionMethodName = "OnCollisionEnter";
 
-    private readonly Dictionary<Type, MethodInfo> _collisionMethods       = [];
-    private readonly List<GameObject>             _gameObjects            = [];
-    private readonly HashSet<Type>                _withoutCollisionMethod = [];
+    private readonly List<GameObject> _gameObjects = [];
 
     public void Update()
     {
@@ -64,29 +61,8 @@ internal class CollisionHandler(Scene scene) : ICollisionHandler
     {
         foreach (Component component in _gameObjects[targetIndex].GetComponents())
         {
-            Type type = component.GetType();
-
-            if (_withoutCollisionMethod.Contains(type))
-            {
-                continue;
-            }
-
-            if (!_collisionMethods.TryGetValue(type, out MethodInfo? method))
-            {
-                method = type.GetMethod(CollisionMethodName,
-                                        BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public,
-                                        [typeof(GameObject)]);
-                if (method is null)
-                {
-                    _withoutCollisionMethod.Add(type);
-
-                    continue;
-                }
-
-                _collisionMethods.Add(type, method);
-            }
-
-            method.Invoke(component, [_gameObjects[gameObjectIndex]]);
+            MethodInvoker.TryInvokeMethod(component, CollisionMethodName, [typeof(GameObject)],
+                                          [_gameObjects[gameObjectIndex]]);
         }
     }
 }

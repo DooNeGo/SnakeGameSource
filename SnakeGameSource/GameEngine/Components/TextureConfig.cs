@@ -11,23 +11,11 @@ internal enum TextureName
 
 internal class TextureConfig : Component
 {
-    private Vector2    _scale = Vector2.One;
-    private Transform? _transform;
-    
     public TextureName Name { get; set; }
 
     public Color Color { get; set; }
 
-    public Vector2 Scale
-    {
-        get => _transform!.Scale * _scale;
-        set => _scale = value;
-    }
-
-    private void Awake()
-    {
-        _transform = GetComponent<Transform>();
-    }
+    public Vector2 Scale { get; set; } = Vector2.One;
 
     public override bool TryCopyTo(Component component)
     {
@@ -38,6 +26,7 @@ internal class TextureConfig : Component
 
         textureConfig.Name  = Name;
         textureConfig.Color = Color;
+        textureConfig.Scale = Scale;
 
         return true;
     }
@@ -59,6 +48,6 @@ internal class TextureConfig : Component
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Name, Color, Scale);
+        return HashCode.Combine(Parent, nameof(TextureConfig));
     }
 }

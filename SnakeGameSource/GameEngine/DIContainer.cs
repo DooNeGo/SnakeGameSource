@@ -116,17 +116,17 @@ public class DiContainer
         ConstructorInfo[] constructorInfo = type.GetConstructors();
         ParameterInfo[]   parameters      = constructorInfo[0].GetParameters();
 
-        object[]? objects = null;
-
-        if (parameters.Length > 0)
+        if (parameters.Length <= 0)
         {
-            objects = new object[parameters.Length];
+            return constructorInfo[0].Invoke(null);
+        }
 
-            for (var i = 0; i < objects.Length; i++)
-            {
-                Type parameterType = parameters[i].ParameterType;
-                objects[i] = GetInstance(parameterType);
-            }
+        var objects = new object[parameters.Length];
+
+        for (var i = 0; i < objects.Length; i++)
+        {
+            Type parameterType = parameters[i].ParameterType;
+            objects[i] = GetInstance(parameterType);
         }
 
         return constructorInfo[0].Invoke(objects);

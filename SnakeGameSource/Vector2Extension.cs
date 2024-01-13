@@ -11,4 +11,12 @@ public static class Vector2Extension
 
         return vector;
     }
+
+    public static Vector2 Abs(this Vector2 vector)
+    {
+        vector.X = float.Abs(vector.X);
+        vector.Y = float.Abs(vector.Y);
+
+        return vector;
+    }
 }

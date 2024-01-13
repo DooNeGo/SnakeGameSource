@@ -258,7 +258,7 @@ internal class Snake : IMovable, IEnumerable<GameObject>
                 if (Scale.X + effect.Value > 0.5f
                  && Scale.Y + effect.Value > 0.5f)
                 {
-                    Scale.Add(effect.Value);
+                    Scale += new Vector2(effect.Value);
                 }
 
                 break;

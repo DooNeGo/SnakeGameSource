@@ -24,8 +24,11 @@ internal class FoodCreator
         textureConfig.Name  = TextureName.Food;
         textureConfig.Color = Color.Red;
 
-        Food.AddComponent<FoodParametersRandom>().Grid = grid;
-        Food.AddComponent<CircleCollider>();
+        var random = Food.AddComponent<FoodParametersRandom>();
+        random.Grid         = grid;
+        random.FoodLifetime = TimeSpan.FromSeconds(FoodLifeTime);
+
+        Food.AddComponent<SquareCollider>();
         Food.AddComponent<Effect>();
     }
 

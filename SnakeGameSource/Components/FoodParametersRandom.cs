@@ -10,9 +10,11 @@ public class FoodParametersRandom : Component
     private readonly Effect[] _effects      = new Effect[5];
     private readonly Random   _random       = new();
 
+    private int _lastEffectIndex;
+
     public Grid? Grid { get; set; }
 
-    public TimeSpan FoodLifetime { get; } = TimeSpan.FromSeconds(7);
+    public TimeSpan FoodLifetime { get; set; }
 
     public TimeSpan RemainFoodLifetime { get; private set; }
 
@@ -27,24 +29,24 @@ public class FoodParametersRandom : Component
         _commonEffect.Value = 1;
 
         _effects[0].Type   = EffectType.Speed;
-        _effects[0].Value  = 0.4f;
+        _effects[0].Value  = 0.3f;
         _effects[0].Chance = 10;
 
         _effects[1].Type   = EffectType.Speed;
-        _effects[1].Value  = 0.4f;
+        _effects[1].Value  = 0.3f;
         _effects[1].Chance = 10;
 
         _effects[2].Type   = EffectType.Scale;
-        _effects[2].Value  = 0.05f;
+        _effects[2].Value  = 0.08f;
         _effects[2].Chance = 10;
 
         _effects[3].Type   = EffectType.Scale;
-        _effects[3].Value  = -0.05f;
+        _effects[3].Value  = -0.08f;
         _effects[3].Chance = 10;
 
         _effects[4].Type   = EffectType.Length;
         _effects[4].Value  = -1;
-        _effects[4].Chance = 1;
+        _effects[4].Chance = 5;
     }
 
     private void Update(TimeSpan delta)
@@ -75,11 +77,16 @@ public class FoodParametersRandom : Component
 
     private void RandEffect()
     {
-        int effectIndex  = _random.Next(0, _effects.Length);
         int effectChance = _random.Next(0, 101);
-        SetEffect(effectChance <= _effects[effectIndex].Chance * _effects.Length
-                      ? _effects[effectIndex]
-                      : _commonEffect);
+        SetEffect(effectChance <= _effects[_lastEffectIndex].Chance ? _effects[_lastEffectIndex] : _commonEffect);
+        if (_lastEffectIndex + 1 == _effects.Length - 1)
+        {
+            _lastEffectIndex = 0;
+        }
+        else
+        {
+            _lastEffectIndex++;
+        }
     }
 
     private void SetEffect(Effect effect)
@@ -111,6 +118,7 @@ public class FoodParametersRandom : Component
 
         random.Grid               = Grid;
         random.RemainFoodLifetime = RemainFoodLifetime;
+        random.FoodLifetime       = FoodLifetime;
 
         return true;
     }

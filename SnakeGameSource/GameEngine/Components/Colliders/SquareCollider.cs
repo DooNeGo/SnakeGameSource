@@ -4,14 +4,35 @@ namespace SnakeGameSource.GameEngine.Components.Colliders;
 
 public class SquareCollider : Collider
 {
+    private Transform _transform;
+
+    public Vector2 Scale { get; set; } = Vector2.One;
+
+    private void Awake()
+    {
+        _transform = GetComponent<Transform>();
+    }
+
     public override float GetDistanceToEdge(Vector2 position)
     {
-        Vector2 vectorToCollider = Vector2.Normalize(GetComponent<Transform>().Position - position);
-        vectorToCollider = new Vector2(MathF.Abs(vectorToCollider.X), MathF.Abs(vectorToCollider.Y));
-        Vector2 unitVector        = vectorToCollider.X > vectorToCollider.Y ? Vector2.UnitX : Vector2.UnitY;
-        float   cosBetweenVectors = Vector2.Dot(unitVector, vectorToCollider);
+        Vector2 vectorToCollider = Vector2.Normalize(_transform.Position - position).Abs();
+        Vector2 unitVector;
+        float   sideLength;
 
-        return GetComponent<Transform>().Scale.X / 2 / cosBetweenVectors;
+        if (vectorToCollider.X > vectorToCollider.Y)
+        {
+            unitVector = Vector2.UnitX;
+            sideLength = _transform.Scale.X * Scale.X;
+        }
+        else
+        {
+            unitVector = Vector2.UnitY;
+            sideLength = _transform.Scale.Y * Scale.Y;
+        }
+
+        float cosBetweenVectors = Vector2.Dot(unitVector, vectorToCollider);
+
+        return sideLength / 2 / cosBetweenVectors;
     }
 
     public override bool TryCopyTo(Component component)
