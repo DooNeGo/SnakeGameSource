@@ -16,8 +16,8 @@ internal class FoodCreator
     {
         Food = new GameObject();
 
-        var transform = Food.Transform;
-        transform.Scale    = _foodScale;
+        Transform transform = Food.Transform;
+        transform.Scale = _foodScale;
 
         var textureConfig = Food.AddComponent<TextureConfig>();
         textureConfig.Name  = TextureName.Food;

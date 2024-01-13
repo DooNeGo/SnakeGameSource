@@ -61,8 +61,7 @@ internal class CollisionHandler(Scene scene) : ICollisionHandler
     {
         foreach (Component component in target.GetComponents())
         {
-            MethodInvoker.TryInvokeMethod(component, CollisionMethodName, [typeof(GameObject)],
-                                          [gameObject]);
+            MethodInvoker.TryInvokeMethod(component, CollisionMethodName, [typeof(GameObject)], [gameObject]);
         }
     }
 }

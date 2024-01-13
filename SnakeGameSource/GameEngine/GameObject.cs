@@ -102,12 +102,9 @@ public sealed class GameObject
 
     public Component? GetComponent(Type type)
     {
-        if (_components.TryGetValue(type, out Component? component))
-        {
-            return component;
-        }
-
-        return _components.Values.FirstOrDefault(type.IsInstanceOfType);
+        return _components.TryGetValue(type, out Component? component)
+            ? component
+            : _components.Values.FirstOrDefault(type.IsInstanceOfType);
     }
 
     public bool TryGetComponent(Type type, [NotNullWhen(true)] out Component? component)
@@ -128,11 +125,10 @@ public sealed class GameObject
     public GameObject Clone()
     {
         GameObject gameObject = new(Name);
-        Dictionary<Type, Component>.ValueCollection values = _components.Values;
 
         foreach (Component component in _components.Values)
         {
-            Component cloneComponent = component.GetType() != typeof(Transform) 
+            Component cloneComponent = component.GetType() != typeof(Transform)
                 ? gameObject.AddComponent(component.GetType())
                 : gameObject.Transform;
             MethodInvoker.TryInvokeMethod(component, TryCopyToMethodName, [typeof(Component)], [cloneComponent]);

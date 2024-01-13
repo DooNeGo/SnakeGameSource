@@ -37,7 +37,7 @@ public class Input
         }
         else
         {
-            _pressedKey = default;
+            _pressedKey = default(Keys);
         }
     }
 
@@ -50,7 +50,7 @@ public class Input
         }
         else
         {
-            _gesture = default;
+            _gesture = default(GestureSample);
         }
     }
 

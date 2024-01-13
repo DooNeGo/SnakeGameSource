@@ -33,7 +33,7 @@ internal class Snake : IMovable, IEnumerable<GameObject>
         {
             GameObject snakePart = i is 0 ? new GameObject("Snake head") : new GameObject();
 
-            var transform = snakePart.Transform;
+            Transform transform = snakePart.Transform;
             transform.Position = snakeConfig.StartPosition - Direction * Scale * i;
             transform.Scale    = Scale;
 
@@ -130,8 +130,8 @@ internal class Snake : IMovable, IEnumerable<GameObject>
 
         for (var i = 1; i < _snakeParts.Count; i++)
         {
-            var transform1 = _snakeParts[i].Transform;
-            var transform2 = _snakeParts[i - 1].Transform;
+            Transform transform1 = _snakeParts[i].Transform;
+            Transform transform2 = _snakeParts[i - 1].Transform;
 
             offsets[i] =  transform2.Position - transform1.Position;
             offsets[i] /= Scale;
@@ -192,7 +192,7 @@ internal class Snake : IMovable, IEnumerable<GameObject>
     {
         foreach (GameObject gameObject in _snakeParts)
         {
-            var        transform = gameObject.Transform;
+            Transform  transform = gameObject.Transform;
             Quaternion rotation  = transform.Rotation;
             transform.Rotation = rotation;
         }
@@ -223,8 +223,8 @@ internal class Snake : IMovable, IEnumerable<GameObject>
 
     private void UpdateProjectedTransform(int snakePartIndex)
     {
-        var transform1 = _snakeParts[snakePartIndex].Transform;
-        var transform2 = _projectedSnakeParts[snakePartIndex].Transform;
+        Transform transform1 = _snakeParts[snakePartIndex].Transform;
+        Transform transform2 = _projectedSnakeParts[snakePartIndex].Transform;
 
         transform1.TryCopyTo(transform2);
         transform2.Position = _grid.Project(transform2.Position);
