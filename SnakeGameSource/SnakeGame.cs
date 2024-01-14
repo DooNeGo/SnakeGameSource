@@ -71,6 +71,10 @@ public class SnakeGame : Game2D
         {
             TimeRatio = TimeRatio is 1 ? 0 : 1;
         }
+        else
+        {
+            TimeRatio = 1;
+        }
     }
 
     private void OnSnakeDie()
