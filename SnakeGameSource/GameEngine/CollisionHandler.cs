@@ -30,38 +30,53 @@ internal class CollisionHandler(Scene scene) : ICollisionHandler
         }
     }
 
-    private void CheckCollisions()
+    private static void CheckCollision(Collider collider1, Collider collider2)
     {
-        for (var i = 0; i < _colliders.Count - 1; i++)
+        Transform transform1 = collider1.Parent!.Transform;
+        Transform transform2 = collider2.Parent!.Transform;
+
+        float distanceToEdge1 = collider1.GetDistanceToEdge(transform2.Position);
+        float distanceToEdge2 = collider2.GetDistanceToEdge(transform1.Position);
+        float distanceBetween = Vector2.Distance(transform1.Position, transform2.Position);
+
+        if (!(distanceToEdge1 + distanceToEdge2 >= distanceBetween))
         {
-            Collider  collider1  = _colliders[i];
-            Transform transform1 = _colliders[i].Parent!.Transform;
-
-            for (int j = i + 1; j < _colliders.Count; j++)
-            {
-                Collider  collider2  = _colliders[j];
-                Transform transform2 = _colliders[j].Parent!.Transform;
-
-                float distanceToEdge1 = collider1.GetDistanceToEdge(transform2.Position);
-                float distanceToEdge2 = collider2.GetDistanceToEdge(transform1.Position);
-                float distanceBetween = Vector2.Distance(transform1.Position, transform2.Position);
-
-                if (!(distanceToEdge1 + distanceToEdge2 >= distanceBetween))
-                {
-                    continue;
-                }
-
-                TryInvokeCollision(collider1.Parent!, collider2.Parent!);
-                TryInvokeCollision(collider2.Parent!, collider1.Parent!);
-            }
+            return;
         }
+
+        TryInvokeCollision(collider1.Parent!, collider2.Parent!);
     }
 
-    private static void TryInvokeCollision(GameObject target, GameObject gameObject)
+    private void CheckCollisions()
     {
-        foreach (Component component in target.GetComponents())
+        var tasks = new Task[_colliders.Count - 1];
+
+        for (var i = 0; i < _colliders.Count - 1; i++)
         {
-            MethodInvoker.TryInvokeMethod(component, CollisionMethodName, [typeof(GameObject)], [gameObject]);
+            int index = i;
+
+            tasks[i] = Task.Run(() =>
+            {
+                for (int j = index + 1; j < _colliders.Count; j++)
+                {
+                    CheckCollision(_colliders[index], _colliders[j]);
+                }
+            });
+        }
+
+        Task.WaitAll(tasks);
+    }
+
+    private static void TryInvokeCollision(GameObject gameObject1, GameObject gameObject2)
+    {
+        foreach (Component component in gameObject1.GetComponents())
+        {
+            MethodInvoker.TryInvokeMethod(component, CollisionMethodName, [typeof(GameObject)], [gameObject2]);
+        }
+
+        foreach (Component component in gameObject2.GetComponents())
+        {
+            MethodInvoker.TryInvokeMethod(component, CollisionMethodName, [typeof(GameObject)], [gameObject1]);
         }
     }
 }

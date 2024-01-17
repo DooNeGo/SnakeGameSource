@@ -47,12 +47,8 @@ public sealed class GameObject
         CheckComponentType(type);
 
         ConstructorInfo? constructor =
-            type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, []);
-
-        if (constructor is null)
-        {
-            throw new NullReferenceException("Component must have parameterless constructor");
-        }
+            type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, []) 
+            ?? throw new NullReferenceException("Component must have parameterless constructor");
 
         var component = (Component)constructor.Invoke(null);
 

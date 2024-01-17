@@ -33,7 +33,7 @@ public class FoodParametersRandom : Component
         _effects[0].Chance = 10;
 
         _effects[1].Type   = EffectType.Speed;
-        _effects[1].Value  = 0.3f;
+        _effects[1].Value  = -0.3f;
         _effects[1].Chance = 10;
 
         _effects[2].Type   = EffectType.Scale;
@@ -101,7 +101,7 @@ public class FoodParametersRandom : Component
             throw new NullReferenceException(nameof(Grid) + "must be not null");
         }
 
-        var transform = GetComponent<Transform>();
+        Transform transform = Parent!.Transform;
         do
         {
             transform.Position = new Vector2(_random.Next(1, Grid.Size.X - 1), _random.Next(1, Grid.Size.Y - 1));

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SnakeGameSource.GameEngine;
 
@@ -80,5 +81,12 @@ public class Input
         }
 
         return moveDirection;
+    }
+
+    public bool TryGetMoveDirection([NotNullWhen(true)] out Vector2? moveDirection)
+    {
+        moveDirection = GetMoveDirection();
+
+        return moveDirection is not null;
     }
 }

@@ -44,6 +44,9 @@ public class SnakeGame : Game2D
 
     private void OnUpdating(GameTime gameTime)
     {
+        //var snake = Container.GetInstance<Snake>();
+        //var foodCreator = Container.GetInstance<FoodCreator>();
+        //Vector2 direction = foodCreator.Food.Transform.Position - snake.Position;
         _physicsMovement.Move(Input.GetMoveDirection(), gameTime.ElapsedGameTime);
         BackgroundColor =  Color.Lerp(BackgroundColors[0], BackgroundColors[1], MathF.Cos(_value));
         _value          += 0.005f * TimeRatio;
@@ -62,6 +65,14 @@ public class SnakeGame : Game2D
         else if (key is Keys.Up or Keys.Down or Keys.Left or Keys.Right)
         {
             TimeRatio = 1;
+        }
+        else if (key is Keys.OemPlus)
+        {
+            TimeRatio++;
+        }
+        else if (key is Keys.OemMinus)
+        {
+            TimeRatio--;
         }
     }
 

@@ -63,8 +63,16 @@ internal class PhysicsMovement
 
     private float GetRotateAngle()
     {
-        float angelBetween = MathF.Acos(Vector2.Dot(_smoothDirection, _lastDirection));
-        float angelPlusOne = MathF.Acos(Vector2.Dot(GetRotatedVector(_smoothDirection, 1), _lastDirection));
+        float cos = Vector2.Dot(_smoothDirection, _lastDirection);
+        float cos1 = Vector2.Dot(GetRotatedVector(_smoothDirection, 1), _lastDirection);
+
+        cos = float.Min(1, cos);
+        cos = float.Max(-1, cos);
+        cos1 = float.Min(1, cos1);
+        cos1 = float.Max(-1, cos1);
+
+        float angelBetween = MathF.Acos(cos);
+        float angelPlusOne = MathF.Acos(cos1);
 
         angelBetween *= 180f / MathF.PI;
         angelPlusOne *= 180f / MathF.PI;
