@@ -8,34 +8,39 @@ public static class MethodInvoker
 
     private static readonly Dictionary<string, MethodsCache> MethodsCaches = [];
 
+    private static readonly object Locker1 = new();
+
     public static void TryInvokeMethod(object obj, string methodName, Type[] paramsTypes, object?[]? parameters)
     {
-        MethodsCache cache = MethodsCaches.TryGetValue(methodName, out MethodsCache? value)
-            ? value
-            : MethodsCaches[methodName] = new MethodsCache();
-
         Type type = obj.GetType();
 
-        if (cache.WithoutMethod.Contains(type))
+        //lock (Locker1)
         {
-            return;
-        }
-
-        if (!cache.Methods.TryGetValue(type, out MethodInfo? method))
-        {
-            method = type.GetMethod(methodName, Flags, paramsTypes);
-
-            if (method is null)
+            MethodsCache cache = MethodsCaches.TryGetValue(methodName, out MethodsCache? value)
+                ? value
+                : MethodsCaches[methodName] = new MethodsCache();
+            
+            if (cache.WithoutMethod.Contains(type))
             {
-                cache.WithoutMethod.Add(type);
-
                 return;
             }
 
-            cache.Methods[type] = method;
-        }
+            if (!cache.Methods.TryGetValue(type, out MethodInfo? method))
+            {
+                method = type.GetMethod(methodName, Flags, paramsTypes);
 
-        method.Invoke(obj, parameters);
+                if (method is null)
+                {
+                    cache.WithoutMethod.Add(type);
+
+                    return;
+                }
+
+                cache.Methods[type] = method;
+            }
+
+            method.Invoke(obj, parameters);
+        }
     }
 
     private class MethodsCache

@@ -7,6 +7,9 @@ public class Scene : IEnumerable<GameObject>
 {
     private const string UpdateMethodName = "Update";
 
+    private static readonly Type[]    InputType  = [typeof(TimeSpan)];
+    private static readonly object?[] InputDelta = new object?[1];
+
     private readonly List<IEnumerable<GameObject>> _compositeObjects = [];
     private readonly List<GameObject>              _gameObjects      = [];
 
@@ -39,12 +42,32 @@ public class Scene : IEnumerable<GameObject>
         InvokeUpdateMethods(delta);
     }
 
+    private static void InvokeUpdateMethod(GameObject gameObject)
+    {
+        IReadOnlyList<Component> components = gameObject.GetComponents();
+
+        for (var j = 0; j < components.Count; j++)
+        {
+            MethodInvoker.TryInvokeMethod(components[j], UpdateMethodName, InputType, InputDelta);
+        }
+    }
+
     private void InvokeUpdateMethods(TimeSpan delta)
     {
-        foreach (Component component in _gameObjects.SelectMany(gameObject => gameObject.GetComponents()))
+        var tasks = new Task[_gameObjects.Count];
+        InputDelta[0] = delta;
+        
+        for (var i = 0; i < _gameObjects.Count; i++)
         {
-            MethodInvoker.TryInvokeMethod(component, UpdateMethodName, [typeof(TimeSpan)], [delta]);
+            int index = i;
+
+            tasks[i] = Task.Run(() =>
+            {
+                InvokeUpdateMethod(_gameObjects[index]);
+            });
         }
+        
+        Task.WaitAll(tasks);
     }
 
     private void UpdateGameObjectsList()

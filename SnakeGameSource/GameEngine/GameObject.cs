@@ -15,6 +15,7 @@ public sealed class GameObject
                                                               "There is no Parent property in Component class");
 
     private readonly Dictionary<Type, Component> _components = [];
+    private readonly List<Component>             _list       = [];
 
     public GameObject(string? name = null)
     {
@@ -37,6 +38,7 @@ public sealed class GameObject
 
         T component = new() { Parent = this };
         _components[type] = component;
+        _list.Add(component);
         MethodInvoker.TryInvokeMethod(component, AwakeMethodName, [], null);
 
         return component;
@@ -46,7 +48,7 @@ public sealed class GameObject
     {
         CheckComponentType(type);
 
-        ConstructorInfo? constructor =
+        ConstructorInfo constructor =
             type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, []) 
             ?? throw new NullReferenceException("Component must have parameterless constructor");
 
@@ -54,6 +56,7 @@ public sealed class GameObject
 
         ParentProperty.SetValue(component, this);
         _components[type] = component;
+        _list.Add(component);
         MethodInvoker.TryInvokeMethod(component, AwakeMethodName, [], null);
 
         return component;
@@ -89,6 +92,7 @@ public sealed class GameObject
         }
 
         _components.Remove(component.GetType());
+        _list.Remove(component);
     }
 
     public T? GetComponent<T>() where T : Component
@@ -133,8 +137,8 @@ public sealed class GameObject
         return gameObject;
     }
 
-    public IEnumerable<Component> GetComponents()
+    internal IReadOnlyList<Component> GetComponents()
     {
-        return _components.Values;
+        return _list;
     }
 }
