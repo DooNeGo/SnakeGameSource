@@ -3,10 +3,11 @@ using SnakeGameSource.Components;
 using SnakeGameSource.GameEngine;
 using SnakeGameSource.GameEngine.Components;
 using SnakeGameSource.GameEngine.Components.Colliders;
+using SnakeGameSource.Model.Abstractions;
 
 namespace SnakeGameSource.Model;
 
-internal class FoodCreator
+internal class FoodCreator : IFoodCreator
 {
     private const int FoodLifeTime = 7;
 

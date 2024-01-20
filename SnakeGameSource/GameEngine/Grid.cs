@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using SnakeGameSource.GameEngine.Abstractions;
 using SnakeGameSource.GameEngine.Components;
 
 namespace SnakeGameSource.GameEngine;
@@ -9,7 +10,7 @@ public class Grid
 {
     private bool[,] _cells = new bool[0, 0];
 
-    public Grid(GameWindow window, Scene scene)
+    public Grid(GameWindow window, IScene scene)
     {
         ActiveScene = scene;
         InitializeGrid(window);
@@ -23,7 +24,7 @@ public class Grid
 
     public Vector2 Center { get; private set; }
 
-    public Scene ActiveScene { get; set; }
+    public IScene ActiveScene { get; set; }
 
     private void OnClientSizeChanged(object? sender, EventArgs e)
     {

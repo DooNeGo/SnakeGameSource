@@ -3,10 +3,11 @@ using Microsoft.Xna.Framework;
 using SnakeGameSource.Components;
 using SnakeGameSource.GameEngine;
 using SnakeGameSource.GameEngine.Components;
+using SnakeGameSource.Model.Abstractions;
 
 namespace SnakeGameSource.Model;
 
-internal class Snake : IMovable, IEnumerable<GameObject>
+internal class Snake : ISnake
 {
     private readonly Grid _grid;
 

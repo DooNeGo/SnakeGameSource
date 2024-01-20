@@ -5,21 +5,13 @@ using SnakeGameSource.GameEngine.Components.Colliders;
 
 namespace SnakeGameSource.GameEngine;
 
-internal class CollisionHandler : ICollisionHandler
+internal class CollisionHandler(Scene scene) : ICollisionHandler
 {
     private const string CollisionMethodName = "OnCollisionEnter";
 
     private static readonly Type[] InputType = [typeof(GameObject)];
 
     private readonly List<Collider> _colliders = [];
-    private readonly object?[]      _input;
-    private readonly Scene          _scene;
-
-    public CollisionHandler(Scene scene)
-    {
-        _scene = scene;
-        _input = new object?[ThreadPool.ThreadCount];
-    }
 
     public void Update()
     {
@@ -31,7 +23,7 @@ internal class CollisionHandler : ICollisionHandler
     {
         _colliders.Clear();
 
-        foreach (GameObject gameObject in _scene)
+        foreach (GameObject gameObject in scene)
         {
             if (gameObject.TryGetComponent(out Collider? collider))
             {

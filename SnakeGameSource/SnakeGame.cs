@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
 using SnakeGameSource.GameEngine;
 using SnakeGameSource.Model;
+using SnakeGameSource.Model.Abstractions;
 
 namespace SnakeGameSource;
 
@@ -26,16 +27,16 @@ public class SnakeGame : Game2D
         Input.KeyDown += OnKeyDown;
         Input.Gesture += OnGesture;
 
-        Container.AddSingleton<Snake>()
+        Container.AddSingleton<ISnake, Snake>()
                  .AddTransient<SnakeConfig>()
                  .AddSingleton<IMovable, Snake>()
-                 .AddSingleton<FoodCreator>()
+                 .AddSingleton<IFoodCreator, FoodCreator>()
                  .AddSingleton<PhysicsMovement>()
                  .Build();
 
         _physicsMovement = Container.GetInstance<PhysicsMovement>();
-        var snake       = Container.GetInstance<Snake>();
-        var foodCreator = Container.GetInstance<FoodCreator>();
+        var snake       = Container.GetInstance<ISnake>();
+        var foodCreator = Container.GetInstance<IFoodCreator>();
         Container.GetInstance<Scene>().Add(snake, [foodCreator.Food]);
         snake.Die += OnSnakeDie;
 
@@ -47,7 +48,8 @@ public class SnakeGame : Game2D
         //var snake = Container.GetInstance<Snake>();
         //var foodCreator = Container.GetInstance<FoodCreator>();
         //Vector2 direction = foodCreator.Food.Transform.Position - snake.Position;
-        _physicsMovement.Move(Input.GetMoveDirection(), gameTime.ElapsedGameTime);
+        //direction.Normalize();
+        _physicsMovement.Update(gameTime.ElapsedGameTime);
         BackgroundColor =  Color.Lerp(BackgroundColors[0], BackgroundColors[1], MathF.Cos(_value));
         _value          += 0.005f * TimeRatio;
     }

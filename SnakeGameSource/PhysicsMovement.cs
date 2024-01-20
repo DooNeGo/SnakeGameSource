@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using SnakeGameSource.GameEngine;
 
 namespace SnakeGameSource;
 
@@ -20,29 +21,36 @@ internal interface IMovable
 internal class PhysicsMovement
 {
     private readonly IMovable _snake;
+    private readonly Input _input;
 
     private Vector2 _lastDirection;
     private Vector2 _smoothDirection;
 
-    public PhysicsMovement(IMovable snake)
+    public PhysicsMovement(IMovable snake, Input input)
     {
+        _input           = input;
         _snake           = snake;
         _smoothDirection = _snake.Direction;
         _lastDirection   = _snake.Direction;
     }
 
-    public void Move(Vector2? direction, TimeSpan delta)
+    public void Update(TimeSpan delta)
     {
-        if (direction is not null
+        if (_input.TryGetMoveDirection(out Vector2? direction)
          && direction != Vector2.Zero)
         {
-            _lastDirection = Vector2.Normalize(direction.Value);
+            _lastDirection = direction.Value;
             float slewingAngle = (float)delta.TotalSeconds
                                * _snake.SlewingSpeed
                                / ((_snake.Scale.X + _snake.Scale.Y) / 2);
             RotateDirection(slewingAngle);
         }
 
+        Move(delta);
+    }
+
+    private void Move(TimeSpan delta)
+    {
         Vector2 offset = (float)delta.TotalSeconds * _snake.MoveSpeed * _smoothDirection;
         _snake.MoveTo(_snake.Position + offset);
     }

@@ -1,14 +1,17 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
+using SnakeGameSource.GameEngine.Abstractions;
 using System.Diagnostics.CodeAnalysis;
 
 namespace SnakeGameSource.GameEngine;
 
-public class Input
+public class Input(Grid grid) : IInput
 {
     private GestureSample _gesture;
-    private Keys          _pressedKey;
+    private Keys _pressedKey;
+
+    public float Sensitivity { get; set; } = 0.1f;
 
     public void Update()
     {
@@ -51,33 +54,39 @@ public class Input
         }
         else
         {
-            _gesture = default(GestureSample);
+            _gesture = new GestureSample();
         }
     }
 
     public Vector2? GetMoveDirection()
     {
-        Vector2? moveDirection;
+        Vector2? moveDirection = null;
 
         if (_pressedKey is not default(Keys))
         {
             moveDirection = _pressedKey switch
             {
-                Keys.Up    => -Vector2.UnitY,
-                Keys.Down  => Vector2.UnitY,
-                Keys.Left  => -Vector2.UnitX,
+                Keys.Up => -Vector2.UnitY,
+                Keys.Down => Vector2.UnitY,
+                Keys.Left => -Vector2.UnitX,
                 Keys.Right => Vector2.UnitX,
-                _          => null
+                _ => null
             };
         }
-        else
+        else if (!_gesture.Equals(new GestureSample()))
         {
-            moveDirection = _gesture.GestureType switch
+            Vector2 delta = _gesture.Delta / grid.CellSize.ToVector2() * Sensitivity;
+
+            if (float.Abs(delta.X) <= 1
+             && float.Abs(delta.Y) <= 1)
             {
-                GestureType.VerticalDrag   => _gesture.Delta.Y > 0 ? Vector2.UnitY : -Vector2.UnitY,
-                GestureType.HorizontalDrag => _gesture.Delta.X > 0 ? Vector2.UnitX : -Vector2.UnitX,
-                _                          => null
-            };
+                moveDirection = delta;
+            }
+            else
+            {
+                moveDirection = Vector2.Normalize(delta);
+            }
+
         }
 
         return moveDirection;

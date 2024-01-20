@@ -18,11 +18,11 @@ public class Game2D : Game
         IsMouseVisible        = true;
     }
 
-    protected Input Input { get; private set; }
+    protected IInput Input { get; private set; }
 
     protected DiContainer Container { get; } = new();
 
-    protected Scene Scene { get; set; }
+    protected IScene Scene { get; private set; }
 
     protected Color BackgroundColor { get; set; }
 
@@ -44,22 +44,21 @@ public class Game2D : Game
 
     protected override void Initialize()
     {
-        Container.AddSingleton<Input>()
+        Container.AddSingleton<IInput, Input>()
                  .AddSingleton<SpriteDrawer>()
                  .AddSingleton<ICollisionHandler, CollisionHandler>()
-                 .AddSingleton<Scene>()
+                 .AddSingleton<IScene, Scene>()
                  .AddSingleton<Grid>()
                  .AddSingleton<SpriteBatch>()
                  .AddSingleton(Window)
                  .AddSingleton(Content)
                  .AddSingleton(GraphicsDevice)
-                 .AddSingleton(Container)
-                 .Build();
+                 .AddSingleton(Container);
 
         _collisionHandler = Container.GetInstance<ICollisionHandler>();
         _drawer           = Container.GetInstance<SpriteDrawer>();
-        Input             = Container.GetInstance<Input>();
-        Scene             = Container.GetInstance<Scene>();
+        Input             = Container.GetInstance<IInput>();
+        Scene             = Container.GetInstance<IScene>();
         Grid              = Container.GetInstance<Grid>();
 
         Initializing?.Invoke();
