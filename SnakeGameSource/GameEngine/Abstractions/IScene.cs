@@ -1,10 +1,12 @@
-﻿namespace SnakeGameSource.GameEngine.Abstractions
+﻿namespace SnakeGameSource.GameEngine.Abstractions;
+
+public interface IScene
 {
-    public interface IScene
-    {
-        public void Add(params IEnumerable<GameObject>[] compositeObjects);
-        public void Remove(params IEnumerable<GameObject>[] compositeObjects);
-        public void Update(TimeSpan delta);
-        public IEnumerable<GameObject> GetGameObjects();
-    }
+    public void Add(params IEnumerable<GameObject>[] compositeObjects);
+
+    public void Remove(params IEnumerable<GameObject>[] compositeObjects);
+
+    public void Update(TimeSpan delta);
+
+    public IEnumerable<GameObject> GetGameObjects();
 }

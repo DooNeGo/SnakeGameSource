@@ -6,24 +6,24 @@ public class MethodInvoker
 {
     private const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
 
-    private readonly Dictionary<string, MethodsCache> MethodsCaches = [];
+    private readonly object _locker1 = new();
 
-    private readonly object Locker1 = new();
+    private readonly Dictionary<string, MethodsCache> _methodsCaches = [];
 
     public void TryInvokeMethod(object obj, string methodName, Type[] paramsTypes, object?[]? parameters)
     {
-        Type type = obj.GetType();
+        Type          type = obj.GetType();
         MethodsCache? cache;
 
         //lock (Locker1)
         {
-            if (!MethodsCaches.TryGetValue(methodName, out cache))
+            if (!_methodsCaches.TryGetValue(methodName, out cache))
             {
                 cache = new MethodsCache();
-                MethodsCaches.Add(methodName, cache);
+                _methodsCaches.Add(methodName, cache);
             }
         }
-            
+
         if (cache.WithoutMethod.Contains(type))
         {
             return;

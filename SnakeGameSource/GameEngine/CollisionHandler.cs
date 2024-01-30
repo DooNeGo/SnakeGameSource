@@ -28,22 +28,12 @@ public class CollisionHandler(IScene scene) : ICollisionHandler
             throw new ArgumentException($"{nameof(colliderType)} must be an instance of 'Collider' class");
         }
 
-        GameObject gameObject = new();
+        GameObject gameObject = new() { Transform = { Position = position } };
 
-        Collider collider1 = (Collider)gameObject.AddComponent(colliderType);
+        var collider1 = (Collider)gameObject.AddComponent(colliderType);
         collider1.Scale = scale;
 
-        gameObject.Transform.Position = position;
-
-        foreach (Collider collider2 in _sceneColliders)
-        {
-            if (IsCollisionBetween(collider1, collider2))
-            {
-                return true;
-            }
-        }
-
-        return false;
+        return _sceneColliders.Any(collider2 => IsCollisionBetween(collider1, collider2));
     }
 
     public bool IsCollidingWithAnyCollider<T>(Vector2 position, Vector2 scale) where T : Collider, new()
@@ -82,15 +72,15 @@ public class CollisionHandler(IScene scene) : ICollisionHandler
     private void CheckCollisions()
     {
         var tasks = new Task[_sceneColliders.Count - 1];
-        
+
         for (var i = 0; i < _sceneColliders.Count - 1; i++)
         {
             int index = i;
-            
+
             tasks[i] = Task.Run(() =>
             {
                 var temp = new object?[1];
-                
+
                 for (int j = index + 1; j < _sceneColliders.Count; j++)
                 {
                     Collider collider1 = _sceneColliders[index];

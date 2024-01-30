@@ -7,12 +7,12 @@ public class Scene : IScene
 {
     private const string UpdateMethodName = "Update";
 
-    private static readonly Type[] InputType      = [typeof(TimeSpan)];
-    private static readonly object?[] InputDelta  = new object?[1];
-    private static readonly MethodInvoker Invoker = new();
+    private static readonly Type[]        InputType  = [typeof(TimeSpan)];
+    private static readonly object?[]     InputDelta = new object?[1];
+    private static readonly MethodInvoker Invoker    = new();
 
     private readonly List<IEnumerable<GameObject>> _compositeObjects = [];
-    private readonly List<GameObject> _gameObjects                   = [];
+    private readonly List<GameObject>              _gameObjects      = [];
 
     public void Add(params IEnumerable<GameObject>[] compositeObjects)
     {
@@ -31,6 +31,11 @@ public class Scene : IScene
     {
         UpdateGameObjectsList();
         InvokeUpdateMethods(delta);
+    }
+
+    public IEnumerable<GameObject> GetGameObjects()
+    {
+        return _gameObjects;
     }
 
     private static void InvokeUpdateMethod(GameObject gameObject)
@@ -52,10 +57,7 @@ public class Scene : IScene
         {
             int index = i;
 
-            tasks[i] = Task.Run(() =>
-            {
-                InvokeUpdateMethod(_gameObjects[index]);
-            });
+            tasks[i] = Task.Run(() => { InvokeUpdateMethod(_gameObjects[index]); });
         }
 
         Task.WaitAll(tasks);
@@ -69,10 +71,5 @@ public class Scene : IScene
         {
             _gameObjects.AddRange(compositeObject);
         }
-    }
-
-    public IEnumerable<GameObject> GetGameObjects()
-    {
-        return _gameObjects;
     }
 }

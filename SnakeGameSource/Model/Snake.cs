@@ -16,10 +16,10 @@ internal class Snake : ISnake
     private readonly List<GameObject> _snakeParts          = [];
 
     private Vector2[] _directions;
-    private Vector2   _scale = new(1f);
 
-    private float _minSpeed;
-    private float _maxSpeed;
+    private float   _maxSpeed;
+    private float   _minSpeed;
+    private Vector2 _scale = new(1f);
 
     public Snake(SnakeConfig snakeConfig, IGrid grid)
     {
@@ -66,12 +66,12 @@ internal class Snake : ISnake
         ProjectedHead.AddComponent<CollisionNotifier>().CollisionEnter += OnCollisionEnter;
     }
 
-    //TODO: Каждые 10 очков смена фона и сделать маленькую надпись скора в углу
-    public int Score { get; private set; }
-
     private GameObject Head => _snakeParts[0];
 
     private GameObject ProjectedHead => _projectedSnakeParts[0];
+
+    //TODO: Каждые 10 очков смена фона и сделать маленькую надпись скора в углу
+    public int Score { get; private set; }
 
     public IEnumerator<GameObject> GetEnumerator()
     {
@@ -241,10 +241,8 @@ internal class Snake : ISnake
         {
             ApplyEffect(effect);
         }
-        else
-        {
-            //Die?.Invoke();
-        }
+
+        //Die?.Invoke();
     }
 
     private void ApplyEffect(Effect effect)

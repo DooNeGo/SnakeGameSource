@@ -10,9 +10,10 @@ public sealed class GameObject
     private const string ParentPropertyName  = "Parent";
     private const string AwakeMethodName     = "Awake";
 
-    private static readonly MethodInvoker Invoker        = new();
-    private static readonly Type[]        InputType      = [typeof(Component)];
-    private static readonly PropertyInfo  ParentProperty = typeof(Component).GetProperty(ParentPropertyName)
+    private static readonly MethodInvoker Invoker   = new();
+    private static readonly Type[]        InputType = [typeof(Component)];
+
+    private static readonly PropertyInfo ParentProperty = typeof(Component).GetProperty(ParentPropertyName)
                                                        ?? throw new NullReferenceException(
                                                               "The 'Component' class doesn't contain a parent property");
 
@@ -51,8 +52,8 @@ public sealed class GameObject
         CheckComponentType(type);
 
         ConstructorInfo constructor =
-            type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, []) 
-            ?? throw new NullReferenceException($"The component {type.Name} must have a parameterless constructor");
+            type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, [])
+         ?? throw new NullReferenceException($"The component {type.Name} must have a parameterless constructor");
 
         var component = (Component)constructor.Invoke(null);
 
@@ -116,7 +117,7 @@ public sealed class GameObject
 
         foreach (Component component in _componentsDictionary.Values)
         {
-            Component componentClone = component.GetType() != typeof(Transform) 
+            Component componentClone = component.GetType() != typeof(Transform)
                 ? gameObject.AddComponent(component.GetType())
                 : gameObject.Transform;
             temp[0] = componentClone;

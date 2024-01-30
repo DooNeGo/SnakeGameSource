@@ -18,21 +18,6 @@ public class Grid : IGrid
 
     public Vector2 Center { get; private set; }
 
-    private void OnClientSizeChanged(object? sender, EventArgs e)
-    {
-        if (sender is GameWindow window)
-        {
-            InitializeGrid(window);
-        }
-    }
-
-    private void InitializeGrid(GameWindow window)
-    {
-        CellSize = new Point(window.ClientBounds.Size.X / 15);
-        Size = window.ClientBounds.Size.Divide(CellSize);
-        Center = new Vector2(Size.X / 2f - 1, Size.Y / 2f - 1);
-    }
-
     //TODO: Рассмотреть вариант проекции через матрицу проекций
     public Vector2 Project(Vector2 position)
     {
@@ -54,5 +39,21 @@ public class Grid : IGrid
     public Vector2 GetAbsolutePosition(Vector2 relativePosition)
     {
         return new Vector2(relativePosition.X * CellSize.X, relativePosition.Y * CellSize.Y);
+    }
+
+    private void OnClientSizeChanged(object? sender, EventArgs e)
+    {
+        if (sender is GameWindow window)
+        {
+            InitializeGrid(window);
+        }
+    }
+
+    private void InitializeGrid(GameWindow window)
+    {
+        // TODO: Убрать магическое число
+        CellSize = new Point(window.ClientBounds.Size.X / 15);
+        Size     = window.ClientBounds.Size.Divide(CellSize);
+        Center   = new Vector2(Size.X / 2f - 1, Size.Y / 2f - 1);
     }
 }

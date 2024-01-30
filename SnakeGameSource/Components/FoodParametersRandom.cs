@@ -95,8 +95,7 @@ public class FoodParametersRandom : Component
 
     private void SetEffect(Effect effect)
     {
-        effect.TryCopyTo(GetComponent<Effect>() 
-            ?? throw new NullReferenceException("There is no 'Effect' component"));
+        effect.TryCopyTo(GetComponent<Effect>() ?? throw new NullReferenceException("There is no 'Effect' component"));
     }
 
     private void RandPosition()
@@ -117,8 +116,8 @@ public class FoodParametersRandom : Component
 
         if (TryGetComponent(out Collider? collider))
         {
-            scale *= collider.Scale;
-            colliderType = collider.GetType();
+            scale        *= collider.Scale;
+            colliderType =  collider.GetType();
         }
 
         do

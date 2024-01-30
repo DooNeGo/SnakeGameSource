@@ -57,9 +57,10 @@ public class Game2D : Game
 
         _collisionHandler = Container.GetInstance<ICollisionHandler>();
         _drawer           = Container.GetInstance<SpriteDrawer>();
+
         //Input             = Container.GetInstance<IInput>();
-        Scene             = Container.GetInstance<IScene>();
-        Grid              = Container.GetInstance<IGrid>();
+        Scene = Container.GetInstance<IScene>();
+        Grid  = Container.GetInstance<IGrid>();
 
         Initializing?.Invoke();
 

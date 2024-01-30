@@ -1,22 +1,23 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
 using SnakeGameSource.GameEngine.Abstractions;
 using SnakeGameSource.Model.Abstractions;
-using System.Diagnostics.CodeAnalysis;
 
 namespace SnakeGameSource.GameEngine;
+
 internal class Bot : IInput
 {
+    private readonly IFoodCreator _foodCreator;
     private readonly Input        _input;
     private readonly IMovable     _movable;
-    private readonly IFoodCreator _foodCreator;
 
-    public Bot(ISnake snake, IFoodCreator foodCreator, IGrid grid)
+    public Bot(IMovable movable, IFoodCreator foodCreator, IGrid grid)
     {
-        _movable     = snake;
+        _movable     = movable;
         _foodCreator = foodCreator;
-        _input       = new(grid);
+        _input       = new Input(grid);
 
         _input.KeyDown += p => { KeyDown?.Invoke(p); };
     }
@@ -24,6 +25,7 @@ internal class Bot : IInput
     public float Sensitivity { get; set; } = 1f;
 
     public event Action<GestureSample>? Gesture;
+
     public event Action<Keys>? KeyDown;
 
     public Vector2? GetMoveDirection()

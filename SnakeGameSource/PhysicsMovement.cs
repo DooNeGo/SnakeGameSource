@@ -20,8 +20,8 @@ internal interface IMovable
 
 internal class PhysicsMovement
 {
+    private readonly IInput   _input;
     private readonly IMovable _snake;
-    private readonly IInput _input;
 
     private Vector2 _lastDirection;
     private Vector2 _smoothDirection;
@@ -66,11 +66,11 @@ internal class PhysicsMovement
 
     private float GetRotateAngle()
     {
-        float cos = Vector2.Dot(_smoothDirection, _lastDirection);
+        float cos  = Vector2.Dot(_smoothDirection,           _lastDirection);
         float cos1 = Vector2.Dot(_smoothDirection.Rotate(1), _lastDirection);
 
-        cos = float.Min(1, cos);
-        cos = float.Max(-1, cos);
+        cos  = float.Min(1, cos);
+        cos  = float.Max(-1, cos);
         cos1 = float.Min(1, cos1);
         cos1 = float.Max(-1, cos1);
 

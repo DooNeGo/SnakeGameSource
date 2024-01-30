@@ -1,11 +1,10 @@
 ﻿using SnakeGameSource.GameEngine;
 
-namespace SnakeGameSource.Model.Abstractions
-{
-    internal interface ISnake : IMovable, IEnumerable<GameObject>
-    {
-        public event Action? Die;
+namespace SnakeGameSource.Model.Abstractions;
 
-        public int Score { get; }
-    }
+internal interface ISnake : IMovable, IEnumerable<GameObject>
+{
+    public int Score { get; }
+
+    public event Action? Die;
 }
