@@ -5,13 +5,15 @@ using SnakeGameSource.GameEngine.Components.Colliders;
 
 namespace SnakeGameSource.GameEngine;
 
-internal class CollisionHandler(Scene scene) : ICollisionHandler
+public class CollisionHandler(IScene scene) : ICollisionHandler
 {
     private const string CollisionMethodName = "OnCollisionEnter";
 
     private static readonly Type[] InputType = [typeof(GameObject)];
 
-    private readonly List<Collider> _colliders = [];
+    private static readonly MethodInvoker Invoker = new();
+
+    private readonly List<Collider> _sceneColliders = [];
 
     public void Update()
     {
@@ -19,42 +21,69 @@ internal class CollisionHandler(Scene scene) : ICollisionHandler
         CheckCollisions();
     }
 
+    public bool IsCollidingWithAnyCollider(Type colliderType, Vector2 position, Vector2 scale)
+    {
+        if (!colliderType.IsAssignableTo(typeof(Collider)))
+        {
+            throw new ArgumentException($"{nameof(colliderType)} must be an instance of 'Collider' class");
+        }
+
+        GameObject gameObject = new();
+
+        Collider collider1 = (Collider)gameObject.AddComponent(colliderType);
+        collider1.Scale = scale;
+
+        gameObject.Transform.Position = position;
+
+        foreach (Collider collider2 in _sceneColliders)
+        {
+            if (IsCollisionBetween(collider1, collider2))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool IsCollidingWithAnyCollider<T>(Vector2 position, Vector2 scale) where T : Collider, new()
+    {
+        return IsCollidingWithAnyCollider(typeof(T), position, scale);
+    }
+
     private void UpdateCollidersList()
     {
-        _colliders.Clear();
+        _sceneColliders.Clear();
 
-        foreach (GameObject gameObject in scene)
+        foreach (GameObject gameObject in scene.GetGameObjects())
         {
             if (gameObject.TryGetComponent(out Collider? collider))
             {
-                _colliders.Add(collider);
+                _sceneColliders.Add(collider);
             }
         }
     }
 
-    private static void CheckCollision(Collider collider1, Collider collider2, object?[] temp)
+    private static bool IsCollisionBetween(Collider collider1, Collider collider2)
     {
         Transform transform1 = collider1.Parent!.Transform;
         Transform transform2 = collider2.Parent!.Transform;
 
-        float distanceToEdge1 = collider1.GetDistanceToEdge(transform2.Position);
-        float distanceToEdge2 = collider2.GetDistanceToEdge(transform1.Position);
-        float distanceBetween = Vector2.Distance(transform1.Position, transform2.Position);
+        Vector2 position1 = transform1.Position;
+        Vector2 position2 = transform2.Position;
 
-        if (!(distanceToEdge1 + distanceToEdge2 >= distanceBetween))
-        {
-            return;
-        }
+        float distanceToEdge1 = collider1.GetDistanceToEdge(position2);
+        float distanceToEdge2 = collider2.GetDistanceToEdge(position1);
+        float distanceBetween = Vector2.Distance(position1, position2);
 
-        TryInvokeCollision(collider1.Parent!, collider2.Parent!, temp);
-        TryInvokeCollision(collider2.Parent!, collider1.Parent!, temp);
+        return distanceToEdge1 + distanceToEdge2 >= distanceBetween;
     }
 
     private void CheckCollisions()
     {
-        var tasks = new Task[_colliders.Count - 1];
+        var tasks = new Task[_sceneColliders.Count - 1];
         
-        for (var i = 0; i < _colliders.Count - 1; i++)
+        for (var i = 0; i < _sceneColliders.Count - 1; i++)
         {
             int index = i;
             
@@ -62,9 +91,18 @@ internal class CollisionHandler(Scene scene) : ICollisionHandler
             {
                 var temp = new object?[1];
                 
-                for (int j = index + 1; j < _colliders.Count; j++)
+                for (int j = index + 1; j < _sceneColliders.Count; j++)
                 {
-                    CheckCollision(_colliders[index], _colliders[j], temp);
+                    Collider collider1 = _sceneColliders[index];
+                    Collider collider2 = _sceneColliders[j];
+
+                    if (!IsCollisionBetween(collider1, collider2))
+                    {
+                        continue;
+                    }
+
+                    TryInvokeCollision(collider1.Parent!, collider2.Parent!, temp);
+                    TryInvokeCollision(collider2.Parent!, collider1.Parent!, temp);
                 }
             });
         }
@@ -80,7 +118,7 @@ internal class CollisionHandler(Scene scene) : ICollisionHandler
 
         for (var i = 0; i < components.Count; i++)
         {
-            MethodInvoker.TryInvokeMethod(components[i], CollisionMethodName, InputType, temp);
+            Invoker.TryInvokeMethod(components[i], CollisionMethodName, InputType, temp);
         }
     }
 }

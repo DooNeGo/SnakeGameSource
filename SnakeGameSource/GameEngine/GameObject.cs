@@ -10,12 +10,14 @@ public sealed class GameObject
     private const string ParentPropertyName  = "Parent";
     private const string AwakeMethodName     = "Awake";
 
-    private static readonly PropertyInfo ParentProperty = typeof(Component).GetProperty(ParentPropertyName)
+    private static readonly MethodInvoker Invoker        = new();
+    private static readonly Type[]        InputType      = [typeof(Component)];
+    private static readonly PropertyInfo  ParentProperty = typeof(Component).GetProperty(ParentPropertyName)
                                                        ?? throw new NullReferenceException(
-                                                              "There is no Parent property in Component class");
+                                                              "The 'Component' class doesn't contain a parent property");
 
-    private readonly Dictionary<Type, Component> _components = [];
-    private readonly List<Component>             _list       = [];
+    private readonly Dictionary<Type, Component> _componentsDictionary = [];
+    private readonly List<Component>             _componentsList       = [];
 
     public GameObject(string? name = null)
     {
@@ -33,13 +35,13 @@ public sealed class GameObject
 
         if (GetComponent(type) is not null)
         {
-            throw new Exception($"{type.FullName} has already added in components");
+            throw new Exception($"The component {type.Name} have already added in game object");
         }
 
         T component = new() { Parent = this };
-        _components[type] = component;
-        _list.Add(component);
-        MethodInvoker.TryInvokeMethod(component, AwakeMethodName, [], null);
+        _componentsDictionary[type] = component;
+        _componentsList.Add(component);
+        Invoker.TryInvokeMethod(component, AwakeMethodName, [], null);
 
         return component;
     }
@@ -50,14 +52,14 @@ public sealed class GameObject
 
         ConstructorInfo constructor =
             type.GetConstructor(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic, []) 
-            ?? throw new NullReferenceException("Component must have parameterless constructor");
+            ?? throw new NullReferenceException($"The component {type.Name} must have a parameterless constructor");
 
         var component = (Component)constructor.Invoke(null);
 
         ParentProperty.SetValue(component, this);
-        _components[type] = component;
-        _list.Add(component);
-        MethodInvoker.TryInvokeMethod(component, AwakeMethodName, [], null);
+        _componentsDictionary[type] = component;
+        _componentsList.Add(component);
+        Invoker.TryInvokeMethod(component, AwakeMethodName, [], null);
 
         return component;
     }
@@ -66,12 +68,12 @@ public sealed class GameObject
     {
         if (!type.IsSubclassOf(typeof(Component)))
         {
-            throw new Exception($"{type.FullName} is not subclass of Component");
+            throw new Exception($"The component {type.Name} isn't subclass of class 'Component'");
         }
 
         if (GetComponent(type) is not null)
         {
-            throw new Exception($"{type.FullName} has already added in components");
+            throw new Exception($"The component {type.Name} have already added in game object");
         }
 
         if (type.IsAbstract
@@ -81,30 +83,16 @@ public sealed class GameObject
         }
     }
 
-    // TODO: Исправить баг с Transform
-    public void RemoveComponent<T>() where T : Component
+    public Component? GetComponent(Type type)
     {
-        var component = GetComponent<T>();
-
-        if (component is null)
-        {
-            return;
-        }
-
-        _components.Remove(component.GetType());
-        _list.Remove(component);
+        return _componentsDictionary.TryGetValue(type, out Component? component)
+            ? component
+            : _componentsDictionary.Values.FirstOrDefault(type.IsInstanceOfType);
     }
 
     public T? GetComponent<T>() where T : Component
     {
         return (T?)GetComponent(typeof(T));
-    }
-
-    public Component? GetComponent(Type type)
-    {
-        return _components.TryGetValue(type, out Component? component)
-            ? component
-            : _components.Values.FirstOrDefault(type.IsInstanceOfType);
     }
 
     public bool TryGetComponent(Type type, [NotNullWhen(true)] out Component? component)
@@ -116,29 +104,30 @@ public sealed class GameObject
 
     public bool TryGetComponent<T>([NotNullWhen(true)] out T? component) where T : Component
     {
-        bool result = TryGetComponent(typeof(T), out Component? value);
-        component = (T?)value;
+        component = GetComponent<T>();
 
-        return result;
+        return component is not null;
     }
 
     public GameObject Clone()
     {
         GameObject gameObject = new(Name);
+        var        temp       = new object[1];
 
-        foreach (Component component in _components.Values)
+        foreach (Component component in _componentsDictionary.Values)
         {
-            Component cloneComponent = component.GetType() != typeof(Transform)
+            Component componentClone = component.GetType() != typeof(Transform) 
                 ? gameObject.AddComponent(component.GetType())
                 : gameObject.Transform;
-            MethodInvoker.TryInvokeMethod(component, TryCopyToMethodName, [typeof(Component)], [cloneComponent]);
+            temp[0] = componentClone;
+            Invoker.TryInvokeMethod(component, TryCopyToMethodName, InputType, temp);
         }
 
         return gameObject;
     }
 
-    internal IReadOnlyList<Component> GetComponents()
+    public IReadOnlyList<Component> GetComponents()
     {
-        return _list;
+        return _componentsList;
     }
 }

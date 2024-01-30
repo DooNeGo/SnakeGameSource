@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using SnakeGameSource.GameEngine;
+using SnakeGameSource.GameEngine.Abstractions;
 using SnakeGameSource.GameEngine.Components;
+using SnakeGameSource.GameEngine.Components.Colliders;
 
 namespace SnakeGameSource.Components;
 
@@ -12,7 +14,9 @@ public class FoodParametersRandom : Component
 
     private int _lastEffectIndex;
 
-    public Grid? Grid { get; set; }
+    public IGrid? Grid { get; set; }
+
+    public ICollisionHandler? CollisionHandler { get; set; }
 
     public TimeSpan FoodLifetime { get; set; }
 
@@ -91,7 +95,8 @@ public class FoodParametersRandom : Component
 
     private void SetEffect(Effect effect)
     {
-        effect.TryCopyTo(GetComponent<Effect>());
+        effect.TryCopyTo(GetComponent<Effect>() 
+            ?? throw new NullReferenceException("There is no 'Effect' component"));
     }
 
     private void RandPosition()
@@ -101,12 +106,26 @@ public class FoodParametersRandom : Component
             throw new NullReferenceException(nameof(Grid) + "must be not null");
         }
 
-        Transform transform = Parent!.Transform;
+        if (CollisionHandler is null)
+        {
+            throw new NullReferenceException(nameof(CollisionHandler) + "must be not null");
+        }
+
+        Transform transform    = Parent!.Transform;
+        Vector2   scale        = transform.Scale;
+        Type      colliderType = typeof(SquareCollider);
+
+        if (TryGetComponent(out Collider? collider))
+        {
+            scale *= collider.Scale;
+            colliderType = collider.GetType();
+        }
+
         do
         {
             transform.Position = new Vector2(_random.Next(1, Grid.Size.X - 1), _random.Next(1, Grid.Size.Y - 1));
         }
-        while (Grid.IsPositionOccupied(transform.Position, transform.Scale));
+        while (CollisionHandler.IsCollidingWithAnyCollider(colliderType, transform.Position, scale));
     }
 
     public override bool TryCopyTo(Component component)

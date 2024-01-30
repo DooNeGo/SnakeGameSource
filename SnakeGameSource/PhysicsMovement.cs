@@ -1,5 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
-using SnakeGameSource.GameEngine;
+using SnakeGameSource.GameEngine.Abstractions;
 
 namespace SnakeGameSource;
 
@@ -21,12 +21,12 @@ internal interface IMovable
 internal class PhysicsMovement
 {
     private readonly IMovable _snake;
-    private readonly Input _input;
+    private readonly IInput _input;
 
     private Vector2 _lastDirection;
     private Vector2 _smoothDirection;
 
-    public PhysicsMovement(IMovable snake, Input input)
+    public PhysicsMovement(IMovable snake, IInput input)
     {
         _input           = input;
         _snake           = snake;
@@ -46,12 +46,12 @@ internal class PhysicsMovement
             RotateDirection(slewingAngle);
         }
 
-        Move(delta);
+        Move(_smoothDirection, delta);
     }
 
-    private void Move(TimeSpan delta)
+    private void Move(Vector2 direction, TimeSpan delta)
     {
-        Vector2 offset = (float)delta.TotalSeconds * _snake.MoveSpeed * _smoothDirection;
+        Vector2 offset = (float)delta.TotalSeconds * _snake.MoveSpeed * direction;
         _snake.MoveTo(_snake.Position + offset);
     }
 
@@ -60,19 +60,14 @@ internal class PhysicsMovement
         float rotateAngle = GetRotateAngle();
         angle = rotateAngle > 0 ? angle : -angle;
 
-        _smoothDirection = GetRotatedVector(_smoothDirection, float.MinMagnitude(angle, rotateAngle));
+        _smoothDirection = _smoothDirection.Rotate(float.MinMagnitude(angle, rotateAngle));
         _smoothDirection.Normalize();
-    }
-
-    private static Vector2 GetRotatedVector(Vector2 vector, float angle)
-    {
-        return Vector2.Transform(vector, Matrix.CreateRotationZ(angle * MathF.PI / 180f));
     }
 
     private float GetRotateAngle()
     {
         float cos = Vector2.Dot(_smoothDirection, _lastDirection);
-        float cos1 = Vector2.Dot(GetRotatedVector(_smoothDirection, 1), _lastDirection);
+        float cos1 = Vector2.Dot(_smoothDirection.Rotate(1), _lastDirection);
 
         cos = float.Min(1, cos);
         cos = float.Max(-1, cos);

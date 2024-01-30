@@ -24,9 +24,6 @@ public class SnakeGame : Game2D
 
     private void OnInitializing()
     {
-        Input.KeyDown += OnKeyDown;
-        Input.Gesture += OnGesture;
-
         Container.AddSingleton<ISnake, Snake>()
                  .AddTransient<SnakeConfig>()
                  .AddSingleton<IMovable, Snake>()
@@ -34,10 +31,13 @@ public class SnakeGame : Game2D
                  .AddSingleton<PhysicsMovement>()
                  .Build();
 
+        Input.KeyDown += OnKeyDown;
+        Input.Gesture += OnGesture;
+
         _physicsMovement = Container.GetInstance<PhysicsMovement>();
         var snake       = Container.GetInstance<ISnake>();
         var foodCreator = Container.GetInstance<IFoodCreator>();
-        Container.GetInstance<Scene>().Add(snake, [foodCreator.Food]);
+        Scene.Add(snake, [foodCreator.Food]);
         snake.Die += OnSnakeDie;
 
         TimeRatio = 0;
@@ -45,10 +45,6 @@ public class SnakeGame : Game2D
 
     private void OnUpdating(GameTime gameTime)
     {
-        //var snake = Container.GetInstance<Snake>();
-        //var foodCreator = Container.GetInstance<FoodCreator>();
-        //Vector2 direction = foodCreator.Food.Transform.Position - snake.Position;
-        //direction.Normalize();
         _physicsMovement.Update(gameTime.ElapsedGameTime);
         BackgroundColor =  Color.Lerp(BackgroundColors[0], BackgroundColors[1], MathF.Cos(_value));
         _value          += 0.005f * TimeRatio;

@@ -18,7 +18,7 @@ public class Game2D : Game
         IsMouseVisible        = true;
     }
 
-    protected IInput Input { get; private set; }
+    protected IInput Input => Container.GetInstance<IInput>();
 
     protected DiContainer Container { get; } = new();
 
@@ -26,7 +26,7 @@ public class Game2D : Game
 
     protected Color BackgroundColor { get; set; }
 
-    protected Grid Grid { get; private set; }
+    protected IGrid Grid { get; private set; }
 
     protected bool IsStop { get; set; }
 
@@ -44,11 +44,11 @@ public class Game2D : Game
 
     protected override void Initialize()
     {
-        Container.AddSingleton<IInput, Input>()
+        Container.AddSingleton<IInput, Bot>()
                  .AddSingleton<SpriteDrawer>()
                  .AddSingleton<ICollisionHandler, CollisionHandler>()
                  .AddSingleton<IScene, Scene>()
-                 .AddSingleton<Grid>()
+                 .AddSingleton<IGrid, Grid>()
                  .AddSingleton<SpriteBatch>()
                  .AddSingleton(Window)
                  .AddSingleton(Content)
@@ -57,9 +57,9 @@ public class Game2D : Game
 
         _collisionHandler = Container.GetInstance<ICollisionHandler>();
         _drawer           = Container.GetInstance<SpriteDrawer>();
-        Input             = Container.GetInstance<IInput>();
+        //Input             = Container.GetInstance<IInput>();
         Scene             = Container.GetInstance<IScene>();
-        Grid              = Container.GetInstance<Grid>();
+        Grid              = Container.GetInstance<IGrid>();
 
         Initializing?.Invoke();
 

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using SnakeGameSource.Components;
 using SnakeGameSource.GameEngine;
+using SnakeGameSource.GameEngine.Abstractions;
 using SnakeGameSource.GameEngine.Components;
 using SnakeGameSource.GameEngine.Components.Colliders;
 using SnakeGameSource.Model.Abstractions;
@@ -13,20 +14,20 @@ internal class FoodCreator : IFoodCreator
 
     private readonly Vector2 _foodScale = new(0.5f);
 
-    public FoodCreator(Grid grid)
+    public FoodCreator(IGrid grid, ICollisionHandler collisionHandler)
     {
         Food = new GameObject();
 
-        Transform transform = Food.Transform;
-        transform.Scale = _foodScale;
+        Food.Transform.Scale = _foodScale;
 
         var textureConfig = Food.AddComponent<TextureConfig>();
         textureConfig.Name  = TextureName.Food;
         textureConfig.Color = Color.Red;
 
         var random = Food.AddComponent<FoodParametersRandom>();
-        random.Grid         = grid;
-        random.FoodLifetime = TimeSpan.FromSeconds(FoodLifeTime);
+        random.Grid             = grid;
+        random.CollisionHandler = collisionHandler;
+        random.FoodLifetime     = TimeSpan.FromSeconds(FoodLifeTime);
 
         Food.AddComponent<SquareCollider>();
         Food.AddComponent<Effect>();

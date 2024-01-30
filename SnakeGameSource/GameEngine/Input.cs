@@ -6,7 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace SnakeGameSource.GameEngine;
 
-public class Input(Grid grid) : IInput
+public class Input(IGrid grid) : IInput
 {
     private GestureSample _gesture;
     private Keys _pressedKey;

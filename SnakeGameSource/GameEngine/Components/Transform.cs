@@ -8,7 +8,7 @@ public class Transform : Component
 
     public Quaternion Rotation { get; set; }
 
-    public Vector2 Scale { get; set; }
+    public Vector2 Scale { get; set; } = Vector2.One;
 
     public override bool TryCopyTo(Component component)
     {

@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using SnakeGameSource.Components;
 using SnakeGameSource.GameEngine;
+using SnakeGameSource.GameEngine.Abstractions;
 using SnakeGameSource.GameEngine.Components;
 using SnakeGameSource.Model.Abstractions;
 
@@ -9,7 +10,7 @@ namespace SnakeGameSource.Model;
 
 internal class Snake : ISnake
 {
-    private readonly Grid _grid;
+    private readonly IGrid _grid;
 
     private readonly List<GameObject> _projectedSnakeParts = [];
     private readonly List<GameObject> _snakeParts          = [];
@@ -17,12 +18,15 @@ internal class Snake : ISnake
     private Vector2[] _directions;
     private Vector2   _scale = new(1f);
 
-    public Snake(SnakeConfig snakeConfig, Grid grid)
+    private float _minSpeed;
+    private float _maxSpeed;
+
+    public Snake(SnakeConfig snakeConfig, IGrid grid)
     {
         MoveSpeed    = snakeConfig.MoveSpeed;
         SlewingSpeed = snakeConfig.SlewingSpeed;
-        _grid        = grid;
         Direction    = snakeConfig.StartDirection;
+        _grid        = grid;
         _directions  = new Vector2[snakeConfig.InitialLength + 1];
 
         for (var i = 0; i < _directions.Length; i++)
@@ -239,7 +243,7 @@ internal class Snake : ISnake
         }
         else
         {
-            Die?.Invoke();
+            //Die?.Invoke();
         }
     }
 

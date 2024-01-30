@@ -4,9 +4,7 @@ namespace SnakeGameSource.GameEngine.Components.Colliders;
 
 public class CircleCollider : Collider
 {
-    private Transform _transform;
-
-    public Vector2 Scale { get; set; } = Vector2.One;
+    private Transform? _transform;
 
     private void Awake()
     {
@@ -15,6 +13,11 @@ public class CircleCollider : Collider
 
     public override float GetDistanceToEdge(Vector2 position)
     {
+        if (_transform is null)
+        {
+            throw new NullReferenceException(nameof(_transform) + "must be not null");
+        }
+
         Vector2 vectorToCollider = Vector2.Normalize(_transform.Position - position).Abs();
         float radius = vectorToCollider.X > vectorToCollider.Y
             ? _transform.Scale.X * Scale.X

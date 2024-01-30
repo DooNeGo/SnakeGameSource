@@ -1,28 +1,18 @@
-﻿using System.Collections;
-using SnakeGameSource.GameEngine.Abstractions;
+﻿using SnakeGameSource.GameEngine.Abstractions;
 using SnakeGameSource.GameEngine.Components;
 
 namespace SnakeGameSource.GameEngine;
 
-public class Scene : IEnumerable<GameObject>, IScene
+public class Scene : IScene
 {
     private const string UpdateMethodName = "Update";
 
-    private static readonly Type[] InputType = [typeof(TimeSpan)];
-    private static readonly object?[] InputDelta = new object?[1];
+    private static readonly Type[] InputType      = [typeof(TimeSpan)];
+    private static readonly object?[] InputDelta  = new object?[1];
+    private static readonly MethodInvoker Invoker = new();
 
     private readonly List<IEnumerable<GameObject>> _compositeObjects = [];
-    private readonly List<GameObject> _gameObjects = [];
-
-    public IEnumerator<GameObject> GetEnumerator()
-    {
-        return _gameObjects.GetEnumerator();
-    }
-
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return _gameObjects.GetEnumerator();
-    }
+    private readonly List<GameObject> _gameObjects                   = [];
 
     public void Add(params IEnumerable<GameObject>[] compositeObjects)
     {
@@ -49,7 +39,7 @@ public class Scene : IEnumerable<GameObject>, IScene
 
         for (var j = 0; j < components.Count; j++)
         {
-            MethodInvoker.TryInvokeMethod(components[j], UpdateMethodName, InputType, InputDelta);
+            Invoker.TryInvokeMethod(components[j], UpdateMethodName, InputType, InputDelta);
         }
     }
 
@@ -79,5 +69,10 @@ public class Scene : IEnumerable<GameObject>, IScene
         {
             _gameObjects.AddRange(compositeObject);
         }
+    }
+
+    public IEnumerable<GameObject> GetGameObjects()
+    {
+        return _gameObjects;
     }
 }

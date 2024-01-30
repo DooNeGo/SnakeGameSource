@@ -1,4 +1,6 @@
-﻿namespace SnakeGameSource.GameEngine.Components;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace SnakeGameSource.GameEngine.Components;
 
 public abstract class Component
 {
@@ -7,6 +9,11 @@ public abstract class Component
     public T? GetComponent<T>() where T : Component
     {
         return Parent!.GetComponent<T>();
+    }
+
+    public bool TryGetComponent<T>([NotNullWhen(true)] out T? component) where T : Component
+    {
+        return Parent!.TryGetComponent(out component);
     }
 
     public T AddComponent<T>() where T : Component, new()
