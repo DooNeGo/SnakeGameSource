@@ -4,10 +4,10 @@ namespace SnakeGameSource.GameEngine;
 
 public class DiContainer
 {
-    private readonly Dictionary<Type, Type>    _associationSingletonTypes = [];
-    private readonly Dictionary<Type, Type>    _associationTransientTypes = [];
-    private readonly Dictionary<Type, object?> _singletonTypes            = [];
-    private readonly HashSet<Type>             _transientTypes            = [];
+    private readonly Dictionary<Type, object?> _singletonInstances         = [];
+    private readonly Dictionary<Type, Type>    _singletonTypesAssociations = [];
+    private readonly HashSet<Type>             _transientTypes             = [];
+    private readonly Dictionary<Type, Type>    _transientTypesAssociations = [];
 
     public DiContainer AddTransient<T>() where T : class
     {
@@ -18,7 +18,7 @@ public class DiContainer
             throw new ArgumentException("You can't add an interface as an implementation");
         }
 
-        if (_singletonTypes.ContainsKey(type))
+        if (_singletonInstances.ContainsKey(type))
         {
             throw new ArgumentException($"You can't add type {type.Name} as singleton and as transient");
         }
@@ -40,7 +40,7 @@ public class DiContainer
 
     public DiContainer AddTransient<TAssociation, TImplementation>() where TImplementation : class
     {
-        if (!_associationTransientTypes.TryAdd(typeof(TAssociation), typeof(TImplementation)))
+        if (!_transientTypesAssociations.TryAdd(typeof(TAssociation), typeof(TImplementation)))
         {
             throw new Exception($"Association {typeof(TAssociation).Name} has already added");
         }
@@ -61,7 +61,7 @@ public class DiContainer
 
     public DiContainer Build()
     {
-        foreach (Type type in _singletonTypes.Keys)
+        foreach (Type type in _singletonInstances.Keys)
         {
             GetInstance(type);
         }
@@ -88,7 +88,7 @@ public class DiContainer
             throw new ArgumentException($"You can't add type {type.Name} as singleton and as transient");
         }
 
-        _singletonTypes.TryAdd(type, instance);
+        _singletonInstances.TryAdd(type, instance);
 
         return this;
     }
@@ -96,7 +96,7 @@ public class DiContainer
     private DiContainer AddSingletonInternal<TAssociation, TImplementation>(TImplementation? instance)
         where TImplementation : class
     {
-        if (!_associationSingletonTypes.TryAdd(typeof(TAssociation), typeof(TImplementation)))
+        if (!_singletonTypesAssociations.TryAdd(typeof(TAssociation), typeof(TImplementation)))
         {
             throw new Exception($"Association {typeof(TAssociation).Name} has already added");
         }
@@ -106,7 +106,7 @@ public class DiContainer
 
     public object GetInstance(Type type)
     {
-        if (_associationTransientTypes.TryGetValue(type, out Type? transientType))
+        if (_transientTypesAssociations.TryGetValue(type, out Type? transientType))
         {
             type = transientType;
         }
@@ -116,20 +116,20 @@ public class DiContainer
             return CreateInstance(type);
         }
 
-        if (_associationSingletonTypes.TryGetValue(type, out Type? singletonType))
+        if (_singletonTypesAssociations.TryGetValue(type, out Type? singletonType))
         {
             type = singletonType;
         }
 
-        if (!_singletonTypes.TryGetValue(type, out object? instance))
+        if (!_singletonInstances.TryGetValue(type, out object? instance))
         {
             throw new ArgumentException($"You forgot to add {type.Name} in the Container.");
         }
 
         if (instance is null)
         {
-            instance              = CreateInstance(type);
-            _singletonTypes[type] = instance;
+            instance                  = CreateInstance(type);
+            _singletonInstances[type] = instance;
         }
 
         return instance;
