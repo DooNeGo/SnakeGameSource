@@ -1,4 +1,6 @@
 using System.Reflection;
+using System.Collections.Frozen;
+using SnakeGameSource.GameEngine.Components;
 
 namespace SnakeGameSource.GameEngine;
 
@@ -6,50 +8,52 @@ public class MethodInvoker
 {
     private const BindingFlags Flags = BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public;
 
-    private readonly object _locker1 = new();
+    //private readonly Dictionary<string, MethodsCache>      _methodsCaches = new();
+    private readonly FrozenDictionary<Type, MethodsCache> _methodsCaches;
 
-    private readonly Dictionary<string, MethodsCache> _methodsCaches = [];
-
-    public void TryInvokeMethod(object obj, string methodName, Type[] paramsTypes, object?[]? parameters)
+    public MethodInvoker()
     {
-        Type          type = obj.GetType();
-        MethodsCache? cache;
+        Dictionary<Type, MethodsCache> methodsCaches = [];
+        IEnumerable<Type> heirs = AppDomain.CurrentDomain.GetAssemblies()
+                                           .SelectMany(a => a.GetTypes())
+                                           .Where(t => t.IsSubclassOf(typeof(Component)));
 
-        //lock (Locker1)
+        foreach (Type heir in heirs)
         {
-            if (!_methodsCaches.TryGetValue(methodName, out cache))
+            Dictionary<string, MethodInfo> methodsCache = [];
+            
+            foreach (MethodInfo method in heir.GetMethods(Flags))
             {
-                cache = new MethodsCache();
-                _methodsCaches.Add(methodName, cache);
+                //Type[] parameterTypes = method.GetParameters().Select(p => p.ParameterType).ToArray();
+                methodsCache.Add(method.Name, method);
             }
+            
+            MethodsCache cache = new(methodsCache.ToFrozenDictionary());
+            methodsCaches.Add(heir, cache);
         }
 
-        if (cache.WithoutMethod.Contains(type))
+        _methodsCaches = methodsCaches.ToFrozenDictionary();
+    }
+    
+    public void TryInvokeMethod(Component obj, string methodName, Type[] paramsTypes, object?[]? parameters)
+    {
+        Type type = obj.GetType();
+
+        if (!_methodsCaches.TryGetValue(type, out MethodsCache cache))
+        {
+            throw new Exception();
+        }
+
+        if (!cache.Methods.TryGetValue(methodName, out MethodInfo? method))
         {
             return;
         }
-
-        if (!cache.Methods.TryGetValue(type, out MethodInfo? method))
-        {
-            method = type.GetMethod(methodName, Flags, paramsTypes);
-
-            if (method is null)
-            {
-                cache.WithoutMethod.Add(type);
-
-                return;
-            }
-
-            cache.Methods[type] = method;
-        }
-
+        
         method.Invoke(obj, parameters);
     }
-
-    private class MethodsCache
+    
+    private readonly struct MethodsCache(FrozenDictionary<string, MethodInfo> methods)
     {
-        public Dictionary<Type, MethodInfo> Methods { get; } = [];
-
-        public HashSet<Type> WithoutMethod { get; } = [];
+        public FrozenDictionary<string, MethodInfo> Methods { get; } = methods;
     }
 }

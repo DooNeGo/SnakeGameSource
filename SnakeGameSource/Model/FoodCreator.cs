@@ -16,9 +16,7 @@ internal class FoodCreator : IFoodCreator
 
     public FoodCreator(IGrid grid, ICollisionHandler collisionHandler)
     {
-        Food = new GameObject();
-
-        Food.Transform.Scale = _foodScale;
+        Food = new GameObject { Transform = { Scale = _foodScale } };
 
         var textureConfig = Food.AddComponent<TextureConfig>();
         textureConfig.Name  = TextureName.Food;

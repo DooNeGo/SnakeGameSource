@@ -59,7 +59,7 @@ public class DiContainer
         return AddSingletonInternal<TAssociation, TImplementation>(instance);
     }
 
-    public DiContainer Build()
+    public void Build()
     {
         foreach (Type type in _singletonInstances.Keys)
         {
@@ -70,8 +70,6 @@ public class DiContainer
         {
             GetInstance(type);
         }
-
-        return this;
     }
 
     private DiContainer AddSingletonInternal<T>(T? instance) where T : class

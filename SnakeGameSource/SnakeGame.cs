@@ -11,26 +11,29 @@ public class SnakeGame : Game2D
 {
     private PhysicsMovement _physicsMovement;
     private float           _value;
-
+    
     public SnakeGame()
     {
+        Configuring  += OnConfiguring;
         Initializing += OnInitializing;
         Updating     += OnUpdating;
 
         Window.AllowUserResizing = true;
     }
 
-    protected Color[] BackgroundColors { get; set; } = [new Color(224, 172, 213), new Color(57, 147, 221)];
+    private Color[] BackgroundColors { get; set; } = [new Color(224, 172, 213), new Color(57, 147, 221)];
 
-    private void OnInitializing()
+    private void OnConfiguring(DiContainer container)
     {
-        Container.AddSingleton<ISnake, Snake>()
+        container.AddSingleton<ISnake, Snake>()
                  .AddTransient<SnakeConfig>()
                  .AddSingleton<IMovable, Snake>()
                  .AddSingleton<IFoodCreator, FoodCreator>()
-                 .AddSingleton<PhysicsMovement>()
-                 .Build();
-
+                 .AddSingleton<PhysicsMovement>();
+    }
+    
+    private void OnInitializing()
+    {
         Input.KeyDown += OnKeyDown;
         Input.Gesture += OnGesture;
 

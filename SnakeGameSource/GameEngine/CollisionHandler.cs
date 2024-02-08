@@ -11,8 +11,6 @@ public class CollisionHandler(IScene scene) : ICollisionHandler
 
     private static readonly Type[] InputType = [typeof(GameObject)];
 
-    private static readonly MethodInvoker Invoker = new();
-
     private readonly List<Collider> _sceneColliders = [];
 
     public void Update()
@@ -68,47 +66,32 @@ public class CollisionHandler(IScene scene) : ICollisionHandler
 
         return distanceToEdge1 + distanceToEdge2 >= distanceBetween;
     }
-
+    
     private void CheckCollisions()
     {
-        var tasks = new Task[_sceneColliders.Count - 1];
-
-        for (var i = 0; i < _sceneColliders.Count - 1; i++)
+        Parallel.For(0, _sceneColliders.Count - 1, i =>
         {
-            int index = i;
+            var temp = new object?[1];
 
-            tasks[i] = Task.Run(() =>
+            for (int j = i + 1; j < _sceneColliders.Count; j++)
             {
-                var temp = new object?[1];
+                Collider collider1 = _sceneColliders[i];
+                Collider collider2 = _sceneColliders[j];
 
-                for (int j = index + 1; j < _sceneColliders.Count; j++)
+                if (!IsCollisionBetween(collider1, collider2))
                 {
-                    Collider collider1 = _sceneColliders[index];
-                    Collider collider2 = _sceneColliders[j];
-
-                    if (!IsCollisionBetween(collider1, collider2))
-                    {
-                        continue;
-                    }
-
-                    TryInvokeCollision(collider1.Parent!, collider2.Parent!, temp);
-                    TryInvokeCollision(collider2.Parent!, collider1.Parent!, temp);
+                    continue;
                 }
-            });
-        }
-
-        Task.WaitAll(tasks);
+                
+                TryInvokeCollision(collider1.Parent!, collider2.Parent!, temp);
+                TryInvokeCollision(collider2.Parent!, collider1.Parent!, temp);
+            }
+        });
     }
 
     private static void TryInvokeCollision(GameObject gameObject1, GameObject gameObject2, object?[] temp)
     {
         temp[0] = gameObject2;
-
-        IReadOnlyList<Component> components = gameObject1.GetComponents();
-
-        for (var i = 0; i < components.Count; i++)
-        {
-            Invoker.TryInvokeMethod(components[i], CollisionMethodName, InputType, temp);
-        }
+        gameObject1.SendMessage(CollisionMethodName, InputType, temp);
     }
 }

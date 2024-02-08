@@ -9,24 +9,24 @@ public class Game2D : Game
     private readonly GraphicsDeviceManager _graphics;
 
     private ICollisionHandler _collisionHandler;
-    private SpriteDrawer      _drawer;
+    private ISpriteDrawer     _drawer;
 
     protected Game2D()
     {
         _graphics             = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
-        IsMouseVisible        = true;
+        IsMouseVisible        = false;
     }
-
-    protected IInput Input => Container.GetInstance<IInput>();
 
     protected DiContainer Container { get; } = new();
 
+    protected IInput Input => Container.GetInstance<IInput>();
+
     protected IScene Scene { get; private set; }
 
-    protected Color BackgroundColor { get; set; }
-
     protected IGrid Grid { get; private set; }
+
+    protected Color BackgroundColor { get; set; }
 
     protected bool IsStop { get; set; }
 
@@ -42,10 +42,12 @@ public class Game2D : Game
 
     public event Action<GameTime>? Drawing;
 
-    protected override void Initialize()
+    public event Action<DiContainer>? Configuring;
+
+    private void Configure()
     {
         Container.AddSingleton<IInput, Bot>()
-                 .AddSingleton<SpriteDrawer>()
+                 .AddSingleton<ISpriteDrawer, SpriteDrawer>()
                  .AddSingleton<ICollisionHandler, CollisionHandler>()
                  .AddSingleton<IScene, Scene>()
                  .AddSingleton<IGrid, Grid>()
@@ -54,13 +56,22 @@ public class Game2D : Game
                  .AddSingleton(Content)
                  .AddSingleton(GraphicsDevice)
                  .AddSingleton(Container);
-
+        
+        Configuring?.Invoke(Container);
+        
+        Container.Build();
+    }
+    
+    protected override void Initialize()
+    {
+        Configure();
+        
         _collisionHandler = Container.GetInstance<ICollisionHandler>();
-        _drawer           = Container.GetInstance<SpriteDrawer>();
-
+        _drawer           = Container.GetInstance<ISpriteDrawer>();
+        
         //Input             = Container.GetInstance<IInput>();
-        Scene = Container.GetInstance<IScene>();
-        Grid  = Container.GetInstance<IGrid>();
+        Scene             = Container.GetInstance<IScene>();
+        Grid              = Container.GetInstance<IGrid>();
 
         Initializing?.Invoke();
 

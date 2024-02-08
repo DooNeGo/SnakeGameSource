@@ -7,7 +7,7 @@ using SnakeGameSource.GameEngine.Components;
 
 namespace SnakeGameSource.GameEngine;
 
-internal class SpriteDrawer(ContentManager content, SpriteBatch spriteBatch, IGrid grid, IScene scene)
+internal class SpriteDrawer(ContentManager content, SpriteBatch spriteBatch, IGrid grid, IScene scene) : ISpriteDrawer
 {
     private FrozenDictionary<TextureName, Texture2D>? _textures;
 
@@ -22,13 +22,12 @@ internal class SpriteDrawer(ContentManager content, SpriteBatch spriteBatch, IGr
 
         foreach (GameObject gameObject in scene.GetGameObjects())
         {
-            var       textureConfig = gameObject.GetComponent<TextureConfig>();
-            Transform transform     = gameObject.Transform;
-
-            if (textureConfig is null)
+            if (!gameObject.TryGetComponent(out TextureConfig? textureConfig))
             {
                 continue;
             }
+
+            Transform transform = gameObject.Transform;
 
             Vector2 absolutePosition = grid.GetAbsolutePosition(transform.Position);
             Vector2 scale = grid.CellSize.ToVector2()
