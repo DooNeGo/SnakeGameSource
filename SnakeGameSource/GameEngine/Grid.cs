@@ -3,7 +3,7 @@ using SnakeGameSource.GameEngine.Abstractions;
 
 namespace SnakeGameSource.GameEngine;
 
-public class Grid : IGrid
+public sealed class Grid : IGrid
 {
     public Grid(GameWindow window)
     {

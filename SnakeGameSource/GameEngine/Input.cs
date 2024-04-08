@@ -6,7 +6,7 @@ using SnakeGameSource.GameEngine.Abstractions;
 
 namespace SnakeGameSource.GameEngine;
 
-public class Input(IGrid grid) : IInput
+public sealed class Input : IInput
 {
     private GestureSample _gesture;
     private Keys          _pressedKey;
@@ -40,10 +40,9 @@ public class Input(IGrid grid) : IInput
         }
         else if (!_gesture.Equals(new GestureSample()))
         {
-            Vector2 delta = _gesture.Delta / grid.CellSize.ToVector2() * Sensitivity;
+            Vector2 delta = _gesture.Delta * Sensitivity;
 
-            if (float.Abs(delta.X) <= 1
-             && float.Abs(delta.Y) <= 1)
+            if (float.Abs(delta.X) <= 1 && float.Abs(delta.Y) <= 1)
             {
                 moveDirection = delta;
             }
@@ -69,7 +68,7 @@ public class Input(IGrid grid) : IInput
         {
             Keys[] keys = Keyboard.GetState().GetPressedKeys();
 
-            foreach (Keys key in keys)
+            foreach (Keys key in keys.AsSpan())
             {
                 KeyDown?.Invoke(key);
 

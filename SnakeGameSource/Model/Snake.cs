@@ -1,4 +1,6 @@
 ﻿using System.Collections;
+using CommunityToolkit.HighPerformance;
+using CommunityToolkit.HighPerformance.Buffers;
 using Microsoft.Xna.Framework;
 using SnakeGameSource.Components;
 using SnakeGameSource.GameEngine;
@@ -8,7 +10,7 @@ using SnakeGameSource.Model.Abstractions;
 
 namespace SnakeGameSource.Model;
 
-internal class Snake : ISnake
+internal sealed class Snake : ISnake
 {
     private readonly IGrid _grid;
 
@@ -96,7 +98,7 @@ internal class Snake : ISnake
         private set
         {
             _scale = value;
-            foreach (GameObject gameObject in _snakeParts)
+            foreach (GameObject gameObject in _snakeParts.AsSpan())
             {
                 gameObject.Transform.Scale = _scale;
             }
@@ -112,12 +114,12 @@ internal class Snake : ISnake
             return;
         }
 
-        Vector2[] offsets = CalculateOffsets(nextPosition);
+        using SpanOwner<Vector2> offsets = CalculateOffsets(nextPosition);
 
         //Vector2[] nextDirections = CalculateDirections(offsets);
         //float[] rotations = CalculateRotations(nextDirections);
 
-        ApplyOffsets(offsets);
+        ApplyOffsets(offsets.Span);
 
         //ApplyDirections(nextDirections);
         //ApplyRotations(rotations);
@@ -127,22 +129,24 @@ internal class Snake : ISnake
 
     public event Action? Die;
 
-    private Vector2[] CalculateOffsets(Vector2 nextPosition)
+    private SpanOwner<Vector2> CalculateOffsets(Vector2 nextPosition)
     {
-        var offsets = new Vector2[_snakeParts.Count];
+        SpanOwner<Vector2> spanOwner = SpanOwner<Vector2>.Allocate(_snakeParts.Count);
+        Span<Vector2>      offsets   = spanOwner.Span;
 
         offsets[0] = nextPosition - Position;
+        Span<GameObject> span = _snakeParts.AsSpan();
 
-        for (var i = 1; i < _snakeParts.Count; i++)
+        for (var i = 1; i < span.Length; i++)
         {
-            Transform transform1 = _snakeParts[i].Transform;
-            Transform transform2 = _snakeParts[i - 1].Transform;
+            Transform transform1 = span[i].Transform;
+            Transform transform2 = span[i - 1].Transform;
 
             offsets[i] =  transform2.Position - transform1.Position;
             offsets[i] /= Scale;
         }
 
-        return offsets;
+        return spanOwner;
     }
 
     private Vector2[] CalculateDirections(Vector2[] offsets)
@@ -178,7 +182,7 @@ internal class Snake : ISnake
         return rotations;
     }
 
-    private void ApplyOffsets(Vector2[] offsets)
+    private void ApplyOffsets(Span<Vector2> offsets)
     {
         Head.Transform.Position += offsets[0];
 
@@ -237,19 +241,20 @@ internal class Snake : ISnake
 
     private void OnCollisionEnter(GameObject gameObject)
     {
-        if (gameObject.TryGetComponent(out Effect? effect))
+        if (gameObject.TryGetComponent(out FoodEffect? effect))
         {
-            ApplyEffect(effect);
+            ApplyFoodEffect(effect);
+            Score++;
         }
 
         //Die?.Invoke();
     }
 
-    private void ApplyEffect(Effect effect)
+    private void ApplyFoodEffect(FoodEffect effect)
     {
         switch (effect.Type)
         {
-            case EffectType.Speed:
+            case FoodEffectType.Speed:
                 if (MoveSpeed + effect.Value > 2)
                 {
                     MoveSpeed += effect.Value;
@@ -257,16 +262,15 @@ internal class Snake : ISnake
 
                 break;
 
-            case EffectType.Scale:
-                if (Scale.X + effect.Value > 0.5f
-                 && Scale.Y + effect.Value > 0.5f)
+            case FoodEffectType.Scale:
+                if (Scale.X + effect.Value > 0.5f && Scale.Y + effect.Value > 0.5f)
                 {
                     Scale += new Vector2(effect.Value);
                 }
 
                 break;
 
-            case EffectType.Length:
+            case FoodEffectType.Length:
                 if (effect.Value > 0)
                 {
                     AddSnakePart();
@@ -281,8 +285,6 @@ internal class Snake : ISnake
             default:
                 throw new ArgumentOutOfRangeException(nameof(effect), $"No such effect type {effect.Type}");
         }
-
-        Score++;
     }
 
     private void RemoveSnakePart(int snakePartIndex)

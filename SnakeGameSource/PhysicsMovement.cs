@@ -18,7 +18,7 @@ internal interface IMovable
     public void MoveTo(Vector2 position);
 }
 
-internal class PhysicsMovement
+internal sealed class PhysicsMovement
 {
     private readonly IInput   _input;
     private readonly IMovable _snake;
@@ -36,8 +36,7 @@ internal class PhysicsMovement
 
     public void Update(TimeSpan delta)
     {
-        if (_input.TryGetMoveDirection(out Vector2? direction)
-         && direction != Vector2.Zero)
+        if (_input.TryGetMoveDirection(out Vector2? direction) && direction != Vector2.Zero)
         {
             _lastDirection = direction.Value;
             float slewingAngle = (float)delta.TotalSeconds
@@ -77,8 +76,8 @@ internal class PhysicsMovement
         float angelBetween = MathF.Acos(cos);
         float angelPlusOne = MathF.Acos(cos1);
 
-        angelBetween *= 180f / MathF.PI;
-        angelPlusOne *= 180f / MathF.PI;
+        angelBetween = MathHelper.ToDegrees(angelBetween);
+        angelPlusOne = MathHelper.ToDegrees(angelPlusOne);
 
         return angelBetween > angelPlusOne ? angelBetween : -angelBetween;
     }

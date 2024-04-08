@@ -8,7 +8,7 @@ using SnakeGameSource.Model.Abstractions;
 
 namespace SnakeGameSource.Model;
 
-internal class FoodCreator : IFoodCreator
+internal sealed class FoodCreator : IFoodCreator
 {
     private const int FoodLifeTime = 7;
 
@@ -28,7 +28,7 @@ internal class FoodCreator : IFoodCreator
         random.FoodLifetime     = TimeSpan.FromSeconds(FoodLifeTime);
 
         Food.AddComponent<SquareCollider>();
-        Food.AddComponent<Effect>();
+        Food.AddComponent<FoodEffect>();
     }
 
     public GameObject Food { get; }

@@ -9,7 +9,7 @@ internal enum TextureName
     Food
 }
 
-internal class TextureConfig : Component
+internal sealed class TextureConfig : Component
 {
     public TextureName Name { get; set; }
 

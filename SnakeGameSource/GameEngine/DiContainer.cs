@@ -2,7 +2,7 @@
 
 namespace SnakeGameSource.GameEngine;
 
-public class DiContainer
+public sealed class DiContainer
 {
     private readonly Dictionary<Type, object?> _singletonInstances         = [];
     private readonly Dictionary<Type, Type>    _singletonTypesAssociations = [];
@@ -149,7 +149,7 @@ public class DiContainer
         }
 
         var objects = new object[parameters.Length];
-
+        
         for (var i = 0; i < objects.Length; i++)
         {
             Type parameterType = parameters[i].ParameterType;

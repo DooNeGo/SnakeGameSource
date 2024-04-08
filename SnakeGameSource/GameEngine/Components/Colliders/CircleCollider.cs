@@ -1,22 +1,20 @@
-﻿using Microsoft.Xna.Framework;
+﻿using CommunityToolkit.Diagnostics;
+using Microsoft.Xna.Framework;
 
 namespace SnakeGameSource.GameEngine.Components.Colliders;
 
-public class CircleCollider : Collider
+public sealed class CircleCollider : Collider
 {
     private Transform? _transform;
 
-    private void Awake()
+    protected override void Awake()
     {
         _transform = Parent!.Transform;
     }
 
     public override float GetDistanceToEdge(Vector2 position)
     {
-        if (_transform is null)
-        {
-            throw new NullReferenceException(nameof(_transform) + "must be not null");
-        }
+        Guard.IsNotNull(_transform, nameof(_transform));
 
         Vector2 vectorToCollider = Vector2.Normalize(_transform.Position - position).Abs();
         float radius = vectorToCollider.X > vectorToCollider.Y

@@ -2,24 +2,24 @@
 
 namespace SnakeGameSource.Components;
 
-public enum EffectType
+public enum FoodEffectType
 {
     Speed,
     Scale,
     Length
 }
 
-public class Effect : Component
+public sealed class FoodEffect : Component
 {
     public float Value { get; set; }
 
-    public EffectType Type { get; set; }
+    public FoodEffectType Type { get; set; }
 
     public float Chance { get; set; }
 
     public override bool TryCopyTo(Component component)
     {
-        if (component is not Effect effect)
+        if (component is not FoodEffect effect)
         {
             return false;
         }

@@ -3,7 +3,7 @@ using SnakeGameSource.GameEngine.Components.Colliders;
 
 namespace SnakeGameSource;
 
-internal class SnakeConfig
+internal sealed class SnakeConfig
 {
     public Vector2 StartPosition { get; } = new(3, 4);
 
@@ -19,7 +19,7 @@ internal class SnakeConfig
 
     public Vector2 StartDirection { get; } = Vector2.UnitX;
 
-    public int InitialLength { get; } = 2;
+    public int InitialLength { get; } = 2200;
 
     public float MinSpeed { get; } = 0.5f;
 

@@ -8,19 +8,19 @@ public class Game2D : Game
 {
     private readonly GraphicsDeviceManager _graphics;
 
-    private ICollisionHandler _collisionHandler;
-    private ISpriteDrawer     _drawer;
+    private ICollisionHandler? _collisionHandler;
+    private ISpriteDrawer?     _drawer;
 
     protected Game2D()
     {
         _graphics             = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
-        IsMouseVisible        = false;
+        IsMouseVisible        = true;
     }
 
     protected DiContainer Container { get; } = new();
 
-    protected IInput Input => Container.GetInstance<IInput>();
+    protected IInput Input { get; private set; }
 
     protected IScene Scene { get; private set; }
 
@@ -56,20 +56,19 @@ public class Game2D : Game
                  .AddSingleton(Content)
                  .AddSingleton(GraphicsDevice)
                  .AddSingleton(Container);
-        
+
         Configuring?.Invoke(Container);
-        
+
         Container.Build();
     }
-    
+
     protected override void Initialize()
     {
         Configure();
-        
+
         _collisionHandler = Container.GetInstance<ICollisionHandler>();
         _drawer           = Container.GetInstance<ISpriteDrawer>();
-        
-        //Input             = Container.GetInstance<IInput>();
+        Input             = Container.GetInstance<IInput>();
         Scene             = Container.GetInstance<IScene>();
         Grid              = Container.GetInstance<IGrid>();
 
@@ -80,7 +79,7 @@ public class Game2D : Game
 
     protected override void LoadContent()
     {
-        _drawer.LoadContent();
+        _drawer?.LoadContent();
         LoadingContent?.Invoke();
 
         base.LoadContent();
@@ -88,7 +87,7 @@ public class Game2D : Game
 
     protected override void UnloadContent()
     {
-        _drawer.UnloadContent();
+        _drawer?.UnloadContent();
         UnloadingContent?.Invoke();
 
         base.UnloadContent();
@@ -108,7 +107,7 @@ public class Game2D : Game
         if (!IsStop)
         {
             Scene.Update(gameTime.ElapsedGameTime);
-            _collisionHandler.Update();
+            _collisionHandler?.Update();
 
             Updating?.Invoke(gameTime);
         }
@@ -119,7 +118,7 @@ public class Game2D : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(BackgroundColor);
-        _drawer.Draw();
+        _drawer?.Draw();
 
         gameTime.ElapsedGameTime *= TimeRatio;
         Drawing?.Invoke(gameTime);

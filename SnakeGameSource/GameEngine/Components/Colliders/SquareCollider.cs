@@ -1,41 +1,44 @@
-﻿using Microsoft.Xna.Framework;
+﻿using CommunityToolkit.Diagnostics;
+using Microsoft.Xna.Framework;
 
 namespace SnakeGameSource.GameEngine.Components.Colliders;
 
-public class SquareCollider : Collider
+public sealed class SquareCollider : Collider
 {
     private Transform? _transform;
 
-    private void Awake()
+    protected override void Awake()
     {
-        _transform = Parent!.Transform;
+        Guard.IsNotNull(Parent, nameof(Parent));
+        _transform = Parent.Transform;
     }
 
     public override float GetDistanceToEdge(Vector2 position)
     {
-        if (_transform is null)
-        {
-            throw new NullReferenceException(nameof(_transform) + "must be not null");
-        }
+        Guard.IsNotNull(_transform, nameof(_transform));
+        //
+        // Vector2 directionToCollider = Vector2.Normalize(_transform.Position - position).Abs();
+        // (Vector2 unitVector, float sideLength) = directionToCollider.X > directionToCollider.Y
+        //     ? (Vector2.UnitX, _transform.Scale.X * Scale.X)
+        //     : (Vector2.UnitY, _transform.Scale.Y * Scale.Y);
+        //
+        // float cosBetweenVectors = Vector2.Dot(unitVector, directionToCollider);
+        //
+        // return cosBetweenVectors is 0 ? sideLength : sideLength / 2 / cosBetweenVectors;
+        
+        Vector2 directionToCollider = _transform.Position - position;
 
-        Vector2 vectorToCollider = Vector2.Normalize(_transform.Position - position).Abs();
-        Vector2 unitVector;
-        float   sideLength;
+        // Используем метрику Махаланобиса для расчета расстояния.
+        // Для этого необходимо определить матрицу ковариации.
+        // В этом примере используется единичная матрица, что эквивалентно Евклидовому расстоянию.
+        Matrix covarianceMatrix = Matrix.Identity;
 
-        if (vectorToCollider.X > vectorToCollider.Y)
-        {
-            unitVector = Vector2.UnitX;
-            sideLength = _transform.Scale.X * Scale.X;
-        }
-        else
-        {
-            unitVector = Vector2.UnitY;
-            sideLength = _transform.Scale.Y * Scale.Y;
-        }
+        // Преобразуем направление в махаланобисово расстояние.
+        float mahalanobisDistance = Vector2.Transform(directionToCollider, covarianceMatrix).Length();
 
-        float cosBetweenVectors = Vector2.Dot(unitVector, vectorToCollider);
+        // Возвращаем расстояние, учитывая масштаб.
+        return mahalanobisDistance * Scale.Length();
 
-        return sideLength / 2 / cosBetweenVectors;
     }
 
     public override bool TryCopyTo(Component component)

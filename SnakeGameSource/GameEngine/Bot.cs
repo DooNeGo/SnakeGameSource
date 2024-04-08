@@ -7,17 +7,17 @@ using SnakeGameSource.Model.Abstractions;
 
 namespace SnakeGameSource.GameEngine;
 
-internal class Bot : IInput
+internal sealed class Bot : IInput
 {
     private readonly IFoodCreator _foodCreator;
     private readonly Input        _input;
     private readonly IMovable     _movable;
 
-    public Bot(IMovable movable, IFoodCreator foodCreator, IGrid grid)
+    public Bot(IMovable movable, IFoodCreator foodCreator)
     {
         _movable     = movable;
         _foodCreator = foodCreator;
-        _input       = new Input(grid);
+        _input       = new Input();
 
         _input.KeyDown += p => { KeyDown?.Invoke(p); };
     }

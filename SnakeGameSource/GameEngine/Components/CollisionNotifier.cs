@@ -1,6 +1,6 @@
 ﻿namespace SnakeGameSource.GameEngine.Components;
 
-internal class CollisionNotifier : Component
+internal sealed class CollisionNotifier : Component
 {
     public event Action<GameObject>? CollisionEnter;
 
@@ -16,7 +16,7 @@ internal class CollisionNotifier : Component
         return true;
     }
 
-    private void OnCollisionEnter(GameObject gameObject)
+    protected override void OnCollisionEnter(GameObject gameObject)
     {
         CollisionEnter?.Invoke(gameObject);
     }

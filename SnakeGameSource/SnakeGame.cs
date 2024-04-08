@@ -7,11 +7,11 @@ using SnakeGameSource.Model.Abstractions;
 
 namespace SnakeGameSource;
 
-public class SnakeGame : Game2D
+public sealed class SnakeGame : Game2D
 {
-    private PhysicsMovement _physicsMovement;
-    private float           _value;
-    
+    private PhysicsMovement? _physicsMovement;
+    private float            _value;
+
     public SnakeGame()
     {
         Configuring  += OnConfiguring;
@@ -21,7 +21,7 @@ public class SnakeGame : Game2D
         Window.AllowUserResizing = true;
     }
 
-    private Color[] BackgroundColors { get; set; } = [new Color(224, 172, 213), new Color(57, 147, 221)];
+    private Color[] BackgroundColors { get; } = [new Color(224, 172, 213), new Color(57, 147, 221)];
 
     private void OnConfiguring(DiContainer container)
     {
@@ -31,7 +31,7 @@ public class SnakeGame : Game2D
                  .AddSingleton<IFoodCreator, FoodCreator>()
                  .AddSingleton<PhysicsMovement>();
     }
-    
+
     private void OnInitializing()
     {
         Input.KeyDown += OnKeyDown;
@@ -48,7 +48,7 @@ public class SnakeGame : Game2D
 
     private void OnUpdating(GameTime gameTime)
     {
-        _physicsMovement.Update(gameTime.ElapsedGameTime);
+        _physicsMovement?.Update(gameTime.ElapsedGameTime);
         BackgroundColor =  Color.Lerp(BackgroundColors[0], BackgroundColors[1], MathF.Cos(_value));
         _value          += 0.005f * TimeRatio;
     }

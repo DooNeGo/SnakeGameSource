@@ -1,4 +1,5 @@
 ﻿using System.Collections.Frozen;
+using CommunityToolkit.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -7,16 +8,14 @@ using SnakeGameSource.GameEngine.Components;
 
 namespace SnakeGameSource.GameEngine;
 
-internal class SpriteDrawer(ContentManager content, SpriteBatch spriteBatch, IGrid grid, IScene scene) : ISpriteDrawer
+internal sealed class SpriteDrawer
+    (ContentManager content, SpriteBatch spriteBatch, IGrid grid, IScene scene) : ISpriteDrawer
 {
     private FrozenDictionary<TextureName, Texture2D>? _textures;
 
     public void Draw()
     {
-        if (_textures is null)
-        {
-            throw new NullReferenceException("No sprites");
-        }
+        Guard.IsNotNull(_textures);
 
         spriteBatch.Begin();
 
@@ -34,10 +33,10 @@ internal class SpriteDrawer(ContentManager content, SpriteBatch spriteBatch, IGr
                           * textureConfig.Scale
                           * transform.Scale
                           / _textures[textureConfig.Name].Bounds.Size.ToVector2();
-            Point spriteCenter = _textures[textureConfig.Name].Bounds.Center;
+            var spriteCenter = _textures[textureConfig.Name].Bounds.Center.ToVector2();
 
             spriteBatch.Draw(_textures[textureConfig.Name], absolutePosition, null, textureConfig.Color,
-                             transform.Rotation.Z, spriteCenter.ToVector2(), scale, SpriteEffects.None, 1);
+                             transform.Rotation.Z, spriteCenter, scale, SpriteEffects.None, 1);
         }
 
         spriteBatch.End();
@@ -48,7 +47,7 @@ internal class SpriteDrawer(ContentManager content, SpriteBatch spriteBatch, IGr
         var           textures = new Dictionary<TextureName, Texture2D>();
         TextureName[] names    = Enum.GetValues<TextureName>();
 
-        foreach (TextureName name in names)
+        foreach (TextureName name in names.AsSpan())
         {
             var texture = content.Load<Texture2D>(name.ToString());
             textures.Add(name, texture);
@@ -59,12 +58,9 @@ internal class SpriteDrawer(ContentManager content, SpriteBatch spriteBatch, IGr
 
     public void UnloadContent()
     {
-        if (_textures is null)
-        {
-            throw new NullReferenceException("No sprites");
-        }
+        Guard.IsNotNull(_textures);
 
-        foreach (Texture2D texture in _textures.Values)
+        foreach (Texture2D texture in _textures.Values.AsSpan())
         {
             texture.Dispose();
         }

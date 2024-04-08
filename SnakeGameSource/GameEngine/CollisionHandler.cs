@@ -1,17 +1,16 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Drawing;
+using CommunityToolkit.HighPerformance;
+using CommunityToolkit.HighPerformance.Helpers;
+using Microsoft.Xna.Framework;
 using SnakeGameSource.GameEngine.Abstractions;
 using SnakeGameSource.GameEngine.Components;
 using SnakeGameSource.GameEngine.Components.Colliders;
 
 namespace SnakeGameSource.GameEngine;
 
-public class CollisionHandler(IScene scene) : ICollisionHandler
+public sealed class CollisionHandler(IScene scene) : ICollisionHandler
 {
-    private const string CollisionMethodName = "OnCollisionEnter";
-
-    private static readonly Type[] InputType = [typeof(GameObject)];
-
-    private readonly List<Collider> _sceneColliders = [];
+    private readonly List<Collider> _colliders = [];
 
     public void Update()
     {
@@ -31,7 +30,15 @@ public class CollisionHandler(IScene scene) : ICollisionHandler
         var collider1 = (Collider)gameObject.AddComponent(colliderType);
         collider1.Scale = scale;
 
-        return _sceneColliders.Any(collider2 => IsCollisionBetween(collider1, collider2));
+        foreach (Collider collider in _colliders.AsSpan())
+        {
+            if (IsCollisionBetween(collider1, collider))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public bool IsCollidingWithAnyCollider<T>(Vector2 position, Vector2 scale) where T : Collider, new()
@@ -41,57 +48,96 @@ public class CollisionHandler(IScene scene) : ICollisionHandler
 
     private void UpdateCollidersList()
     {
-        _sceneColliders.Clear();
+        _colliders.Clear();
 
         foreach (GameObject gameObject in scene.GetGameObjects())
         {
             if (gameObject.TryGetComponent(out Collider? collider))
             {
-                _sceneColliders.Add(collider);
+                _colliders.Add(collider);
             }
         }
     }
 
     private static bool IsCollisionBetween(Collider collider1, Collider collider2)
     {
-        Transform transform1 = collider1.Parent!.Transform;
-        Transform transform2 = collider2.Parent!.Transform;
+        RectangleF bounds1 = collider1.GetBounds();
+        RectangleF bounds2 = collider2.GetBounds();
 
-        Vector2 position1 = transform1.Position;
-        Vector2 position2 = transform2.Position;
+        if (!bounds1.IntersectsWith(bounds2))
+        {
+            return false;
+        }
+
+        Vector2 position1 = collider1.Parent!.Transform.Position;
+        Vector2 position2 = collider2.Parent!.Transform.Position;
 
         float distanceToEdge1 = collider1.GetDistanceToEdge(position2);
+        if (distanceToEdge1 is float.NaN)
+        {
+            return true;
+        }
+
         float distanceToEdge2 = collider2.GetDistanceToEdge(position1);
+        if (distanceToEdge2 is float.NaN)
+        {
+            return true;
+        }
+
         float distanceBetween = Vector2.Distance(position1, position2);
 
         return distanceToEdge1 + distanceToEdge2 >= distanceBetween;
     }
-    
+
     private void CheckCollisions()
     {
-        Parallel.For(0, _sceneColliders.Count - 1, i =>
+        if (_colliders.Count <= 1)
         {
-            var temp = new object?[1];
+            return;
+        }
 
-            for (int j = i + 1; j < _sceneColliders.Count; j++)
+        var collisionChecker = new CollisionChecker(_colliders);
+
+        if (_colliders.Count <= 100)
+        {
+            for (var i = 0; i < _colliders.Count - 1; i++)
             {
-                Collider collider1 = _sceneColliders[i];
-                Collider collider2 = _sceneColliders[j];
+                collisionChecker.Invoke(i);
+            }
+        }
+        else
+        {
+            Parallel.For(0, _colliders.Count - 1, i => collisionChecker.Invoke(i));
+        }
+    }
+
+    private static void TryInvokeCollision(GameObject gameObject1, GameObject gameObject2)
+    {
+        foreach (Component component in gameObject1.GetComponents())
+        {
+            MethodInvoker.OnCollisionEnter(component, gameObject2);
+        }
+    }
+
+    private readonly struct CollisionChecker(List<Collider> colliders) : IAction
+    {
+        public void Invoke(int i)
+        {
+            ReadOnlySpan<Collider> span = colliders.AsSpan();
+
+            for (int j = i + 1; j < span.Length; j++)
+            {
+                Collider collider1 = span[i];
+                Collider collider2 = span[j];
 
                 if (!IsCollisionBetween(collider1, collider2))
                 {
                     continue;
                 }
-                
-                TryInvokeCollision(collider1.Parent!, collider2.Parent!, temp);
-                TryInvokeCollision(collider2.Parent!, collider1.Parent!, temp);
-            }
-        });
-    }
 
-    private static void TryInvokeCollision(GameObject gameObject1, GameObject gameObject2, object?[] temp)
-    {
-        temp[0] = gameObject2;
-        gameObject1.SendMessage(CollisionMethodName, InputType, temp);
+                TryInvokeCollision(collider1.Parent!, collider2.Parent!);
+                TryInvokeCollision(collider2.Parent!, collider1.Parent!);
+            }
+        }
     }
 }

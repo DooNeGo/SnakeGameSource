@@ -2,7 +2,7 @@
 
 namespace SnakeGameSource.GameEngine.Components;
 
-public class Transform : Component
+public sealed class Transform : Component
 {
     public Vector2 Position { get; set; }
 

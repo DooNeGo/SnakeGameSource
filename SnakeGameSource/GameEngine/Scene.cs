@@ -1,25 +1,25 @@
-﻿using SnakeGameSource.GameEngine.Abstractions;
+﻿using CommunityToolkit.HighPerformance;
+using SnakeGameSource.GameEngine.Abstractions;
+using SnakeGameSource.GameEngine.Components;
 
 namespace SnakeGameSource.GameEngine;
 
-public class Scene : IScene
+public sealed class Scene : IScene
 {
-    private const string UpdateMethodName = "Update";
-
-    private static readonly Type[]    InputType  = [typeof(TimeSpan)];
-    private static readonly object?[] InputDelta = new object?[1];
-
     private readonly List<IEnumerable<GameObject>> _compositeObjects = [];
     private readonly List<GameObject>              _gameObjects      = [];
 
     public void Add(params IEnumerable<GameObject>[] compositeObjects)
     {
-        _compositeObjects.AddRange(compositeObjects);
+        foreach (IEnumerable<GameObject> compositeObject in compositeObjects.AsSpan())
+        {
+            _compositeObjects.Add(compositeObject);
+        }
     }
 
     public void Remove(params IEnumerable<GameObject>[] compositeObjects)
     {
-        foreach (IEnumerable<GameObject> compositeObject in compositeObjects)
+        foreach (IEnumerable<GameObject> compositeObject in compositeObjects.AsSpan())
         {
             _compositeObjects.Remove(compositeObject);
         }
@@ -31,26 +31,40 @@ public class Scene : IScene
         InvokeUpdateMethods(delta);
     }
 
-    public IEnumerable<GameObject> GetGameObjects()
+    public ReadOnlySpan<GameObject> GetGameObjects()
     {
-        return _gameObjects;
+        return _gameObjects.AsSpan();
     }
 
     private void InvokeUpdateMethods(TimeSpan delta)
     {
-        InputDelta[0] = delta;
-
-        Parallel.For(0, _gameObjects.Count, i =>
+        if (_gameObjects.Count <= 100)
         {
-            _gameObjects[i].SendMessage(UpdateMethodName, InputType, InputDelta);
-        });
+            foreach (GameObject gameObject in GetGameObjects())
+            {
+                foreach (Component component in gameObject.GetComponents())
+                {
+                    MethodInvoker.Update(component, delta);
+                }
+            }
+        }
+        else
+        {
+            Parallel.ForEach(_gameObjects, gameObject =>
+            {
+                foreach (Component component in gameObject.GetComponents())
+                {
+                    MethodInvoker.Update(component, delta);
+                }
+            });
+        }
     }
 
     private void UpdateGameObjectsList()
     {
         _gameObjects.Clear();
 
-        foreach (IEnumerable<GameObject> compositeObject in _compositeObjects)
+        foreach (IEnumerable<GameObject> compositeObject in _compositeObjects.AsSpan())
         {
             _gameObjects.AddRange(compositeObject);
         }

@@ -8,5 +8,5 @@ public interface IScene
 
     public void Update(TimeSpan delta);
 
-    public IEnumerable<GameObject> GetGameObjects();
+    public ReadOnlySpan<GameObject> GetGameObjects();
 }
