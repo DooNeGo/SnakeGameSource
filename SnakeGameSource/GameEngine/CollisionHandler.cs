@@ -20,7 +20,7 @@ public sealed class CollisionHandler(IScene scene) : ICollisionHandler
 
     public bool IsCollidingWithAnyCollider(Type colliderType, Vector2 position, Vector2 scale)
     {
-        if (!colliderType.IsAssignableTo(typeof(Collider)))
+        if (!colliderType.IsSubclassOf(typeof(Collider)))
         {
             throw new ArgumentException($"{nameof(colliderType)} must be an instance of 'Collider' class");
         }

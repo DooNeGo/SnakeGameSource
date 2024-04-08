@@ -3,6 +3,7 @@ using System.Reflection;
 using CommunityToolkit.Diagnostics;
 using CommunityToolkit.HighPerformance;
 using SnakeGameSource.GameEngine.Components;
+using SnakeGameSource.GameEngine.Exceptions;
 
 namespace SnakeGameSource.GameEngine;
 
@@ -11,9 +12,7 @@ public sealed class GameObject
     private const string ParentPropertyName  = "Parent";
 
     private static readonly MethodInvoker Invoker   = new();
-    private static readonly PropertyInfo ParentProperty = typeof(Component).GetProperty(ParentPropertyName)
-                                                       ?? throw new NullReferenceException(
-                                                              "The 'Component' class doesn't contain a parent property");
+    private static readonly PropertyInfo ParentProperty = typeof(Component).GetProperty(ParentPropertyName)!;
 
     private readonly List<Component> _componentsList = [];
 
@@ -118,7 +117,7 @@ public sealed class GameObject
             return component;
         }
 
-        throw new NullReferenceException($"There is no component of type: {type.Name}");
+        throw new ComponentNotFoundException(type.Name);
     }
 
     public T GetRequiredComponent<T>() where T : Component
@@ -128,7 +127,7 @@ public sealed class GameObject
             return component;
         }
 
-        throw new NullReferenceException($"There is no component of type: {typeof(T).Name}");
+        throw new ComponentNotFoundException(typeof(T).Name);
     }
 
     public void SendMessage(string methodName, Type[] parametersTypes, object?[]? parameters)

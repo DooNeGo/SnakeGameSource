@@ -19,7 +19,7 @@ internal sealed class SnakeConfig
 
     public Vector2 StartDirection { get; } = Vector2.UnitX;
 
-    public int InitialLength { get; } = 2200;
+    public int InitialLength { get; } = 600;
 
     public float MinSpeed { get; } = 0.5f;
 

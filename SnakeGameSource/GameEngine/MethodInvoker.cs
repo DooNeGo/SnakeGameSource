@@ -1,7 +1,8 @@
+using CommunityToolkit.Diagnostics;
+using SnakeGameSource.GameEngine.Components;
 using System.Collections.Frozen;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using SnakeGameSource.GameEngine.Components;
 
 namespace SnakeGameSource.GameEngine;
 
@@ -38,28 +39,26 @@ public sealed class MethodInvoker
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "Awake")]
     internal static extern void Awake(Component component);
-    
+
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "Update")]
     internal static extern void Update(Component component, TimeSpan time);
 
     [UnsafeAccessor(UnsafeAccessorKind.Method, Name = "OnCollisionEnter")]
     internal static extern void OnCollisionEnter(Component component, GameObject gameObject);
 
-    public void TryInvokeMethod(Component obj, string methodName, Type[] paramsTypes, object?[]? parameters)
+    public void TryInvokeMethod(Component component, string methodName, Type[] paramsTypes, object?[]? parameters)
     {
-        Type type = obj.GetType();
+        Type type = component.GetType();
 
         if (!_methodsCaches.TryGetValue(type, out MethodsCache cache))
         {
-            throw new Exception();
+            ThrowHelper.ThrowMissingMethodException(methodName);
         }
 
-        if (!cache.Methods.TryGetValue(methodName, out MethodInfo? method))
+        if (cache.Methods.TryGetValue(methodName, out MethodInfo? method))
         {
-            return;
+            method.Invoke(component, parameters);
         }
-
-        method.Invoke(obj, parameters);
     }
 
     private readonly struct MethodsCache(FrozenDictionary<string, MethodInfo> methods)

@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using CommunityToolkit.Diagnostics;
+using System.Reflection;
 
 namespace SnakeGameSource.GameEngine;
 
@@ -15,12 +16,12 @@ public sealed class DiContainer
 
         if (type.IsInterface)
         {
-            throw new ArgumentException("You can't add an interface as an implementation");
+            ThrowHelper.ThrowArgumentException("You can't add an interface as an implementation");
         }
 
         if (_singletonInstances.ContainsKey(type))
         {
-            throw new ArgumentException($"You can't add type {type.Name} as singleton and as transient");
+            ThrowHelper.ThrowArgumentException($"You can't add type {type.Name} as singleton and as transient");
         }
 
         _transientTypes.Add(type);
@@ -78,12 +79,12 @@ public sealed class DiContainer
 
         if (type.IsInterface)
         {
-            throw new ArgumentException("You can't add an interface as an implementation");
+            ThrowHelper.ThrowArgumentException("You can't add an interface as an implementation");
         }
 
         if (_transientTypes.Contains(type))
         {
-            throw new ArgumentException($"You can't add type {type.Name} as singleton and as transient");
+            ThrowHelper.ThrowArgumentException($"You can't add type {type.Name} as singleton and as transient");
         }
 
         _singletonInstances.TryAdd(type, instance);
@@ -121,7 +122,7 @@ public sealed class DiContainer
 
         if (!_singletonInstances.TryGetValue(type, out object? instance))
         {
-            throw new ArgumentException($"You forgot to add {type.Name} in the Container.");
+            ThrowHelper.ThrowArgumentNullException($"You forgot to add {type.Name} in the Container.");
         }
 
         if (instance is null)

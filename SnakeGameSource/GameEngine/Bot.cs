@@ -20,6 +20,7 @@ internal sealed class Bot : IInput
         _input       = new Input();
 
         _input.KeyDown += p => { KeyDown?.Invoke(p); };
+        _input.Gesture += g => { Gesture?.Invoke(g); };
     }
 
     public float Sensitivity { get; set; } = 1f;
