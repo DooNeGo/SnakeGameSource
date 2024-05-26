@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Diagnostics;
 using Microsoft.Xna.Framework;
 
-namespace SnakeGameSource.GameEngine.Components.Colliders;
+namespace SnakeGameSource.GameEngine.Common.Components.Colliders;
 
 public sealed class SquareCollider : Collider
 {
@@ -16,6 +16,7 @@ public sealed class SquareCollider : Collider
     public override float GetDistanceToEdge(Vector2 position)
     {
         Guard.IsNotNull(_transform, nameof(_transform));
+
         //
         // Vector2 directionToCollider = Vector2.Normalize(_transform.Position - position).Abs();
         // (Vector2 unitVector, float sideLength) = directionToCollider.X > directionToCollider.Y
@@ -25,7 +26,7 @@ public sealed class SquareCollider : Collider
         // float cosBetweenVectors = Vector2.Dot(unitVector, directionToCollider);
         //
         // return cosBetweenVectors is 0 ? sideLength : sideLength / 2 / cosBetweenVectors;
-        
+
         Vector2 directionToCollider = _transform.Position - position;
 
         // Используем метрику Махаланобиса для расчета расстояния.
@@ -38,18 +39,5 @@ public sealed class SquareCollider : Collider
 
         // Возвращаем расстояние, учитывая масштаб.
         return mahalanobisDistance * Scale.Length();
-
-    }
-
-    public override bool TryCopyTo(Component component)
-    {
-        if (component is not SquareCollider collider)
-        {
-            return false;
-        }
-
-        collider.Scale = Scale;
-
-        return true;
     }
 }

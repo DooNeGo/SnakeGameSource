@@ -3,9 +3,10 @@ using CommunityToolkit.HighPerformance;
 using CommunityToolkit.HighPerformance.Buffers;
 using Microsoft.Xna.Framework;
 using SnakeGameSource.Components;
-using SnakeGameSource.GameEngine;
 using SnakeGameSource.GameEngine.Abstractions;
-using SnakeGameSource.GameEngine.Components;
+using SnakeGameSource.GameEngine.Common;
+using SnakeGameSource.GameEngine.Common.Components;
+using SnakeGameSource.GameEngine.Extensions;
 using SnakeGameSource.Model.Abstractions;
 
 namespace SnakeGameSource.Model;
@@ -17,73 +18,30 @@ internal sealed class Snake : ISnake
     private readonly List<GameObject> _projectedSnakeParts = [];
     private readonly List<GameObject> _snakeParts          = [];
 
-    private Vector2[] _directions;
-
     private float   _maxSpeed;
     private float   _minSpeed;
-    private Vector2 _scale = new(1f);
+    private Vector2 _scale = Vector2.One;
 
-    public Snake(SnakeConfig snakeConfig, IGrid grid)
+    public Snake(SnakeConfig config, IGrid grid)
     {
-        MoveSpeed    = snakeConfig.MoveSpeed;
-        SlewingSpeed = snakeConfig.SlewingSpeed;
-        Direction    = snakeConfig.StartDirection;
+        MoveSpeed    = config.MoveSpeed;
+        SlewingSpeed = config.SlewingSpeed;
+        Direction    = config.StartDirection;
         _grid        = grid;
-        _directions  = new Vector2[snakeConfig.InitialLength + 1];
-
-        for (var i = 0; i < _directions.Length; i++)
-        {
-            _directions[i] = snakeConfig.StartDirection;
-        }
-
-        for (var i = 0; i <= snakeConfig.InitialLength; i++)
-        {
-            GameObject snakePart = i is 0 ? new GameObject("Snake head") : new GameObject();
-
-            Transform transform = snakePart.Transform;
-            transform.Position = snakeConfig.StartPosition - Direction * Scale * i;
-            transform.Scale    = Scale;
-
-            var texture = snakePart.AddComponent<TextureConfig>();
-            if (i is 0)
-            {
-                texture.Color = snakeConfig.HeadColor;
-                texture.Name  = TextureName.SnakeHead;
-            }
-            else
-            {
-                texture.Color = snakeConfig.BodyColor;
-                texture.Name  = TextureName.SnakeBody;
-            }
-
-            if (i is not 1)
-            {
-                snakePart.AddComponent(snakeConfig.ColliderType);
-            }
-
-            _snakeParts.Add(snakePart);
-        }
+        
+        CreateHead(config);
+        CreateBody(config);
 
         UpdateProjectedSnakeParts();
         ProjectedHead.AddComponent<CollisionNotifier>().CollisionEnter += OnCollisionEnter;
     }
 
-    private GameObject Head => _snakeParts[0];
-
-    private GameObject ProjectedHead => _projectedSnakeParts[0];
-
     //TODO: Каждые 10 очков смена фона и сделать маленькую надпись скора в углу
     public int Score { get; private set; }
 
-    public IEnumerator<GameObject> GetEnumerator()
-    {
-        return _projectedSnakeParts.GetEnumerator();
-    }
+    public IEnumerator<GameObject> GetEnumerator() => _projectedSnakeParts.GetEnumerator();
 
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        return _projectedSnakeParts.GetEnumerator();
-    }
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     public Vector2 Position => Head.Transform.Position;
 
@@ -106,28 +64,41 @@ internal sealed class Snake : ISnake
     }
 
     public float SlewingSpeed { get; }
+    
+    private GameObject Head => _snakeParts[0];
+
+    private GameObject ProjectedHead => _projectedSnakeParts[0];
 
     public void MoveTo(Vector2 nextPosition)
     {
-        if (nextPosition == Position)
-        {
-            return;
-        }
-
+        if (nextPosition == Position) return;
         using SpanOwner<Vector2> offsets = CalculateOffsets(nextPosition);
-
-        //Vector2[] nextDirections = CalculateDirections(offsets);
-        //float[] rotations = CalculateRotations(nextDirections);
-
         ApplyOffsets(offsets.Span);
-
-        //ApplyDirections(nextDirections);
-        //ApplyRotations(rotations);
-
         UpdateProjectedSnakeParts();
     }
 
     public event Action? Die;
+
+    private void CreateHead(SnakeConfig config) =>
+        _snakeParts.Add(new GameObject("Snake Head")
+            .WithTransform(config.StartPosition, Scale)
+            .WithTextureConfig(TextureName.SnakeHead, config.HeadColor)
+            .WithCollider(config.ColliderType));
+
+    private void CreateBody(SnakeConfig config)
+    {
+        _snakeParts.Add(new GameObject()
+            .WithTransform(config.StartPosition - Direction * Scale, Scale)
+            .WithTextureConfig(TextureName.SnakeBody, config.BodyColor));
+
+        for (var i = 1; i < config.InitialLength; i++)
+        {
+            _snakeParts.Add(new GameObject()
+                .WithTransform(config.StartPosition - Direction * Scale * (i + 1), Scale)
+                .WithCollider(config.ColliderType)
+                .WithTextureConfig(TextureName.SnakeBody, config.BodyColor));
+        }
+    }
 
     private SpanOwner<Vector2> CalculateOffsets(Vector2 nextPosition)
     {
@@ -135,7 +106,7 @@ internal sealed class Snake : ISnake
         Span<Vector2>      offsets   = spanOwner.Span;
 
         offsets[0] = nextPosition - Position;
-        Span<GameObject> span = _snakeParts.AsSpan();
+        ReadOnlySpan<GameObject> span = _snakeParts.AsSpan();
 
         for (var i = 1; i < span.Length; i++)
         {
@@ -149,39 +120,6 @@ internal sealed class Snake : ISnake
         return spanOwner;
     }
 
-    private Vector2[] CalculateDirections(Vector2[] offsets)
-    {
-        var directions = new Vector2[offsets.Length];
-
-        for (var i = 0; i < directions.Length; i++)
-        {
-            directions[i] = offsets[i] != Vector2.Zero ? Vector2.Normalize(offsets[i]) : Vector2.Zero;
-        }
-
-        return directions;
-    }
-
-    private float[] CalculateRotations(Vector2[] nextDirections)
-    {
-        var rotations = new float[nextDirections.Length];
-
-        for (var i = 0; i < rotations.Length; i++)
-        {
-            if (_directions.Length <= i)
-            {
-                rotations[i] = 0;
-            }
-            else
-            {
-                float   cos    = Vector2.Dot(_directions[i], nextDirections[i]);
-                Vector2 vector = _directions[i] - nextDirections[i];
-                rotations[i] = MathF.Asin(cos);
-            }
-        }
-
-        return rotations;
-    }
-
     private void ApplyOffsets(Span<Vector2> offsets)
     {
         Head.Transform.Position += offsets[0];
@@ -189,21 +127,6 @@ internal sealed class Snake : ISnake
         for (var i = 1; i < offsets.Length; i++)
         {
             _snakeParts[i].Transform.Position += offsets[i] * offsets[0].Length();
-        }
-    }
-
-    private void ApplyDirections(Vector2[] nextDirections)
-    {
-        _directions = nextDirections;
-    }
-
-    private void ApplyRotations(float[] rotations)
-    {
-        foreach (GameObject gameObject in _snakeParts)
-        {
-            Transform  transform = gameObject.Transform;
-            Quaternion rotation  = transform.Rotation;
-            transform.Rotation = rotation;
         }
     }
 
@@ -259,7 +182,6 @@ internal sealed class Snake : ISnake
                 {
                     MoveSpeed += effect.Value;
                 }
-
                 break;
 
             case FoodEffectType.Scale:
@@ -267,19 +189,11 @@ internal sealed class Snake : ISnake
                 {
                     Scale += new Vector2(effect.Value);
                 }
-
                 break;
 
             case FoodEffectType.Length:
-                if (effect.Value > 0)
-                {
-                    AddSnakePart();
-                }
-                else if (_snakeParts.Count - 1 > 2)
-                {
-                    RemoveSnakePart(_snakeParts.Count - 1);
-                }
-
+                if (effect.Value > 0) AddSnakePart();
+                else if (_snakeParts.Count - 1 > 2) RemoveSnakePart(_snakeParts.Count - 1);
                 break;
 
             default:
@@ -287,13 +201,7 @@ internal sealed class Snake : ISnake
         }
     }
 
-    private void RemoveSnakePart(int snakePartIndex)
-    {
-        _snakeParts.RemoveAt(snakePartIndex);
-    }
+    private void RemoveSnakePart(int snakePartIndex) => _snakeParts.RemoveAt(snakePartIndex);
 
-    private void AddSnakePart()
-    {
-        _snakeParts.Add(_snakeParts[^1].Clone());
-    }
+    private void AddSnakePart() => _snakeParts.Add(_snakeParts[^1].Clone());
 }

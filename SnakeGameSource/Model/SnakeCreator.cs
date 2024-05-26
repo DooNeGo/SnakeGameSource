@@ -1,6 +1,3 @@
-using SnakeGameSource.GameEngine;
-using SnakeGameSource.GameEngine.Abstractions;
-
 namespace SnakeGameSource.Model;
 
 public sealed class SnakeCreator

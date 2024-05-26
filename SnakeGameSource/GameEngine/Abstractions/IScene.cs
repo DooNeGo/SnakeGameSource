@@ -1,4 +1,6 @@
-﻿namespace SnakeGameSource.GameEngine.Abstractions;
+﻿using SnakeGameSource.GameEngine.Common;
+
+namespace SnakeGameSource.GameEngine.Abstractions;
 
 public interface IScene
 {
@@ -8,5 +10,5 @@ public interface IScene
 
     public void Update(TimeSpan delta);
 
-    public ReadOnlySpan<GameObject> GetGameObjects();
+    public ReadOnlySpan<GameObject> GameObjects { get; }
 }

@@ -1,3 +1,5 @@
+using SnakeGameSource.GameEngine.Common;
+
 namespace SnakeGameSource.GameEngine;
 
 internal static class ObjectsTree

@@ -58,7 +58,6 @@ public sealed class Input : IInput
     public bool TryGetMoveDirection([NotNullWhen(true)] out Vector2? moveDirection)
     {
         moveDirection = GetMoveDirection();
-
         return moveDirection is not null;
     }
 

@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.HighPerformance;
 using SnakeGameSource.GameEngine.Abstractions;
-using SnakeGameSource.GameEngine.Components;
+using SnakeGameSource.GameEngine.Common;
+using SnakeGameSource.GameEngine.Common.Components;
 
 namespace SnakeGameSource.GameEngine;
 
@@ -31,18 +32,15 @@ public sealed class Scene : IScene
         InvokeUpdateMethods(delta);
     }
 
-    public ReadOnlySpan<GameObject> GetGameObjects()
-    {
-        return _gameObjects.AsSpan();
-    }
+    public ReadOnlySpan<GameObject> GameObjects => _gameObjects.AsSpan();
 
     private void InvokeUpdateMethods(TimeSpan delta)
     {
         if (_gameObjects.Count <= 100)
         {
-            foreach (GameObject gameObject in GetGameObjects())
+            foreach (GameObject gameObject in GameObjects)
             {
-                foreach (Component component in gameObject.GetComponents())
+                foreach (Component component in gameObject.Components)
                 {
                     MethodInvoker.Update(component, delta);
                 }
@@ -52,7 +50,7 @@ public sealed class Scene : IScene
         {
             Parallel.ForEach(_gameObjects, gameObject =>
             {
-                foreach (Component component in gameObject.GetComponents())
+                foreach (Component component in gameObject.Components)
                 {
                     MethodInvoker.Update(component, delta);
                 }

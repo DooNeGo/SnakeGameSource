@@ -1,4 +1,4 @@
-﻿using SnakeGameSource.GameEngine.Components;
+﻿using SnakeGameSource.GameEngine.Common.Components;
 
 namespace SnakeGameSource.Components;
 
@@ -19,10 +19,7 @@ public sealed class FoodEffect : Component
 
     public override bool TryCopyTo(Component component)
     {
-        if (component is not FoodEffect effect)
-        {
-            return false;
-        }
+        if (component is not FoodEffect effect) return false;
 
         effect.Value  = Value;
         effect.Type   = Type;

@@ -1,8 +1,9 @@
-using CommunityToolkit.Diagnostics;
-using SnakeGameSource.GameEngine.Components;
 using System.Collections.Frozen;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using CommunityToolkit.Diagnostics;
+using SnakeGameSource.GameEngine.Common;
+using SnakeGameSource.GameEngine.Common.Components;
 
 namespace SnakeGameSource.GameEngine;
 
@@ -61,8 +62,5 @@ public sealed class MethodInvoker
         }
     }
 
-    private readonly struct MethodsCache(FrozenDictionary<string, MethodInfo> methods)
-    {
-        public FrozenDictionary<string, MethodInfo> Methods { get; } = methods;
-    }
+    private readonly record struct MethodsCache(FrozenDictionary<string, MethodInfo> Methods);
 }

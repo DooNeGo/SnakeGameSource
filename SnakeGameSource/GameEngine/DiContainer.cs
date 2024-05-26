@@ -1,5 +1,5 @@
-﻿using CommunityToolkit.Diagnostics;
-using System.Reflection;
+﻿using System.Reflection;
+using CommunityToolkit.Diagnostics;
 
 namespace SnakeGameSource.GameEngine;
 
@@ -29,15 +29,9 @@ public sealed class DiContainer
         return this;
     }
 
-    public DiContainer AddSingleton<T>() where T : class
-    {
-        return AddSingletonInternal<T>(null);
-    }
+    public DiContainer AddSingleton<T>() where T : class => AddSingletonInternal<T>(null);
 
-    public DiContainer AddSingleton<T>(T instance) where T : class
-    {
-        return AddSingletonInternal(instance);
-    }
+    public DiContainer AddSingleton<T>(T instance) where T : class => AddSingletonInternal(instance);
 
     public DiContainer AddTransient<TAssociation, TImplementation>() where TImplementation : class
     {
@@ -49,16 +43,11 @@ public sealed class DiContainer
         return AddTransient<TImplementation>();
     }
 
-    public DiContainer AddSingleton<TAssociation, TImplementation>() where TImplementation : class
-    {
-        return AddSingletonInternal<TAssociation, TImplementation>(null);
-    }
+    public DiContainer AddSingleton<TAssociation, TImplementation>() where TImplementation : class =>
+        AddSingletonInternal<TAssociation, TImplementation>(null);
 
     public DiContainer AddSingleton<TAssociation, TImplementation>(TImplementation instance)
-        where TImplementation : class
-    {
-        return AddSingletonInternal<TAssociation, TImplementation>(instance);
-    }
+        where TImplementation : class => AddSingletonInternal<TAssociation, TImplementation>(instance);
 
     public void Build()
     {
@@ -105,20 +94,11 @@ public sealed class DiContainer
 
     public object GetInstance(Type type)
     {
-        if (_transientTypesAssociations.TryGetValue(type, out Type? transientType))
-        {
-            type = transientType;
-        }
+        if (_transientTypesAssociations.TryGetValue(type, out Type? transientType)) type = transientType;
 
-        if (_transientTypes.Contains(type))
-        {
-            return CreateInstance(type);
-        }
+        if (_transientTypes.Contains(type)) return CreateInstance(type);
 
-        if (_singletonTypesAssociations.TryGetValue(type, out Type? singletonType))
-        {
-            type = singletonType;
-        }
+        if (_singletonTypesAssociations.TryGetValue(type, out Type? singletonType)) type = singletonType;
 
         if (!_singletonInstances.TryGetValue(type, out object? instance))
         {
@@ -134,23 +114,17 @@ public sealed class DiContainer
         return instance;
     }
 
-    public T GetInstance<T>()
-    {
-        return (T)GetInstance(typeof(T));
-    }
+    public T GetInstance<T>() => (T)GetInstance(typeof(T));
 
     private object CreateInstance(Type type)
     {
         ConstructorInfo[] constructorInfo = type.GetConstructors();
         ParameterInfo[]   parameters      = constructorInfo[0].GetParameters();
 
-        if (parameters.Length <= 0)
-        {
-            return constructorInfo[0].Invoke(null);
-        }
+        if (parameters.Length is 0) return constructorInfo[0].Invoke(null);
 
         var objects = new object[parameters.Length];
-        
+
         for (var i = 0; i < objects.Length; i++)
         {
             Type parameterType = parameters[i].ParameterType;

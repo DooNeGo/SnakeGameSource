@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace SnakeGameSource.GameEngine.Components;
+namespace SnakeGameSource.GameEngine.Common.Components;
 
 public sealed class Transform : Component
 {

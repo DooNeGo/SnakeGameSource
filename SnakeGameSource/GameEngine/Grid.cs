@@ -36,17 +36,12 @@ public sealed class Grid : IGrid
         return projection;
     }
 
-    public Vector2 GetAbsolutePosition(Vector2 relativePosition)
-    {
-        return new Vector2(relativePosition.X * CellSize.X, relativePosition.Y * CellSize.Y);
-    }
+    public Vector2 GetAbsolutePosition(Vector2 relativePosition) =>
+        new(relativePosition.X * CellSize.X, relativePosition.Y * CellSize.Y);
 
     private void OnClientSizeChanged(object? sender, EventArgs e)
     {
-        if (sender is GameWindow window)
-        {
-            InitializeGrid(window);
-        }
+        if (sender is GameWindow window) InitializeGrid(window);
     }
 
     private void InitializeGrid(GameWindow window)

@@ -2,17 +2,17 @@
 using System.Reflection;
 using CommunityToolkit.Diagnostics;
 using CommunityToolkit.HighPerformance;
-using SnakeGameSource.GameEngine.Components;
+using SnakeGameSource.GameEngine.Common.Components;
 using SnakeGameSource.GameEngine.Exceptions;
 
-namespace SnakeGameSource.GameEngine;
+namespace SnakeGameSource.GameEngine.Common;
 
 public sealed class GameObject
 {
-    private const string ParentPropertyName  = "Parent";
+    private const string ParentPropertyName = "Parent";
 
-    private static readonly MethodInvoker Invoker   = new();
-    private static readonly PropertyInfo ParentProperty = typeof(Component).GetProperty(ParentPropertyName)!;
+    private static readonly MethodInvoker Invoker        = new();
+    private static readonly PropertyInfo  ParentProperty = typeof(Component).GetProperty(ParentPropertyName)!;
 
     private readonly List<Component> _componentsList = [];
 
@@ -54,7 +54,7 @@ public sealed class GameObject
 
         return component;
     }
-
+    
     private void CheckComponentType(Type type)
     {
         if (!type.IsSubclassOf(typeof(Component)))
@@ -72,7 +72,7 @@ public sealed class GameObject
 
     public Component? GetComponent(Type type)
     {
-        foreach (Component component in GetComponents())
+        foreach (Component component in Components)
         {
             if (type.IsInstanceOfType(component))
             {
@@ -85,7 +85,7 @@ public sealed class GameObject
 
     public T? GetComponent<T>() where T : Component
     {
-        foreach (Component component in GetComponents())
+        foreach (Component component in Components)
         {
             if (component is T tComponent)
             {
@@ -99,56 +99,43 @@ public sealed class GameObject
     public bool TryGetComponent(Type type, [NotNullWhen(true)] out Component? component)
     {
         component = GetComponent(type);
-
         return component is not null;
     }
 
     public bool TryGetComponent<T>([NotNullWhen(true)] out T? component) where T : Component
     {
         component = GetComponent<T>();
-
         return component is not null;
     }
 
     public Component GetRequiredComponent(Type type)
     {
-        if (TryGetComponent(type, out Component? component))
-        {
-            return component;
-        }
-
+        if (TryGetComponent(type, out Component? component)) return component;
         throw new ComponentNotFoundException(type.Name);
     }
 
     public T GetRequiredComponent<T>() where T : Component
     {
-        if (TryGetComponent(out T? component))
-        {
-            return component;
-        }
-
+        if (TryGetComponent(out T? component)) return component;
         throw new ComponentNotFoundException(typeof(T).Name);
     }
 
     public void SendMessage(string methodName, Type[] parametersTypes, object?[]? parameters)
     {
-        foreach (Component component in GetComponents())
+        foreach (Component component in Components)
         {
             Invoker.TryInvokeMethod(component, methodName, parametersTypes, parameters);
         }
     }
 
-    public void SendMessage(string methodName)
-    {
-        SendMessage(methodName, [], null);
-    }
+    public void SendMessage(string methodName) => SendMessage(methodName, [], null);
 
     public GameObject Clone()
     {
         var gameObject = new GameObject(Name);
         Transform.TryCopyTo(gameObject.Transform);
 
-        foreach (Component component in GetComponents())
+        foreach (Component component in Components)
         {
             component.TryCopyTo(gameObject.AddComponent(component.GetType()));
         }
@@ -156,8 +143,5 @@ public sealed class GameObject
         return gameObject;
     }
 
-    public ReadOnlySpan<Component> GetComponents()
-    {
-        return _componentsList.AsSpan();
-    }
+    public ReadOnlySpan<Component> Components => _componentsList.AsSpan();
 }

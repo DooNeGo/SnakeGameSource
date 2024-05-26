@@ -1,15 +1,15 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace SnakeGameSource.GameEngine.Components;
+namespace SnakeGameSource.GameEngine.Common.Components;
 
-internal enum TextureName
+public enum TextureName
 {
     SnakeHead,
     SnakeBody,
     Food
 }
 
-internal sealed class TextureConfig : Component
+public sealed class TextureConfig : Component
 {
     public TextureName Name { get; set; }
 

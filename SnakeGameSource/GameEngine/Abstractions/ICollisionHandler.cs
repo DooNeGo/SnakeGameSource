@@ -1,5 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
-using SnakeGameSource.GameEngine.Components.Colliders;
+using SnakeGameSource.GameEngine.Common.Components.Colliders;
 
 namespace SnakeGameSource.GameEngine.Abstractions;
 

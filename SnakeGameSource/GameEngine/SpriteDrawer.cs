@@ -4,12 +4,13 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using SnakeGameSource.GameEngine.Abstractions;
-using SnakeGameSource.GameEngine.Components;
+using SnakeGameSource.GameEngine.Common;
+using SnakeGameSource.GameEngine.Common.Components;
 
 namespace SnakeGameSource.GameEngine;
 
-internal sealed class SpriteDrawer
-    (ContentManager content, SpriteBatch spriteBatch, IGrid grid, IScene scene) : ISpriteDrawer
+internal sealed class SpriteDrawer(ContentManager content, SpriteBatch spriteBatch, IGrid grid, IScene scene)
+    : ISpriteDrawer
 {
     private FrozenDictionary<TextureName, Texture2D>? _textures;
 
@@ -19,12 +20,9 @@ internal sealed class SpriteDrawer
 
         spriteBatch.Begin();
 
-        foreach (GameObject gameObject in scene.GetGameObjects())
+        foreach (GameObject gameObject in scene.GameObjects)
         {
-            if (!gameObject.TryGetComponent(out TextureConfig? textureConfig))
-            {
-                continue;
-            }
+            if (!gameObject.TryGetComponent(out TextureConfig? textureConfig)) continue;
 
             Transform transform = gameObject.Transform;
 

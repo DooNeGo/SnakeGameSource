@@ -1,16 +1,13 @@
 ﻿using CommunityToolkit.Diagnostics;
 using Microsoft.Xna.Framework;
 
-namespace SnakeGameSource.GameEngine.Components.Colliders;
+namespace SnakeGameSource.GameEngine.Common.Components.Colliders;
 
 public sealed class CircleCollider : Collider
 {
     private Transform? _transform;
 
-    protected override void Awake()
-    {
-        _transform = Parent!.Transform;
-    }
+    protected override void Awake() => _transform = Parent!.Transform;
 
     public override float GetDistanceToEdge(Vector2 position)
     {
@@ -22,17 +19,5 @@ public sealed class CircleCollider : Collider
             : _transform.Scale.Y * Scale.Y;
 
         return radius / 2;
-    }
-
-    public override bool TryCopyTo(Component component)
-    {
-        if (component is not CircleCollider collider)
-        {
-            return false;
-        }
-
-        collider.Scale = Scale;
-
-        return false;
     }
 }

@@ -2,7 +2,7 @@
 using CommunityToolkit.Diagnostics;
 using Microsoft.Xna.Framework;
 
-namespace SnakeGameSource.GameEngine.Components.Colliders;
+namespace SnakeGameSource.GameEngine.Common.Components.Colliders;
 
 public abstract class Collider : Component
 {
@@ -20,5 +20,12 @@ public abstract class Collider : Component
         var point = new PointF(transform.Position.ToNumerics() - (size / 2f).ToVector2());
 
         return new RectangleF(point, size);
+    }
+
+    public override bool TryCopyTo(Component component)
+    {
+        if (component is not Collider collider) return false;
+        Scale = collider.Scale;
+        return true;
     }
 }

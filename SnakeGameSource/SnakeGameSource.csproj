@@ -7,8 +7,8 @@
         <AnalysisLevel>latest-recommended</AnalysisLevel>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.2.2" />
-        <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.2.2" />
+        <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.2.2"/>
+        <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.2.2"/>
         <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.1.303">
             <PrivateAssets>All</PrivateAssets>
         </PackageReference>

@@ -1,35 +1,32 @@
 ﻿using Microsoft.Xna.Framework;
 using SnakeGameSource.Components;
-using SnakeGameSource.GameEngine;
 using SnakeGameSource.GameEngine.Abstractions;
-using SnakeGameSource.GameEngine.Components;
-using SnakeGameSource.GameEngine.Components.Colliders;
+using SnakeGameSource.GameEngine.Common;
+using SnakeGameSource.GameEngine.Common.Components;
+using SnakeGameSource.GameEngine.Common.Components.Colliders;
+using SnakeGameSource.GameEngine.Extensions;
 using SnakeGameSource.Model.Abstractions;
 
 namespace SnakeGameSource.Model;
 
 internal sealed class FoodCreator : IFoodCreator
 {
-    private const int FoodLifeTime = 7;
+    private const int FoodLifeTimeInSeconds = 7;
 
     private readonly Vector2 _foodScale = new(0.5f);
 
-    public FoodCreator(IGrid grid, ICollisionHandler collisionHandler)
-    {
-        Food = new GameObject { Transform = { Scale = _foodScale } };
-
-        var textureConfig = Food.AddComponent<TextureConfig>();
-        textureConfig.Name  = TextureName.Food;
-        textureConfig.Color = Color.Red;
-
-        var random = Food.AddComponent<FoodParametersRandom>();
-        random.Grid             = grid;
-        random.CollisionHandler = collisionHandler;
-        random.FoodLifetime     = TimeSpan.FromSeconds(FoodLifeTime);
-
-        Food.AddComponent<SquareCollider>();
-        Food.AddComponent<FoodEffect>();
-    }
+    public FoodCreator(IGrid grid, ICollisionHandler collisionHandler) =>
+        Food = new GameObject()
+            .WithTransform(Vector2.One, _foodScale)
+            .WithTextureConfig(TextureName.Food, Color.Red)
+            .WithCollider<SquareCollider>()
+            .WithComponent<FoodEffect>()
+            .AddComponentWithSetup<FoodParametersRandom>(parametersRandom =>
+            {
+                parametersRandom.Grid = grid;
+                parametersRandom.CollisionHandler = collisionHandler;
+                parametersRandom.FoodLifetime = TimeSpan.FromSeconds(FoodLifeTimeInSeconds);
+            });
 
     public GameObject Food { get; }
 }

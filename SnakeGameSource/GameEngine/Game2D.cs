@@ -97,10 +97,7 @@ public class Game2D : Game
     {
         gameTime.ElapsedGameTime *= TimeRatio;
 
-        if (!IsActive)
-        {
-            return;
-        }
+        if (!IsActive) return;
 
         Input.Update();
 

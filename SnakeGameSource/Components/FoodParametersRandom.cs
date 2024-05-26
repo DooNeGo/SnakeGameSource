@@ -1,9 +1,9 @@
 ﻿using CommunityToolkit.Diagnostics;
 using Microsoft.Xna.Framework;
-using SnakeGameSource.GameEngine;
 using SnakeGameSource.GameEngine.Abstractions;
-using SnakeGameSource.GameEngine.Components;
-using SnakeGameSource.GameEngine.Components.Colliders;
+using SnakeGameSource.GameEngine.Common;
+using SnakeGameSource.GameEngine.Common.Components;
+using SnakeGameSource.GameEngine.Common.Components.Colliders;
 
 namespace SnakeGameSource.Components;
 
@@ -66,7 +66,7 @@ public sealed class FoodParametersRandom : Component
 
     protected override void OnCollisionEnter(GameObject gameObject)
     {
-        if (gameObject.Name is "Snake head")
+        if (gameObject.Name is "Snake Head")
         {
             RandFoodParameters();
         }
@@ -94,10 +94,7 @@ public sealed class FoodParametersRandom : Component
         }
     }
 
-    private void SetEffect(FoodEffect effect)
-    {
-        effect.TryCopyTo(GetRequiredComponent<FoodEffect>());
-    }
+    private void SetEffect(FoodEffect effect) => effect.TryCopyTo(GetRequiredComponent<FoodEffect>());
 
     private void RandPosition()
     {
@@ -126,10 +123,7 @@ public sealed class FoodParametersRandom : Component
 
     public override bool TryCopyTo(Component component)
     {
-        if (component is not FoodParametersRandom random)
-        {
-            return false;
-        }
+        if (component is not FoodParametersRandom random) return false;
 
         random.Grid               = Grid;
         random.RemainFoodLifetime = RemainFoodLifetime;

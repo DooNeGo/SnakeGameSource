@@ -1,5 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
-using SnakeGameSource.GameEngine.Components.Colliders;
+using SnakeGameSource.GameEngine.Common.Components.Colliders;
 
 namespace SnakeGameSource;
 
@@ -19,7 +19,7 @@ internal sealed class SnakeConfig
 
     public Vector2 StartDirection { get; } = Vector2.UnitX;
 
-    public int InitialLength { get; } = 600;
+    public int InitialLength { get; } = 300;
 
     public float MinSpeed { get; } = 0.5f;
 

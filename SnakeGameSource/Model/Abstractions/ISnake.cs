@@ -1,4 +1,4 @@
-﻿using SnakeGameSource.GameEngine;
+﻿using SnakeGameSource.GameEngine.Common;
 
 namespace SnakeGameSource.Model.Abstractions;
 
