@@ -18,16 +18,19 @@ internal sealed class Snake : ISnake
     private readonly List<GameObject> _projectedSnakeParts = [];
     private readonly List<GameObject> _snakeParts          = [];
 
-    private float   _maxSpeed;
-    private float   _minSpeed;
+    private float _maxSpeed;
+    private float _minSpeed;
+    
     private Vector2 _scale = Vector2.One;
 
     public Snake(SnakeConfig config, IGrid grid)
     {
-        MoveSpeed    = config.MoveSpeed;
+        MoveSpeed = config.MoveSpeed;
         SlewingSpeed = config.SlewingSpeed;
-        Direction    = config.StartDirection;
-        _grid        = grid;
+        Direction = config.StartDirection;
+        _minSpeed = config.MinSpeed;
+        _maxSpeed = config.MaxSpeed;
+        _grid = grid;
         
         CreateHead(config);
         CreateBody(config);
@@ -83,7 +86,7 @@ internal sealed class Snake : ISnake
         _snakeParts.Add(new GameObject("Snake Head")
             .WithTransform(config.StartPosition, Scale)
             .WithTextureConfig(TextureName.SnakeHead, config.HeadColor)
-            .WithCollider(config.ColliderType));
+            .WithComponent(config.ColliderType));
 
     private void CreateBody(SnakeConfig config)
     {
@@ -95,7 +98,7 @@ internal sealed class Snake : ISnake
         {
             _snakeParts.Add(new GameObject()
                 .WithTransform(config.StartPosition - Direction * Scale * (i + 1), Scale)
-                .WithCollider(config.ColliderType)
+                .WithComponent(config.ColliderType)
                 .WithTextureConfig(TextureName.SnakeBody, config.BodyColor));
         }
     }
@@ -122,11 +125,17 @@ internal sealed class Snake : ISnake
 
     private void ApplyOffsets(Span<Vector2> offsets)
     {
-        Head.Transform.Position += offsets[0];
-
-        for (var i = 1; i < offsets.Length; i++)
+        if (offsets.Length != _snakeParts.Count)
         {
-            _snakeParts[i].Transform.Position += offsets[i] * offsets[0].Length();
+            throw new ArgumentException("Count of offsets and snake parts don't match");
+        }
+        Head.Transform.Position += offsets[0];
+        float offsetLength = offsets[0].Length();
+
+        var counter = 1;
+        foreach (GameObject snakePart in _snakeParts.AsSpan()[1..])
+        {
+            snakePart.Transform.Position += offsets[counter++] * offsetLength;
         }
     }
 
@@ -178,17 +187,11 @@ internal sealed class Snake : ISnake
         switch (effect.Type)
         {
             case FoodEffectType.Speed:
-                if (MoveSpeed + effect.Value > 2)
-                {
-                    MoveSpeed += effect.Value;
-                }
+                if (IsValidSpeed(MoveSpeed + effect.Value)) MoveSpeed += effect.Value;
                 break;
 
             case FoodEffectType.Scale:
-                if (Scale.X + effect.Value > 0.5f && Scale.Y + effect.Value > 0.5f)
-                {
-                    Scale += new Vector2(effect.Value);
-                }
+                if (Scale.X + effect.Value > 0.5f && Scale.Y + effect.Value > 0.5f) Scale += new Vector2(effect.Value);
                 break;
 
             case FoodEffectType.Length:
@@ -200,6 +203,8 @@ internal sealed class Snake : ISnake
                 throw new ArgumentOutOfRangeException(nameof(effect), $"No such effect type {effect.Type}");
         }
     }
+
+    private bool IsValidSpeed(float speed) => speed > _minSpeed && speed < _maxSpeed;
 
     private void RemoveSnakePart(int snakePartIndex) => _snakeParts.RemoveAt(snakePartIndex);
 

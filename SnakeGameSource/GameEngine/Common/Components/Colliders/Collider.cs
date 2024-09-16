@@ -13,7 +13,7 @@ public abstract class Collider : Component
     public virtual RectangleF GetBounds()
     {
         Guard.IsNotNull(Parent);
-
+        
         Transform transform = Parent.Transform;
 
         var size  = new SizeF((transform.Scale * Scale).ToNumerics());

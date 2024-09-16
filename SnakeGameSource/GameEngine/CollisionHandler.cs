@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Runtime.CompilerServices;
 using CommunityToolkit.HighPerformance;
 using CommunityToolkit.HighPerformance.Helpers;
 using Microsoft.Xna.Framework;
@@ -13,24 +14,20 @@ public sealed class CollisionHandler : ICollisionHandler
 {
     private readonly List<Collider> _colliders = [];
     private readonly IScene _scene;
-    private readonly Action<int> _checkCollision;
+    private readonly Action _synchronouslyCheckCollisions;
+    private readonly Action _parallelCheckCollisions;
 
     public CollisionHandler(IScene scene)
     {
         _scene = scene;
-        _checkCollision = i =>
+        _synchronouslyCheckCollisions = () => 
         {
-            ReadOnlySpan<Collider> span = _colliders.AsSpan();
-
-            for (int j = i + 1; j < span.Length; j++)
+            for (var i = 0; i < _colliders.Count - 1; i++)
             {
-                (Collider collider1, Collider collider2) = (span[i], span[j]);
-                if (!IsCollisionBetween(collider1, collider2)) continue;
-
-                TryInvokeCollision(collider1.Parent!, collider2.Parent!);
-                TryInvokeCollision(collider2.Parent!, collider1.Parent!);
-            }
+                CheckCollision(i);
+            } 
         };
+        _parallelCheckCollisions = () => Parallel.For(0, _colliders.Count - 1, CheckCollision);
     }
 
     public void Update()
@@ -99,48 +96,34 @@ public sealed class CollisionHandler : ICollisionHandler
         return distanceToEdge1 + distanceToEdge2 >= distanceBetween;
     }
     
-    private void CheckCollisions()
+    private void CheckCollision(int i)
     {
-        if (_colliders.Count <= 1) return;
+        ReadOnlySpan<Collider> span = _colliders.AsSpan();
 
-        var checker = new CollisionChecker(_colliders);
-        
-        if (_colliders.Count <= 100)
+        for (int j = i + 1; j < span.Length; j++)
         {
-            for (var i = 0; i < _colliders.Count - 1; i++)
-            {
-                _checkCollision.Invoke(i);
-            }
-        }
-        else if (_colliders.Count > 100)
-        {
-            Parallel.For(0, _colliders.Count - 1, _checkCollision);
-            ParallelHelper.For(.._colliders.Count, checker);
+            (Collider collider1, Collider collider2) = (span[i], span[j]);
+            if (!IsCollisionBetween(collider1, collider2)) continue;
+
+            TryInvokeCollision(collider1.Parent!, collider2.Parent!);
+            TryInvokeCollision(collider2.Parent!, collider1.Parent!);
         }
     }
+
+    private void CheckCollisions() => GetCollisionChecker().Invoke();
+
+    private Action GetCollisionChecker() => _colliders.Count switch
+    {
+        <= 1 => () => { },
+        <= 100 => _synchronouslyCheckCollisions,
+        _ => _parallelCheckCollisions
+    };
 
     private static void TryInvokeCollision(GameObject gameObject1, GameObject gameObject2)
     {
         foreach (Component component in gameObject1.Components)
         {
             MethodInvoker.OnCollisionEnter(component, gameObject2);
-        }
-    }
-
-    private readonly struct CollisionChecker(List<Collider> colliders) : IAction
-    {
-        public void Invoke(int i)
-        {
-            ReadOnlySpan<Collider> span = colliders.AsSpan();
-
-            for (int j = i + 1; j < span.Length; j++)
-            {
-                (Collider collider1, Collider collider2) = (span[i], span[j]);
-                if (!IsCollisionBetween(collider1, collider2)) continue;
-
-                TryInvokeCollision(collider1.Parent!, collider2.Parent!);
-                TryInvokeCollision(collider2.Parent!, collider1.Parent!);
-            }
         }
     }
 }

@@ -96,29 +96,17 @@ public sealed class GameObject
         return null;
     }
 
-    public bool TryGetComponent(Type type, [NotNullWhen(true)] out Component? component)
-    {
-        component = GetComponent(type);
-        return component is not null;
-    }
+    public bool TryGetComponent(Type type, [NotNullWhen(true)] out Component? component) =>
+        (component = GetComponent(type)) is not null;
 
-    public bool TryGetComponent<T>([NotNullWhen(true)] out T? component) where T : Component
-    {
-        component = GetComponent<T>();
-        return component is not null;
-    }
+    public bool TryGetComponent<T>([NotNullWhen(true)] out T? component) where T : Component =>
+        (component = GetComponent<T>()) is not null;
 
-    public Component GetRequiredComponent(Type type)
-    {
-        if (TryGetComponent(type, out Component? component)) return component;
-        throw new ComponentNotFoundException(type.Name);
-    }
+    public Component GetRequiredComponent(Type type) =>
+        GetComponent(type) ?? throw new ComponentNotFoundException(type.Name);
 
-    public T GetRequiredComponent<T>() where T : Component
-    {
-        if (TryGetComponent(out T? component)) return component;
-        throw new ComponentNotFoundException(typeof(T).Name);
-    }
+    public T GetRequiredComponent<T>() where T : Component =>
+        GetComponent<T>() ?? throw new ComponentNotFoundException(typeof(T).Name);
 
     public void SendMessage(string methodName, Type[] parametersTypes, object?[]? parameters)
     {

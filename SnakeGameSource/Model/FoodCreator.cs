@@ -19,9 +19,9 @@ internal sealed class FoodCreator : IFoodCreator
         Food = new GameObject()
             .WithTransform(Vector2.One, _foodScale)
             .WithTextureConfig(TextureName.Food, Color.Red)
-            .WithCollider<SquareCollider>()
+            .WithComponent<SquareCollider>()
             .WithComponent<FoodEffect>()
-            .AddComponentWithSetup<FoodParametersRandom>(parametersRandom =>
+            .WithComponentAndSetup<FoodParametersRandom>(parametersRandom =>
             {
                 parametersRandom.Grid = grid;
                 parametersRandom.CollisionHandler = collisionHandler;

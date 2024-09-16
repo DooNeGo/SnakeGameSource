@@ -104,7 +104,7 @@ public class Game2D : Game
         if (!IsStop)
         {
             Scene.Update(gameTime.ElapsedGameTime);
-            _collisionHandler?.Update();
+            _collisionHandler!.Update();
 
             Updating?.Invoke(gameTime);
         }

@@ -23,14 +23,13 @@ public sealed class SnakeGame : Game2D
 
     private Color[] BackgroundColors { get; } = [new Color(224, 172, 213), new Color(57, 147, 221)];
 
-    private void OnConfiguring(DiContainer container)
-    {
-        container.AddSingleton<ISnake, Snake>()
-                 .AddTransient<SnakeConfig>()
-                 .AddSingleton<IMovable, Snake>()
-                 .AddSingleton<IFoodCreator, FoodCreator>()
-                 .AddSingleton<PhysicsMovement>();
-    }
+    private static void OnConfiguring(DiContainer container) =>
+        container
+            .AddSingleton<ISnake, Snake>()
+            .AddTransient<SnakeConfig>()
+            .AddSingleton<IMovable, Snake>()
+            .AddSingleton<IFoodCreator, FoodCreator>()
+            .AddSingleton<PhysicsMovement>();
 
     private void OnInitializing()
     {
@@ -53,41 +52,34 @@ public sealed class SnakeGame : Game2D
         _value          += 0.005f * TimeRatio;
     }
 
-    private void OnKeyDown(Keys key)
+    private void OnKeyDown(Keys key) => GetActionFromKey(key).Invoke();
+
+    private void OnGesture(GestureSample gesture) => GetActionFromGesture(gesture).Invoke();
+
+    private Action GetActionFromKey(Keys key) => key switch
     {
-        if (key is Keys.Escape)
-        {
-            Exit();
-        }
-        else if (key is Keys.Space)
-        {
-            TimeRatio = TimeRatio is 1 ? 0 : 1;
-        }
-        else if (key is Keys.Up or Keys.Down or Keys.Left or Keys.Right)
-        {
-            TimeRatio = 1;
-        }
-        else if (key is Keys.OemPlus)
-        {
-            TimeRatio++;
-        }
-        else if (key is Keys.OemMinus)
-        {
-            TimeRatio--;
-        }
+        Keys.Escape => Exit,
+        Keys.Space => () => IsStop = !IsStop,
+        Keys.OemPlus => IncreaseTimeRatio,
+        Keys.OemMinus => DecreaseTimeRatio,
+        Keys.Up or Keys.Down or Keys.Left or Keys.Right => ResumeGame,
+        _ => () => { }
+    };
+
+    private Action GetActionFromGesture(GestureSample gesture) => gesture.GestureType switch
+    {
+        GestureType.DoubleTap => () => IsStop = !IsStop,
+        _ => ResumeGame
+    };
+
+    private void ResumeGame()
+    {
+        if (!IsStop) IsStop = true;
     }
 
-    private void OnGesture(GestureSample gesture)
-    {
-        if (gesture.GestureType is GestureType.DoubleTap)
-        {
-            TimeRatio = TimeRatio is 1 ? 0 : 1;
-        }
-        else
-        {
-            TimeRatio = 1;
-        }
-    }
+    private void IncreaseTimeRatio() => TimeRatio++;
+    
+    private void DecreaseTimeRatio() => TimeRatio--;
 
     private void OnSnakeDie()
     {

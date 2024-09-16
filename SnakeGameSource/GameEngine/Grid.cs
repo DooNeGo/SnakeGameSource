@@ -8,7 +8,6 @@ public sealed class Grid : IGrid
     public Grid(GameWindow window)
     {
         InitializeGrid(window);
-
         window.ClientSizeChanged += OnClientSizeChanged;
     }
 
