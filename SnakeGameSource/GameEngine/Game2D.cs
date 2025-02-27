@@ -46,7 +46,7 @@ public class Game2D : Game
 
     private void Configure()
     {
-        Container.AddSingleton<IInput, Bot>()
+        Container.AddSingleton<IInput, Input>()
                  .AddSingleton<ISpriteDrawer, SpriteDrawer>()
                  .AddSingleton<ICollisionHandler, CollisionHandler>()
                  .AddSingleton<IScene, Scene>()

@@ -6,6 +6,7 @@ using SnakeGameSource.GameEngine.Common.Components;
 using SnakeGameSource.GameEngine.Common.Components.Colliders;
 using SnakeGameSource.GameEngine.Extensions;
 using SnakeGameSource.Model.Abstractions;
+using Vector2 = System.Numerics.Vector2;
 
 namespace SnakeGameSource.Model;
 

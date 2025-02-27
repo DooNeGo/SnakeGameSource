@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
+using System.Numerics;
 using CommunityToolkit.Diagnostics;
-using Microsoft.Xna.Framework;
 
 namespace SnakeGameSource.GameEngine.Common.Components.Colliders;
 
@@ -16,8 +16,8 @@ public abstract class Collider : Component
 
         Transform transform = Parent.Transform;
 
-        var size  = new SizeF((transform.Scale * Scale).ToNumerics());
-        var point = new PointF(transform.Position.ToNumerics() - (size / 2f).ToVector2());
+        var size  = new SizeF(transform.Scale * Scale);
+        var point = new PointF(transform.Position - (size / 2f).ToVector2());
 
         return new RectangleF(point, size);
     }

@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System.Numerics;
 using SnakeGameSource.GameEngine.Common.Components.Colliders;
 
 namespace SnakeGameSource.GameEngine.Abstractions;

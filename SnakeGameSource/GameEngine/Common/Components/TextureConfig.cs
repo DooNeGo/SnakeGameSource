@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Vector2 = System.Numerics.Vector2;
 
 namespace SnakeGameSource.GameEngine.Common.Components;
 

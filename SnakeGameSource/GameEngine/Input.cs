@@ -1,8 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Microsoft.Xna.Framework;
+using System.Numerics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Input.Touch;
 using SnakeGameSource.GameEngine.Abstractions;
+using SnakeGameSource.GameEngine.Common;
 
 namespace SnakeGameSource.GameEngine;
 
@@ -38,9 +39,9 @@ public sealed class Input : IInput
                 _          => null
             };
         }
-        else if (!_gesture.Equals(new GestureSample()))
+        else if (_gesture.Equals(new GestureSample()))
         {
-            Vector2 delta = _gesture.Delta * Sensitivity;
+            Vector2 delta = _gesture.Delta.ToNumerics() * Sensitivity;
 
             if (float.Abs(delta.X) <= 1 && float.Abs(delta.Y) <= 1)
             {
@@ -48,7 +49,7 @@ public sealed class Input : IInput
             }
             else
             {
-                moveDirection = Vector2.Normalize(delta);
+                moveDirection = delta.Normalize();
             }
         }
 

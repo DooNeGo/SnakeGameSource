@@ -1,5 +1,5 @@
-﻿using CommunityToolkit.Diagnostics;
-using Microsoft.Xna.Framework;
+﻿using System.Numerics;
+using CommunityToolkit.Diagnostics;
 
 namespace SnakeGameSource.GameEngine.Common.Components.Colliders;
 

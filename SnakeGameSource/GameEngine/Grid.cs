@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using SnakeGameSource.GameEngine.Abstractions;
+using Point = System.Drawing.Point;
+using Vector2 = System.Numerics.Vector2;
 
 namespace SnakeGameSource.GameEngine;
 
@@ -47,8 +49,18 @@ public sealed class Grid : IGrid
     private void InitializeGrid(GameWindow window)
     {
         // TODO: Убрать магическое число
-        CellSize = new Point(window.ClientBounds.Size.X / 15);
-        Size     = window.ClientBounds.Size.Divide(CellSize);
-        Center   = new Vector2(Size.X / 2f - 1, Size.Y / 2f - 1);
+        int xCellSize = window.ClientBounds.Size.X / 15;
+        CellSize = new Point(xCellSize, xCellSize);
+        Size = window.ClientBounds.Size.ToNumerics().Divide(CellSize);
+        Center = new Vector2(Size.X / 2f - 1, Size.Y / 2f - 1);
     }
+}
+
+public static class PointExtensions
+{
+    public static Point ToNumerics(this Microsoft.Xna.Framework.Point point) => new(point.X, point.Y);
+    
+    public static Vector2 ToVector2(this Point point) => new(point.X, point.Y);
+    
+    public static Point Divide(this Point point, Point divider) => new(point.X / divider.X, point.Y / divider.Y);
 }

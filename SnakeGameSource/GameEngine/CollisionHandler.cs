@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
+using System.Numerics;
 using CommunityToolkit.HighPerformance;
 using CommunityToolkit.HighPerformance.Helpers;
-using Microsoft.Xna.Framework;
 using SnakeGameSource.GameEngine.Abstractions;
 using SnakeGameSource.GameEngine.Common;
 using SnakeGameSource.GameEngine.Common.Components;

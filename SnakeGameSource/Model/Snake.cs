@@ -1,7 +1,7 @@
 ﻿using System.Collections;
+using System.Numerics;
 using CommunityToolkit.HighPerformance;
 using CommunityToolkit.HighPerformance.Buffers;
-using Microsoft.Xna.Framework;
 using SnakeGameSource.Components;
 using SnakeGameSource.GameEngine.Abstractions;
 using SnakeGameSource.GameEngine.Common;
@@ -169,8 +169,10 @@ internal sealed class Snake : ISnake
             ApplyFoodEffect(effect);
             Score++;
         }
-
-        //Die?.Invoke();
+        else
+        {
+            //Die?.Invoke();   
+        }
     }
 
     private void ApplyFoodEffect(FoodEffect effect)

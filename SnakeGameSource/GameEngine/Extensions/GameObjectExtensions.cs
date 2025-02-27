@@ -2,6 +2,8 @@ using Microsoft.Xna.Framework;
 using SnakeGameSource.GameEngine.Common;
 using SnakeGameSource.GameEngine.Common.Components;
 using SnakeGameSource.GameEngine.Common.Components.Colliders;
+using Quaternion = System.Numerics.Quaternion;
+using Vector2 = System.Numerics.Vector2;
 
 namespace SnakeGameSource.GameEngine.Extensions;
 

@@ -1,5 +1,5 @@
-﻿using CommunityToolkit.Diagnostics;
-using Microsoft.Xna.Framework;
+﻿using System.Numerics;
+using CommunityToolkit.Diagnostics;
 
 namespace SnakeGameSource.GameEngine.Common.Components.Colliders;
 
@@ -32,7 +32,7 @@ public sealed class SquareCollider : Collider
         // Используем метрику Махаланобиса для расчета расстояния.
         // Для этого необходимо определить матрицу ковариации.
         // В этом примере используется единичная матрица, что эквивалентно Евклидовому расстоянию.
-        Matrix covarianceMatrix = Matrix.Identity;
+        Matrix3x2 covarianceMatrix = Matrix3x2.Identity;
 
         // Преобразуем направление в махаланобисово расстояние.
         float mahalanobisDistance = Vector2.Transform(directionToCollider, covarianceMatrix).Length();

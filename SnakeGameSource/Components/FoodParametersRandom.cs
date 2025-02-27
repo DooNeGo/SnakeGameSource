@@ -1,5 +1,5 @@
-﻿using CommunityToolkit.Diagnostics;
-using Microsoft.Xna.Framework;
+﻿using System.Numerics;
+using CommunityToolkit.Diagnostics;
 using SnakeGameSource.GameEngine.Abstractions;
 using SnakeGameSource.GameEngine.Common;
 using SnakeGameSource.GameEngine.Common.Components;

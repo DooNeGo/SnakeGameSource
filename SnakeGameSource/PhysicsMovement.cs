@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using SnakeGameSource.GameEngine.Abstractions;
+using SnakeGameSource.GameEngine.Common;
+using Vector2 = System.Numerics.Vector2;
 
 namespace SnakeGameSource;
 
@@ -60,13 +62,15 @@ internal sealed class PhysicsMovement
         angle = rotateAngle > 0 ? angle : -angle;
 
         _smoothDirection = _smoothDirection.Rotate(float.MinMagnitude(angle, rotateAngle));
-        _smoothDirection.Normalize();
+        _smoothDirection = _smoothDirection.Normalize();
     }
 
     private float GetRotateAngle()
     {
-        float cos  = Vector2.Dot(_smoothDirection,           _lastDirection);
-        float cos1 = Vector2.Dot(_smoothDirection.Rotate(1), _lastDirection);
+        Vector2 direction = _smoothDirection;
+        
+        float cos  = Vector2.Dot(_smoothDirection, _lastDirection);
+        float cos1 = Vector2.Dot(direction.Rotate(1), _lastDirection);
 
         cos  = float.Min(1, cos);
         cos  = float.Max(-1, cos);
